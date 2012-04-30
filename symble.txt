@@ -1,0 +1,50 @@
+
+test.elf:     file format elf32-littlearm
+
+SYMBOL TABLE:
+00010000 l    d  .text	00000000 .text
+00010244 l    d  .rodata.str1.4	00000000 .rodata.str1.4
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_loc	00000000 .debug_loc
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_ranges	00000000 .debug_ranges
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00010274 l    d  .bss	00000000 .bss
+00010020 l       .text	00000000 reset
+00010034 l       .text	00000000 stack_setup
+0001008c l       .text	00000000 strex_spot
+00000000 l    df *ABS*	00000000 test.c
+00000000 l    df *ABS*	00000000 task.c
+00010190 l     F .text	00000034 initial_task_func
+00010078 g       .text	00000000 reserved
+0001006c g       .text	00000000 syscall
+00010080 g       .text	00000000 fiq
+00010068 g       .text	00000000 undefined
+000100d4 g     F .text	00000028 print_uart0
+000101c4 g     F .text	00000064 arch_task_initialize
+00010040 g       .text	00000000 arm_context_switch
+000100a8 g     F .text	00000028 func1
+00010274 g     O .bss	00000038 task1
+00010000 g       .text	00000000 _start
+000102ac g     O .bss	00000038 current
+0001007c g       .text	00000000 irq
+000122e8 g       *ABS*	00000000 stack_top
+000102e4 g     O .bss	00000004 current_task
+000100fc g     F .text	00000094 c_entry
+00010228 g     F .text	0000001c arch_context_switch
+000100d0 g     F .text	00000004 func2
+00010070 g       .text	00000000 prefetch_abort
+000102e8 g       *ABS*	00000000 _end
+000102f8 g       *ABS*	00000000 __heap
+00010074 g       .text	00000000 data_abort
+
+
+DYNAMIC SYMBOL TABLE:
+no symbols
+
+
