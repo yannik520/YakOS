@@ -16,20 +16,20 @@ LDFLAGS += -gc-sections
 
 NOECHO ?= @
 
-ALLOBJS := test.o setup.o task.o printf.o malloc.o
-LINKER_SCRIPT := test.ld
+ALLOBJS := main.o setup.o task.o printf.o malloc.o
+LINKER_SCRIPT := build.ld
 
-all: test.bin test.elf test.sym
+all: bigeye.bin bigeye.elf bigeye.sym
 
-test.bin: test.elf
+bigeye.bin: bigeye.elf
 	@echo generation image: $@
 	$(NOECHO)$(SIZE) $<
 	$(NOCOPY)$(OBJCOPY) -O binary $< $@
 
-test.elf: $(ALLOBJS) $(LINKER_SCRIPT)
+bigeye.elf: $(ALLOBJS) $(LINKER_SCRIPT)
 	@echo linking $@
 	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS) -o $@
-test.sym: test.elf
+bigeye.sym: bigeye.elf
 	@echo generating listing: $@
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
 

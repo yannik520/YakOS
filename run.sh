@@ -6,7 +6,7 @@ QEMU=/home/yannik/work/qemu/mini2440/arm-softmmu/qemu-system-arm
 
 if [ "$1" = "-d" ]; then
     
-    $QEMU -M versatilepb -nographic -s -S -kernel test.bin
+    $QEMU -M versatilepb -nographic -s -S -kernel bigeye.bin
 else
-    $QEMU -M versatilepb -nographic -kernel test.bin
+    $QEMU -M versatilepb -nographic -kernel bigeye.bin
 fi
