@@ -2,7 +2,7 @@
 #C+a x  exit qemu
 #C+a h  show help
 
-QEMU ?= /home/yannik/work/qemu/mini2440/arm-softmmu/qemu-system-arm
+QEMU=/home/yannik/work/qemu/mini2440/arm-softmmu/qemu-system-arm
 
 if [ "$1" = "-d" ]; then
     
