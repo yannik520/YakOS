@@ -2,11 +2,11 @@
 #include "printf.h"
 #include "malloc.h"
 
-extern int __heap;
-extern unsigned int stack_top;
-extern task_t *all_task[MAX_TASKS];
-extern int task_index;
-extern int running_index;
+extern int		 __heap;
+extern unsigned int	 stack_top;
+extern task_t		*all_task[MAX_TASKS];
+extern int		 task_index;
+extern int		 running_index;
 
 volatile unsigned int * const UART0DR = (unsigned int *)0x101f1000;
 
@@ -20,8 +20,6 @@ void __puts(const char *s) {
 
 }
 
-task_t task1;
-task_t task2;
 task_t current;
 
 void func1(void *arg)
