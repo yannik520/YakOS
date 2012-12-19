@@ -25,34 +25,24 @@ stack_setup:
 
 .global arm_context_switch
 arm_context_switch:	
-	mov		ip, sp
-	sub		sp, sp, #4 //skip cpsr
+	mov		r12, sp
 .global test_point
 test_point:	
-	stmfd		sp!, {ip, lr}
-	stmfd		sp!, {r4-r10, fp, ip}
+	stmfd		sp!, {r12, lr}
+	stmfd		sp!, {r4-r10, r11, r12}
 .global test_point1
 test_point1:	
-	mrs		r2, cpsr
-	str		r2, [sp, #44] //11*4
 	str		sp, [r0]
 .global test_point2
 test_point2:	
 	
-	ldr		fp, [r1]
-	mrs		r0, cpsr
-	orr		r0, r0, #0xc0
-	msr		cpsr, r0
-	ldr		r0, [fp, #44]
-	msr		spsr, r0
+	ldr		r12, [r1]
 .global test_point3
 test_point3:	
-
-	ldmfd		fp, {r4-r10, fp, ip, sp, lr}
+	ldmfd		r12, {r4-r10, r11, r12, sp, lr}
 .global test_point4
 test_point4:	
-
-	movs		pc, lr
+	mov		pc, lr
 
 .global undefined
 undefined:
