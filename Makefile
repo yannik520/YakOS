@@ -1,3 +1,5 @@
+ARCH ?= arm
+BOARD ?= armemu
 TOOLCHAIN_PREFIX := arm-none-eabi-
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
@@ -7,7 +9,7 @@ CPPFILT := $(TOOLCHAIN_PREFIX)c++filt
 SIZE := $(TOOLCHAIN_PREFIX)size
 NM := $(TOOLCHAIN_PREFIX)nm
 
-CFLAGS := -O2 -g -fno-builtin -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
+CFLAGS := -O2 -g -Iinclude -fno-builtin -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
 CPPFLAGS := -fno-exceptions -fno-rtti -fno-threadsafe-statics
 ASMFLAGS := -DASSEMBLY
 LDFLAGS := 
@@ -16,10 +18,33 @@ LDFLAGS += -gc-sections
 
 NOECHO ?= @
 
-ALLOBJS := main.o setup.o task.o printf.o malloc.o
+ALLOBJS := \
+	kernel/main.o \
+	kernel/task.o \
+	kernel/printf.o \
+	kernel/malloc.o
+
+include arch/$(ARCH)/Makefile
+include arch/$(ARCH)/boot/Makefile
+include arch/$(ARCH)/boards/$(BOARD)/Makefile
+
+LINKER_SCRIPT_TEMPLETE := arch/$(ARCH)/boot/build.ld
 LINKER_SCRIPT := build.ld
 
-all: bigeye.bin bigeye.elf bigeye.sym
+ALL_INCLUDE_FILES := $(wildcard ./include/arch/arm/boards/armemu/*.h)
+
+all: prepare bigeye.bin bigeye.elf bigeye.sym
+
+prepare: prepare_include build.ld
+
+.PHONY: prepare_include build.ld
+prepare_include:
+	echo $(ALL_INCLUDE_FILES)
+	@cp $(wildcard ./include/arch/arm/boards/armemu/*.h) ./include/arch
+	@cp $(wildcard ./include/arch/arm/*.h) ./include/arch
+
+build.ld: $(LINKER_SCRIPT_TEMPLETE)
+	@sed "s/%MEMBASE%/$(MEMBASE)/;s/%STACKSIZE%/$(STACKSIZE)/" < $< > $@
 
 bigeye.bin: bigeye.elf
 	@echo generation image: $@
@@ -34,4 +59,5 @@ bigeye.sym: bigeye.elf
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
 
 clean:
-	@rm -rf *.bin *.elf *.sym *.o
+	echo $(ALLOBJS)
+	@rm -rf *.bin *.elf *.sym $(ALLOBJS)

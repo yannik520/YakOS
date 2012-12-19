@@ -4,7 +4,7 @@ OUTPUT_ARCH(arm)
 ENTRY(_start)
 SECTIONS
 {
-	. = 0x0;
+	. = %MEMBASE%;
 	.text : {
 	      	arch/arm/boot/setup.o
 	      	*(.text)
@@ -17,6 +17,6 @@ SECTIONS
 	
 	__heap = . + 0x40;
 
-	. = . + 0x8000; /* 8kB of stack memory */
+	. = . + %STACKSIZE%; /* 8kB of stack memory */
 	stack_top = .;
 }
