@@ -5,4 +5,6 @@ STACKSIZE := 0x8000
 
 ALLOBJS	+= \
 	$(LOCALDIR)/display.o \
-	$(LOCALDIR)/text.o
+	$(LOCALDIR)/text.o \
+	$(LOCALDIR)/interrupts.o \
+	$(LOCALDIR)/timer.o

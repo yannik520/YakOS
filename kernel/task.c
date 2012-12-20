@@ -16,6 +16,7 @@ void initial_task_func(void)
 	int ret;
 	
 	printf("initial_task_func: entry=0x%x\n", current_task->entry);
+	exit_critical_section();
 	ret = current_task->entry(current_task->args);
 }
 
@@ -74,6 +75,7 @@ void task_schedule(void)
 		}
 		else
 		{
+			printf("No other task in run queue now!\n");
 			goto out;
 		}
 		
@@ -81,6 +83,7 @@ void task_schedule(void)
 	else
 	{
 		printf("Needn't switch priority group!\n");
+		printf("task_bitmap=%d, i=%d.\n", task_bitmap, i);
 		new_task = (task_t *)current_task->list.next;
 	}
 
@@ -89,7 +92,7 @@ void task_schedule(void)
 	       (unsigned int)old_task->stack, (unsigned int)new_task->stack);
 	arch_context_switch(old_task, new_task);
 out:
-	printf("No other task in run queue now!\n");
+	printf("task_schedule end!\n");
 }
 
 void task_init(void)

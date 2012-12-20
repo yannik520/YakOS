@@ -7,7 +7,7 @@ _start:
 	b	prefetch_abort
 	b	data_abort
 	b	reserved
-	b	irq
+	b	arm_irq
 	b	fiq
 
 reset:
@@ -19,6 +19,13 @@ reset:
 	mcr	p15, 0, r0, c1, c0, 0
 
 stack_setup:
+	mrs	r0, cpsr
+	bic	r0, r0, #0x1f
+	orr	r1, r0, #0x12 //irq
+	msr	cpsr_c, r1
+	ldr	r13, =irq_save_spot
+	orr	r1, r0, #0x13 //svc
+	msr	cpsr_c, r1
 	ldr	sp, =stack_top
 	bl	c_entry
 	b	.

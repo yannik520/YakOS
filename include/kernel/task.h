@@ -2,6 +2,7 @@
 #define _TASK_H_
 
 #include "kernel/list.h"
+#include "arch/ops.h"
 
 #define MAX_TASKS	8
 
@@ -27,4 +28,15 @@ typedef struct task {
 void initial_task_func(void);
 task_t *task_create(task_routine entry, void *args, unsigned int priority, int stack_size);
 void task_schedule(void);
+
+static inline void enter_critical_section(void)
+{
+	arch_disable_ints();
+}
+
+static inline void exit_critical_section(void)
+{
+	arch_enable_ints();
+}
+
 #endif
