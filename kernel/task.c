@@ -6,10 +6,10 @@
 
 extern unsigned int stack_top;
 
-task_t *current_task;
-struct list_head all_task[MAX_TASKS];
-unsigned int task_bitmap;
-unsigned int task_index = 0;
+task_t			*current_task;
+struct list_head	 all_task[MAX_PRIORITY];
+unsigned int		 task_bitmap;
+unsigned int		 task_index = 0;
 
 void initial_task_func(void)
 {
@@ -24,6 +24,7 @@ task_t *task_create(task_routine entry, void *args, unsigned int priority, int s
 {
 	task_t *t;
 	unsigned int stack_addr = (int)(&stack_top - (task_index + 1) * stack_size);
+
 	printf("task_create, task_index=0x%x, stack_top=0x%x,stack_size=0x%x stack_addr=0x%x\n", task_index, &stack_top, stack_size, stack_addr);
 
 	t = (task_t *)malloc(sizeof(task_t));
@@ -32,20 +33,28 @@ task_t *task_create(task_routine entry, void *args, unsigned int priority, int s
 		printf("alloc task_t error!\n");
 		return 0;
 	}
+
 	printf("task_add=0x%x, sizeof_task=0x%x\n", (unsigned int)t, sizeof(task_t));
+
 	t->stack = (unsigned int *)stack_addr;
 	t->stack_size = stack_size;
 	t->entry = entry;
 	t->args = args;
 	t->priority = priority;
+
 	printf("before in arch_task_initialize!\n");
+
 	arch_task_initialize(t);
 	INIT_LIST_HEAD(&t->list);
 	list_add_tail(&t->list, &all_task[priority]);
+
 	printf("after list_add_tail!\n");
+
 	task_bitmap |= 1 << priority;
 	task_index++;
+
 	printf("task_create ok\n");
+
 	return t;
 }
 
@@ -60,7 +69,7 @@ void task_schedule(void)
 	{
 		printf("start switch priority group!\n");
 
-		for (i=0; i<MAX_TASKS; i++)
+		for (i=0; i<MAX_PRIORITY; i++)
 		{
 			if ((task_bitmap >> i) & 1)
 			{
@@ -69,7 +78,7 @@ void task_schedule(void)
 		}
 		
 		printf("current_priority=%d\n", i);
-		if (i < MAX_TASKS)
+		if (i < MAX_PRIORITY)
 		{
 			new_task = (task_t *)all_task[i].next;
 		}
@@ -99,7 +108,7 @@ void task_init(void)
 {
 	int i;
 	
-	for (i=0; i< MAX_TASKS; i++)
+	for (i=0; i< MAX_PRIORITY; i++)
 	{
 		INIT_LIST_HEAD(&all_task[i]);
 	}

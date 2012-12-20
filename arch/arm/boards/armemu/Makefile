@@ -7,4 +7,5 @@ ALLOBJS	+= \
 	$(LOCALDIR)/display.o \
 	$(LOCALDIR)/text.o \
 	$(LOCALDIR)/interrupts.o \
-	$(LOCALDIR)/timer.o
+	$(LOCALDIR)/timer.o \
+	$(LOCALDIR)/platform.o

@@ -4,7 +4,7 @@
 #include "kernel/list.h"
 #include "arch/ops.h"
 
-#define MAX_TASKS	8
+#define MAX_PRIORITY	8
 
 typedef int (*task_routine)(void *arg);
 

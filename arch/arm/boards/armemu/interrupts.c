@@ -22,7 +22,7 @@ int mask_interrupt(unsigned int vector)
 	if (vector >= PIC_MAX_INT)
 		return -1;
 
-//	dprintf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
+//	printf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
 
 	enter_critical_section();
 
@@ -38,7 +38,7 @@ int unmask_interrupt(unsigned int vector)
 	if (vector >= PIC_MAX_INT)
 		return -1;
 
-//	dprintf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
+//	printf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
 
 	enter_critical_section();
 
@@ -49,25 +49,23 @@ int unmask_interrupt(unsigned int vector)
 	return 0;
 }
 
-enum handler_return platform_irq(struct arm_iframe *frame)
+handler_return platform_irq(struct arm_iframe *frame)
 {
 	// get the current vector
 	unsigned int vector = *REG32(PIC_CURRENT_NUM);
 	if (vector == 0xffffffff)
 		return INT_NO_RESCHEDULE;
-	printf("platform_irq!\n");
-	printf("platform_irq.......!\n");
 
-//	dprintf("platform_irq: spsr 0x%x, pc 0x%x, currthread %p, vector %d\n", frame->spsr, frame->pc, current_thread, vector);
+//	printf("platform_irq: spsr 0x%x, pc 0x%x, currthread %p, vector %d\n", frame->spsr, frame->pc, current_thread, vector);
 
 	// deliver the interrupt
-	enum handler_return ret; 
+	handler_return ret; 
 
 	ret = INT_NO_RESCHEDULE;
 	if (int_handler_table[vector].handler)
 		ret = int_handler_table[vector].handler(int_handler_table[vector].arg);
 
-//	dprintf("platform_irq: exit %d\n", ret);
+//	printf("platform_irq: exit %d\n", ret);
 
 	return ret;
 }

@@ -1,6 +1,8 @@
 #ifndef _TYPE_H_
 #define _TYPE_H_
 
+#include "arch/types.h"
+
 #undef offsetof
 #ifdef __compiler_offsetof
 #define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
@@ -11,7 +13,5 @@
 #define container_of(ptr, type, member) ({			\
 	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
 	(type *)( (char *)__mptr - offsetof(type,member) );})
-
-
 
 #endif

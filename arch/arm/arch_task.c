@@ -33,7 +33,6 @@ void arch_task_initialize(task_t *t)
 	  *(addr + i) = 0;
 
 	frame->sp = stack_addr;
-	//frame->cpsr = 0x13; //svc mode, irq and fiq disabled
 	frame->lr = (unsigned int)&initial_task_func;
 	
 	t->sp = (unsigned int)(frame);

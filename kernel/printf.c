@@ -17,13 +17,6 @@
 typedef long          ssize_t;
 typedef long long     off_t;
 
-extern void __console_init(void);
-
-void console_init(void)
-{
-  __console_init();
-}
-
 void puts(const char *s)
 {
   __puts(s);
