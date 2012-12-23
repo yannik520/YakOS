@@ -6,6 +6,16 @@
 
 #define MAX_PRIORITY	8
 
+enum task_state {                // Task state values
+        
+        RUNNING    = 0,          // Task is runnable or running
+        SLEEPING   = 1,          // Task is waiting for something to happen
+        SUSPENDED  = 2,          // Suspend count is non-zero
+        CREATING   = 4,          // Task is being created
+        EXITED     = 8,         // Task has exited
+};
+
+
 typedef int (*task_routine)(void *arg);
 
 typedef struct task {
@@ -13,6 +23,7 @@ typedef struct task {
 	unsigned int sp;
 	
 	unsigned int priority;
+	enum task_state state;
 
 	void *stack;
 	int stack_size;

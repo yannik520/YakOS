@@ -21,11 +21,11 @@ void initial_task_func(void)
 
 task_t *task_create(task_routine entry, void *args, unsigned int priority, int stack_size)
 {
-	task_t *t;
-	unsigned int *stack_addr;
+	task_t		*t;
+	unsigned int	*stack_addr;
 
 	t = (task_t *)kmalloc(sizeof(task_t));
-	if (t == (task_t *)0)
+	if (t == NULL)
 	{
 		printf("alloc task_t error!\n");
 		return NULL;
@@ -40,13 +40,17 @@ task_t *task_create(task_routine entry, void *args, unsigned int priority, int s
 
 	t->stack = (unsigned int *)((unsigned int)stack_addr + stack_size);
 	t->stack_size = stack_size;
-	t->entry = entry;
-	t->args = args;
-	t->priority = priority;
+	t->entry      = entry;
+	t->args	      = args;
+	t->priority   = priority;
+	t->state      = CREATING;
 
 	arch_task_initialize(t);
 	INIT_LIST_HEAD(&t->list);
+
+	enter_critical_section();
 	list_add_tail(&t->list, &all_task[priority]);
+	exit_critical_section();
 
 	task_bitmap |= 1 << priority;
 
@@ -55,10 +59,10 @@ task_t *task_create(task_routine entry, void *args, unsigned int priority, int s
 
 void task_schedule(void)
 {
-	struct list_head *list = &current_task->list;
-	task_t *old_task = current_task;
-	task_t *new_task;
-	unsigned int i;
+	struct list_head	*list	  = &current_task->list;
+	task_t			*old_task = current_task;
+	task_t			*new_task;
+	unsigned int		 i;
 
 	if (list_empty(list) || list_is_last(list, &all_task[current_task->priority]))
 	{
@@ -85,6 +89,8 @@ void task_schedule(void)
 	{
 		new_task = (task_t *)current_task->list.next;
 	}
+       
+	new_task->state = RUNNING;
 
 	current_task = new_task;
 

@@ -14,9 +14,10 @@ extern task_t			*current_task;
 
 task_t *init_task_create()
 {
-	unsigned int *stack_addr;
+	unsigned int	*stack_addr;
+	task_t		*init;
 
-	task_t *init = (task_t *)kmalloc(sizeof(task_t));
+	init = (task_t *)kmalloc(sizeof(task_t));
 	if (init == (task_t *)0)
 	{
 		printf("alloc task_t error!\n");
