@@ -30,18 +30,15 @@ void arch_task_initialize(task_t *t)
 
 	addr = (unsigned int *)frame;
 	for (i=0; i<sizeof(*frame); i++)
-	  *(addr + i) = 0;
+		*(addr + i) = 0;
 
 	frame->sp = stack_addr;
 	frame->lr = (unsigned int)&initial_task_func;
-	
-	t->sp = (unsigned int)(frame);
+	t->sp	  = (unsigned int)(frame);
 }
 
 void arch_context_switch(task_t *oldtask, task_t *newtask)
 {
-	printf("arch_context_switch\n");
-	printf("oldtask->sp=0x%x, newtask->sp=0x%x.\n",
-	       oldtask->sp, newtask->sp);
+
 	arm_context_switch(&oldtask->sp, &newtask->sp);
 }

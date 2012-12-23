@@ -1,20 +1,10 @@
-#ifndef __MALLOC_H__
-#define __MALLOC_H__
+#ifndef _MALLOC_H_
+#define _MALLOC_H_
 
-struct mem_head
-{
-	unsigned int flag;
-	unsigned int size;
-	void *pre;
-};
+#include "list.h"
 
-
-void malloc_init(unsigned int *addr, unsigned int size);
-unsigned int * malloc(unsigned int size);
-void free(unsigned int *addr);
-
-#define AVAILABLE_FLAG        (0x80000000)
-#define AVAILABLE_MASK        (~0x80000000)
-#define MEM_FLAG              (0x0000aa55)
+void kmalloc_init(unsigned int *addr, unsigned int size);
+void *kmalloc(unsigned int size);
+void kfree(unsigned int *addr);
 
 #endif
