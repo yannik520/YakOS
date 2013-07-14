@@ -4,7 +4,8 @@
 #include "kernel/list.h"
 #include "arch/ops.h"
 
-#define MAX_PRIORITY	8
+#define INVALID_PRIORITY 0
+#define MAX_PRIORITY	 8
 
 enum task_state {                // Task state values
         
@@ -37,8 +38,10 @@ typedef struct task {
 } task_t;
 
 void initial_task_func(void);
-task_t *task_create(task_routine entry, void *args, unsigned int priority, int stack_size);
+int task_create(task_t *task, task_routine entry, void *args);
 void task_schedule(void);
+void task_create_init(void);
+void task_init(void);
 
 static inline void enter_critical_section(void)
 {

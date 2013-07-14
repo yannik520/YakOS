@@ -32,7 +32,16 @@ stack_setup:
 
 .global arm_context_switch
 arm_context_switch:	
-	mov		r12, sp
+	push    { r4-r11, lr}
+
+	/* save sp */
+	str     sp, [r0]
+
+	/* load new regs */
+	mov     sp, r1
+	pop     { r4-r11, lr}
+	bx      lr
+	
 .global test_point
 test_point:	
 	stmfd		sp!, {r12, lr}

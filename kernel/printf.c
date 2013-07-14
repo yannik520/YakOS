@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include <string.h>
+#include "string.h"
 #include "kernel/printf.h"
 
 #define LONGFLAG		0x00000001
@@ -14,25 +14,9 @@
 #define LEFTFORMATFLAG		0x00000200
 #define LEADZEROFLAG		0x00000400
 
-typedef long          ssize_t;
-typedef long long     off_t;
-
 void puts(const char *s)
 {
 	__puts(s);
-}
-
-size_t
-strlen(char const *s)
-{
-	size_t i;
-
-	i= 0;
-	while(s[i]) {
-		i+= 1;
-	}
-
-	return i;
 }
 
 static char *longlong_to_string(char *buf, unsigned long long n, int len, unsigned int flag)

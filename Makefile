@@ -1,6 +1,6 @@
 ARCH ?= arm
 BOARD ?= armemu
-TOOLCHAIN_PREFIX := arm-none-eabi-
+TOOLCHAIN_PREFIX := arm-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
@@ -22,7 +22,8 @@ ALLOBJS := \
 	kernel/main.o \
 	kernel/task.o \
 	kernel/printf.o \
-	kernel/malloc.o
+	kernel/malloc.o \
+	lib/string.o
 
 include arch/$(ARCH)/Makefile
 include arch/$(ARCH)/boot/Makefile
