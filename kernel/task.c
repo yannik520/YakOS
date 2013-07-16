@@ -41,6 +41,39 @@ void initial_task_func(void)
 	ret = current_task->entry(current_task->args);
 }
 
+task_t *task_alloc(char *name, int stack_size, unsigned int priority)
+{
+	task_t *task;
+
+	if (NULL == name || priority >= MAX_PRIORITY)
+	{
+		return NULL;
+	}
+
+	task = (task_t *)kmalloc(sizeof(task_t));
+	if (task == (task_t *)0)
+	{
+		printf("Alloc task_t error!\n");
+		return;
+	}
+	memset(task, 0, sizeof(task_t));
+	memcpy(task->name, name, strlen(name));
+	task->stack_size = stack_size;
+	task->priority = priority;
+
+	return task;
+}
+
+void task_free(task_t *task)
+{
+	if (NULL == task)
+	{
+		return NULL;
+	}
+	
+	kfree(task);
+}
+
 int task_create(task_t *task, task_routine entry, void *args)
 {
 	unsigned int	*stack_addr;
@@ -54,11 +87,6 @@ int task_create(task_t *task, task_routine entry, void *args)
 	if (stack_addr == NULL)
 	{
 		return -1;
-	}
-
-	if (INVALID_PRIORITY == task->priority)
-	{
-		task->priority = DEFAULT_PRIORITY;
 	}
 
 	task->stack      = stack_addr;

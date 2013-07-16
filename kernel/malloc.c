@@ -41,13 +41,13 @@
 typedef struct mem_head
 {
 	struct list_head list;
-	//just save the power index,the real_size = 1 << size
+	/*just save the power index,the real_size = 1 << size */
 	unsigned int size;
 
 }mem_head;
 
-#define MIN_POWER	5
-#define MAX_POWER	20
+#define MIN_POWER	(5)
+#define MAX_POWER	(20)
 #define GROUP_NUM	((MAX_POWER) - (MIN_POWER) + 1)
 #define HEADER_SIZE	(sizeof(mem_head))
 #define MIN(x, y)	((x) <= (y) ? (x) : (y))

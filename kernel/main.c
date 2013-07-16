@@ -66,7 +66,6 @@ int func3(void *arg)
 	return 0;
 }
 
-
 void c_entry(void)
 {
 	task_t *task1;
@@ -85,15 +84,11 @@ void c_entry(void)
 	task_create_init();
 	
 	/*************** Creating TASK1 ****************/
-	task1 = (task_t *)kmalloc(sizeof(task_t));
-	if (task1 == (task_t *)0)
+	task1 = task_alloc("task1", 0x800, 1);
+	if (NULL == task1)
 	{
-		printf("Alloc task_t error!\n");
 		return;
 	}
-	memset(task1, 0, sizeof(task_t));
-	memcpy(task1->name, "task1", strlen("task1"));
-	task1->priority = 1;
 	ret = task_create(task1, func1, 0);
 	if (ret)
 	{
@@ -101,15 +96,11 @@ void c_entry(void)
 	}
 
 	/*************** Creating TASK2 ****************/
-	task2 = (task_t *)kmalloc(sizeof(task_t));
-	if (task2 == (task_t *)0)
+	task2 = task_alloc("task2", 0x800, 1);
+	if (NULL == task2)
 	{
-		printf("Alloc task_t error!\n");
 		return;
 	}
-	memset(task2, 0, sizeof(task_t));
-	memcpy(task2->name, "task2", strlen("task2"));
-	task2->priority = 1;
 	ret = task_create(task2, func2, 0);
 	if (ret)
 	{
@@ -117,15 +108,11 @@ void c_entry(void)
 	}
 
 	/*************** Creating TASK3 ****************/
-	task3 = (task_t *)kmalloc(sizeof(task_t));
-	if (task3 == (task_t *)0)
+	task3 = task_alloc("task3", 0x800, 1);
+	if (NULL == task3)
 	{
-		printf("Alloc task_t error!\n");
 		return;
 	}
-	memset(task3, 0, sizeof(task_t));
-	memcpy(task3->name, "task3", strlen("task3"));
-	task3->priority = 1;
 	ret = task_create(task3, func3, 0);
 	if (ret)
 	{
@@ -136,4 +123,8 @@ void c_entry(void)
 	{
 		printf("main\n");
 	}
+
+	task_free(task1);
+	task_free(task2);
+	task_free(task3);
 }
