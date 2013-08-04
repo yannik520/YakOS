@@ -21,8 +21,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <stdarg.h>
-#include "string.h"
-#include "kernel/printf.h"
+#include <string.h>
+#include <kernel/task.h>
+#include <kernel/printf.h>
 
 #define LONGFLAG		0x00000001
 #define LONGLONGFLAG		0x00000002
@@ -288,9 +289,12 @@ int _dvprintf(const char *fmt, va_list ap)
 	char	buf[256];
 	int	err;
 
-	err = vsnprintf(buf, sizeof(buf), fmt, ap);
+	enter_critical_section();
 
+	err = vsnprintf(buf, sizeof(buf), fmt, ap);
 	puts(buf);
+
+	exit_critical_section();
 
 	return err;
 }

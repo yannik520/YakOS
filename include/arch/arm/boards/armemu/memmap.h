@@ -26,7 +26,7 @@
 #define MEMBANK_SIZE (4*1024*1024)
 
 /* some helpful macros */
-#define REG64(x) ((volatile unsigned long long *)(x))
+//#define REG64(x) ((volatile unsigned long long *)(x))
 #define REG(x) ((volatile unsigned int *)(x))
 #define REG_H(x) ((volatile unsigned short *)(x))
 #define REG_B(x) ((volatile unsigned char *)(x))

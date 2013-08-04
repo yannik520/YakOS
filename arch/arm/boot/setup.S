@@ -21,40 +21,87 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-.section ".text.boot"
-.global _start
-_start:
-	b	reset
-	b 	undefined
-	b	syscall
-	b	prefetch_abort
-	b	data_abort
-	b	reserved
-	b	arm_irq
-	b	fiq
+#include <linkage.h>
 
-reset:
+.section ".text.boot"
+ENTRY(_start)
+	ldr	pc, _reset
+	ldr	pc, _undefined
+	ldr	pc, _syscall
+	ldr	pc, _prefetch_abort
+	ldr	pc, _data_abort
+	ldr	pc, _reserved
+	ldr	pc, _irq
+	ldr	pc, _fiq
+
+_reset:
+	.word reset
+_undefined:
+	.word undefined
+_syscall:
+	.word syscall
+_prefetch_abort:
+	.word prefetch_abort
+_data_abort:
+	.word data_abort
+_reserved:
+	.word reserved
+_irq:
+	.word arm_irq
+_fiq:
+	.word fiq
+	
+ENTRY(reset)
 	/* disable i/d cache and mmu */
 	mrc	p15, 0, r0, c1, c0, 0
 	bic	r0, r0, #(1<<15 | 1<<13 | 1<<12)
 	bic	r0, r0, #(1<<2 | 1<<0)
-	orr	r0, r0, #(1<<1) /* enable alignment faults */
+	/* enable alignment faults */
+	orr	r0, r0, #(1<<1) 
 	mcr	p15, 0, r0, c1, c0, 0
 
+/* relocate exception vertor table */
+relocate_vectors:
+	/* save current position to r0 */
+	adr	r0, _start
+	mov	r1, #0x0
+	/* if not start from address 0x0, relocat vertor table */
+	cmp	r0, r1
+	beq	stack_setup
+	adr	r2, reset
+copy_loop:	
+	ldmia	r0!, {r3-r10}
+	stmia	r1!, {r3-r10}
+	cmp	r0, r2
+	blo	copy_loop
+	
 stack_setup:
+	/* for irq mode */
 	mrs	r0, cpsr
 	bic	r0, r0, #0x1f
-	orr	r1, r0, #0x12 //irq
+	orr	r1, r0, #0x12
 	msr	cpsr_c, r1
 	ldr	r13, =irq_save_spot
-	orr	r1, r0, #0x13 //svc
+	/* for svc mode */
+	orr	r1, r0, #0x13
 	msr	cpsr_c, r1
 	ldr	sp, =stack_top
+
+clear_bss:
+	/* clear out the bss */
+	ldr		r0, =__bss_start
+	ldr		r1, =_end
+	mov		r2, #0
+__bss_loop:
+	cmp		r0, r1
+	strlt		r2, [r0], #4
+	blt		__bss_loop
+	/* start c program */
 	bl	c_entry
 	b	.
 
-.global arm_context_switch
-arm_context_switch:	
+
+ENTRY(arm_context_switch)
 	push    { r4-r11, lr}
 
 	/* save sp */
@@ -64,53 +111,6 @@ arm_context_switch:
 	mov     sp, r1
 	pop     { r4-r11, lr}
 	bx      lr
-	
-.global test_point
-test_point:	
-	stmfd		sp!, {r12, lr}
-	stmfd		sp!, {r4-r10, r11, r12}
-.global test_point1
-test_point1:	
-	str		sp, [r0]
-.global test_point2
-test_point2:	
-	
-	ldr		r12, [r1]
-.global test_point3
-test_point3:	
-	ldmfd		r12, {r4-r10, r11, r12, sp, lr}
-.global test_point4
-test_point4:	
-	mov		pc, lr
-
-.global undefined
-undefined:
-	b	.
-	
-.global syscall
-syscall:
-	b	.
-
-.global prefetch_abort
-prefetch_abort:
-	b	.
-	
-.global data_abort
-data_abort:
-	b	.
-	
-.global reserved
-reserved:
-	b	.
-
-.global irq
-irq:
-	b	.
-	
-.global fiq
-fiq:
-	b	.
-
 .data
 strex_spot:
 	.word	0

@@ -20,21 +20,32 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <arch/text.h>
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
+void __puts(const char *str)
+{
+	while (*str) {
+		while (UART_FR & (1 << 5));
 
-#include <arch/types.h>
+		UART_DR = *str;
 
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
-#else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#endif
+		if (*str == '\n') {
+			while (UART_FR & (1 << 5));
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
+			UART_DR = '\r';
+		}
+		str++;
+	}
+	while (UART_FR & (1 << 3));
+}
 
-#endif
+void putchar(char c)
+{
+	while (UART_FR & (1 << 5));
+	UART_DR = c;
+	while (UART_FR & (1 << 3));
+}
+
+void __console_init(void)
+{
+}

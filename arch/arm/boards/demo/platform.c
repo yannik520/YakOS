@@ -20,21 +20,26 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <arch/text.h>
+#include <arch/interrupts.h>
+#include <arch/timer.h>
+#include <arch/platform.h>
+#include <kernel/printf.h>
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
+void console_init(void)
+{
+	__console_init();
+}
 
-#include <arch/types.h>
+void platform_init(void)
+{
+	/* init serial port */
+	console_init();
+	
+	/* init interrupt controller */
+	platform_init_interrupts();
 
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
-#else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#endif
-
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
-
-#endif
+	/* init timmer for kernel tick */
+	platform_init_timer();
+	//platform_set_periodic_timer(timer_tick, 0, 10); /* 10ms */
+}

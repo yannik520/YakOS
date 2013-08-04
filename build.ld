@@ -4,19 +4,23 @@ OUTPUT_ARCH(arm)
 ENTRY(_start)
 SECTIONS
 {
-	. = 0x0;
+	. = 0xc0000000;
 	.text : {
-	      	arch/arm/boot/setup.o
+	      	arch/arm/boot/setup.o(.text.boot .rodata)
 	      	*(.text)
-		}
+	}
 	.data : { *(.data) }
-	.bss : { *(.bss) }
+	.bss : ALIGN(4) {
+	       	. = ALIGN(4);
+		__bss_start = .;
+	       	*(.bss) 
+	}
 	
 	. = ALIGN(4);
 	_end = .;
 	
 	__heap = . + 0x40;
 
-	. = . + 0x8000; /* 8kB of stack memory */
+	. = . + 0x200000; /* 8kB of stack memory */
 	stack_top = .;
 }

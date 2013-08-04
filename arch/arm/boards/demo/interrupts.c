@@ -22,34 +22,45 @@
  */
 #include <arch/memmap.h>
 #include <arch/interrupts.h>
+#include <arch/chip_regs.h>
 #include <kernel/task.h>
 #include <kernel/reg.h>
 #include <kernel/printf.h>
+
+struct arm_iframe {
+	unsigned int spsr;
+	unsigned int r0;
+	unsigned int r1;
+	unsigned int r2;
+	unsigned int r3;
+	unsigned int r12;
+	unsigned int lr;
+	unsigned int pc;
+};
 
 struct int_handler_struct {
 	int_handler handler;
 	void *arg;
 };
 
-static struct int_handler_struct int_handler_table[PIC_MAX_INT];
+static struct int_handler_struct int_handler_table[INTNR_IRQ_END];
 
 void platform_init_interrupts(void)
 {
-	// mask all the interrupts
-	*REG32(PIC_MASK_LATCH) = 0xffffffff;
+	writel(~0, ioaddr_intc(REG_INTC_INTENCLEAR));
+	writel(0, ioaddr_intc(REG_INTC_INTSELECT));
+	writel(~0, ioaddr_intc(REG_INTC_SOFTINTCLEAR));
+	writel(1, ioaddr_intc(REG_INTC_SUPERPRIV_PROT));
 }
 
 int mask_interrupt(unsigned int vector)
 {
-	if (vector >= PIC_MAX_INT)
+	if (vector > INTNR_IRQ_END)
 		return -1;
 
-//	printf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
-
+	vector -= INTNR_IRQ_START;
 	enter_critical_section();
-
-	*REG32(PIC_MASK_LATCH) = 1 << vector;
-
+	writel(1<<vector, ioaddr_intc(REG_INTC_INTENCLEAR));
 	exit_critical_section();
 
 	return 0;
@@ -57,15 +68,12 @@ int mask_interrupt(unsigned int vector)
 
 int unmask_interrupt(unsigned int vector)
 {
-	if (vector >= PIC_MAX_INT)
+	if (vector > INTNR_IRQ_END)
 		return -1;
 
-//	printf("%s: vector %d\n", __PRETTY_FUNCTION__, vector);
-
+	vector -= INTNR_IRQ_START;
 	enter_critical_section();
-
-	*REG32(PIC_UNMASK_LATCH) = 1 << vector;
-
+	writel(1<<vector, ioaddr_intc(REG_INTC_INTENABLE));
 	exit_critical_section();
 
 	return 0;
@@ -73,21 +81,22 @@ int unmask_interrupt(unsigned int vector)
 
 handler_return platform_irq(struct arm_iframe *frame)
 {
-	// get the current vector
-	unsigned int vector = *REG32(PIC_CURRENT_NUM);
-	if (vector == 0xffffffff)
-		return INT_NO_RESCHEDULE;
+	unsigned int irq_num = 0;
+	// get the current irq status
+	unsigned int irq_status = readl(ioaddr_intc(REG_INTC_IRQSTATUS));
 
-//	printf("platform_irq: spsr 0x%x, pc 0x%x, currthread %p, vector %d\n", frame->spsr, frame->pc, current_thread, vector);
+	while((irq_status & 0x1) == 0)
+	{
+		irq_status >>= 1;
+		irq_num ++;
+	}
 
 	// deliver the interrupt
 	handler_return ret; 
 
 	ret = INT_NO_RESCHEDULE;
-	if (int_handler_table[vector].handler)
-		ret = int_handler_table[vector].handler(int_handler_table[vector].arg);
-
-//	printf("platform_irq: exit %d\n", ret);
+	if (int_handler_table[irq_num].handler)
+		ret = int_handler_table[irq_num].handler(int_handler_table[irq_num].arg);
 
 	return ret;
 }
@@ -99,7 +108,7 @@ void platform_fiq(struct arm_iframe *frame)
 
 void register_int_handler(unsigned int vector, int_handler handler, void *arg)
 {
-	if (vector >= PIC_MAX_INT)
+	if (vector > INTNR_IRQ_END)
 		printf("register_int_handler: vector out of range %d\n", vector);
 
 	enter_critical_section();

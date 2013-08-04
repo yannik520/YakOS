@@ -20,21 +20,25 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <linkage.h>
 
 .text
 
 /* void arch_enable_ints(void); */
-.global arch_enable_ints
-arch_enable_ints:	
+ENTRY(arch_enable_ints)
 	mrs	r0, cpsr
 	bic	r0, r0, #(1<<7)		/* clear the I bit */
 	msr	cpsr_c, r0
 	bx	lr
 
 /* void arch_disable_ints(void); */
-.global arch_disable_ints
-arch_disable_ints:	
+ENTRY(arch_disable_ints)
 	mrs	r0, cpsr
 	orr	r0, r0, #(1<<7)
 	msr	cpsr_c, r0
+	bx	lr
+
+ENTRY(get_cpsr)
+	mrs	r1, cpsr
+	str     r1, [r0]
 	bx	lr

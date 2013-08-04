@@ -34,9 +34,9 @@
 	       	 +++------+++------+++---------------+++---------------------------------+++-----
 */
 
-#include "kernel/malloc.h"
-#include "kernel/list.h"
-#include "kernel/type.h"
+#include <kernel/malloc.h>
+#include <kernel/list.h>
+#include <kernel/type.h>
 
 typedef struct mem_head
 {

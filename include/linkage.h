@@ -20,21 +20,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __LINKAGE_H__
+#define __LINKAGE_H__
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
-
-#include <arch/types.h>
-
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+#ifdef __cplusplus
+#define CPP_ASMLINKAGE extern "C"
 #else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define CPP_ASMLINKAGE
 #endif
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
-
+#ifndef __ALIGN
+#define __ALIGN		.align 4,0x90
+#define __ALIGN_STR	".align 4,0x90"
 #endif
+
+#ifndef asmlinkage
+#define asmlinkage CPP_ASMLINKAGE
+#endif
+
+#ifdef __ASSEMBLY__
+
+#ifndef LINKER_SCRIPT
+#define ALIGN __ALIGN
+#define ALIGN_STR __ALIGN_STR
+
+#ifndef ENTRY
+#define ENTRY(name) \
+  .globl name; \
+  ALIGN; \
+  name:
+#endif /* ENTRY */
+#endif /* LINKER_SCRIPT */
+#endif /* __ASSEMBLY__ */
+
+#endif /* __LINKAGE_H__ */

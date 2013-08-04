@@ -20,21 +20,22 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __DEBUG_H__
+#define __DEBUG_H__
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
+#include <kernel/printf.h>
 
-#include <arch/types.h>
-
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+#ifdef DEBUG
+#define DBG(fmt,args...) \
+	printf("%s %s: " fmt , "DEBUG", \
+	       __FUNCTION__, ## args)
 #else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define DBG(fmt,args...) \
+	do { } while (0)
 #endif
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
+#define ERROR(fmt, args...) \
+	printf("%s %s: " fmt , "ERROR", \
+	       __FUNCTION__, ## args)
 
-#endif
+#endif /* __DEBUG_H__ */

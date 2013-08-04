@@ -20,8 +20,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "arch/display.h"
-#include "arch/memmap.h"
+#include <arch/display.h>
+#include <arch/memmap.h>
 
 static unsigned int *fb = (unsigned int *)DISPLAY_BASE;
 

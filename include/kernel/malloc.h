@@ -24,7 +24,7 @@
 #ifndef _MALLOC_H_
 #define _MALLOC_H_
 
-#include "list.h"
+#include <kernel/list.h>
 
 void kmalloc_init(unsigned int *addr, unsigned int size);
 void *kmalloc(unsigned int size);

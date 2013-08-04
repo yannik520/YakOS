@@ -20,11 +20,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "arch/timer.h"
-#include "kernel/task.h"
-#include "kernel/reg.h"
-#include "arch/memmap.h"
-#include "arch/interrupts.h"
+#include <arch/timer.h>
+#include <kernel/task.h>
+#include <kernel/reg.h>
+#include <arch/memmap.h>
+#include <arch/interrupts.h>
 
 static platform_timer_callback t_callback;
 

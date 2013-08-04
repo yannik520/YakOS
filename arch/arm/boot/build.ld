@@ -6,11 +6,15 @@ SECTIONS
 {
 	. = %MEMBASE%;
 	.text : {
-	      	arch/arm/boot/setup.o
+	      	arch/arm/boot/setup.o(.text.boot .rodata)
 	      	*(.text)
-		}
+	}
 	.data : { *(.data) }
-	.bss : { *(.bss) }
+	.bss : ALIGN(4) {
+	       	. = ALIGN(4);
+		__bss_start = .;
+	       	*(.bss) 
+	}
 	
 	. = ALIGN(4);
 	_end = .;

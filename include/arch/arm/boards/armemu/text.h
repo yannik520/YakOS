@@ -24,7 +24,7 @@
 #ifndef __TEXT_H
 #define __TEXT_H
 
-#include "display.h"
+#include <arch/display.h>
 
 int initialize_text(void);
 void draw_char(unsigned char c, int x, int y);

@@ -20,21 +20,41 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __COMPILER_GCC_H__
+#define __COMPILER_GCC_H__
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
+#ifndef __ASSEMBLY__
+#ifdef __GNUC__
 
-#include <arch/types.h>
+#define likely(x)		__builtin_expect(!!(x), 1)
+#define unlikely(x)		__builtin_expect(!!(x), 0)
+#define __deprecated		__attribute__((deprecated))
+#define __noreturn		__attribute__((noreturn))
+#define __aligned(x)		__attribute__((aligned(x)))
+#define __printf(a, b)		__attribute__((format(printf, a, b)))
+#define __scanf(a, b)		__attribute__((format(scanf, a, b)))
+#define  noinline		__attribute__((noinline))
+#define __attribute_const__	__attribute__((__const__))
+#define __maybe_unused		__attribute__((unused))
+#define __always_unused		__attribute__((unused))
+#define __always_inline		inline __attribute__((always_inline))
 
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
 #else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#endif
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
+#define likely(x)      (x)
+#define unlikely(x)    (x)
+#define __deprecated
+#define __noreturn
+#define __aligned(x)
+#define __printf(a, b)
+#define __scanf(a, b)
+#define  noinline
+#define __attribute_const__
+#define __maybe_unused
+#define __always_unused
+#define __always_inline
+
+#endif
+#endif
 
 #endif

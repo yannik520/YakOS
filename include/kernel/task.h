@@ -24,8 +24,9 @@
 #ifndef _TASK_H_
 #define _TASK_H_
 
-#include "kernel/list.h"
-#include "arch/ops.h"
+#include <kernel/list.h>
+#include <arch/ops.h>
+#include <compiler.h>
 
 #define MAX_PRIORITY	 8
 
@@ -34,6 +35,7 @@ enum task_state {                // Task state values
         RUNNING    = 0,          // Task is runnable or running
         SLEEPING   = 1,          // Task is waiting for something to happen
         SUSPENDED  = 2,          // Suspend count is non-zero
+	READY      = 3,
         CREATING   = 4,          // Task is being created
         EXITED     = 8,         // Task has exited
 };
@@ -59,22 +61,34 @@ typedef struct task {
 	char name[32];
 } task_t;
 
+extern int critical_section_count;
+
 void initial_task_func(void);
 task_t *task_alloc(char *name, int stack_size, unsigned int priority);
 void task_free(task_t *task);
 int task_create(task_t *task, task_routine entry, void *args);
 void task_schedule(void);
+void task_sleep(unsigned long delay);
 void task_create_init(void);
 void task_init(void);
+void task_exit(int retcode);
 
-static inline void enter_critical_section(void)
+static __always_inline void enter_critical_section(void)
 {
-	arch_disable_ints();
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
 }
 
-static inline void exit_critical_section(void)
+static __always_inline void exit_critical_section(void)
 {
-	arch_enable_ints();
+	critical_section_count--;
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+	}
 }
 
 #endif

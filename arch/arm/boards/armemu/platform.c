@@ -20,11 +20,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "arch/text.h"
-#include "arch/interrupts.h"
-#include "arch/timer.h"
-#include "arch/platform.h"
-#include "kernel/printf.h"
+#include <arch/text.h>
+#include <arch/interrupts.h>
+#include <arch/timer.h>
+#include <arch/platform.h>
+#include <kernel/printf.h>
 
 void console_init(void)
 {
@@ -33,7 +33,7 @@ void console_init(void)
 
 static enum handler_return timer_tick(void *arg, time_t now)
 {
-	printf("timer_tick\n");
+	printf("timer_tick: 0x%x\n", now);
 	return INT_RESCHEDULE;
 }
 

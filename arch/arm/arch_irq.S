@@ -63,9 +63,9 @@
    +----------+	       	   +----------+	       	      +----------+
 
 */
+#include <linkage.h>
 
-.global arm_irq
-arm_irq:
+ENTRY(arm_irq)
 	/* save r4-r6 and use as a temporary place to save while we switch into supervisor mode */
 	stmia	r13, { r4-r6 }
 	mov	r4, r13
@@ -90,13 +90,25 @@ arm_irq:
 	/* restore r4-r6 */
 	ldmia	r4, { r4-r6 }
 
+	/* increment the global critical section count */
+	ldr     r1, =critical_section_count
+	ldr     r0, [r1]
+	add     r0, r0, #1
+	str     r0, [r1]
+
 	/* call into higher level code */
 	mov	r0, sp /* iframe */
 	bl	platform_irq
 
 	/* reschedule if the handler returns nonzero */
 	cmp     r0, #0
-	bl    	task_schedule
+	blne   	task_schedule
+
+	/* decrement the global critical section count */
+	ldr     r1, =critical_section_count
+	ldr     r0, [r1]
+	sub     r0, r0, #1
+	str     r0, [r1]
 
 	/* restore spsr */
 	ldmfd	sp!, { r0 }
@@ -105,13 +117,58 @@ arm_irq:
 	/* restore back to where we came from, if no pc in
 	   register list, with ^ will operate user mode register
 	   otherwise, with ^ will back to the mode before enter
-	   int, and with state switch(copy spsr_irq to cpse)*/
+	   int, and with state switch(copy spsr_irq to cpse) */
 	ldmfd	sp!, { r0-r3, r12, lr, pc }^
 
+ENTRY(undefined)
+	ldr	r0, =undefined_str
+	bl	printf
+	b 	undefined
+	
+ENTRY(syscall)
+	ldr	r0, =syscall_str
+	bl	printf
+	b	syscall
+
+ENTRY(prefetch_abort)
+	ldr	r0, =prefetch_abort
+	bl	printf
+	b	prefetch_abort
+
+ENTRY(data_abort)
+	ldr	r0, =data_abort_str
+	bl	printf
+	b	data_abort
+
+ENTRY(reserved)
+	ldr	r0, =reserved_str
+	bl	printf
+	b	reserved
+
+ENTRY(irq)
+	b	arm_irq
+
+ENTRY(fiq)
+	ldr	r0, =fiq_str
+	bl	printf
+	b	fiq
+
 .bss
-.align 2
-.global irq_save_spot
-irq_save_spot:
+ENTRY(irq_save_spot)
 	.word	0	/* r4 */
 	.word	0	/* r5 */
 	.word	0	/* r6 */
+.data
+.align 4
+undefined_str:
+	.ascii	"Exception: undefined\n"
+syscall_str:
+	.ascii	"Exception: syscall\n"
+prefetch_abort_str:
+	.ascii	"Exception: prefetch abort\n"
+data_abort_str:
+	.ascii	"Exception: data abort\n"
+reserved_str:
+	.ascii	"Exception: reserved\n"
+fiq_str:
+	.ascii	"Exception: fiq\n"

@@ -20,11 +20,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "kernel/task.h"
-#include "kernel/printf.h"
-#include "kernel/malloc.h"
-#include "arch/platform.h"
-#include "kernel/type.h"
+#include <kernel/task.h>
+#include <kernel/printf.h>
+#include <kernel/malloc.h>
+#include <arch/platform.h>
+#include <kernel/type.h>
+#include <kernel/timer.h>
 
 #define HEAP_SIZE		0x100000 //1M
 
@@ -36,7 +37,9 @@ int func1(void *arg)
 
 	for (i=0;;i++)
 	{
-		printf("%d: func1 running\n", i);
+		printf("%d: tfunc1 running\n", i);
+		task_sleep(150);
+
 	}
 	
 	return 0;
@@ -48,7 +51,12 @@ int func2(void *arg)
 
 	for (i=0;;i++)
 	{
-		printf("%d: func2 running\n", i);
+		printf("%d: tfunc2 running\n", i);
+		if ( i == 100)
+		{
+			task_exit(0);
+		}
+		task_sleep(120);
 	}
 
 	return 0;
@@ -60,7 +68,9 @@ int func3(void *arg)
 
 	for (i=0;;i++)
 	{
-		printf("%d: func3 running\n", i);
+		printf("%d: tfunc3 running\n", i);
+		task_sleep(200);
+
 	}
 	
 	return 0;
@@ -72,19 +82,21 @@ void c_entry(void)
 	task_t *task2;
 	task_t *task3;
 	int ret;
+	int i;
 
 	printf("start ...!\n");
 
 	/*************** Init Platform ****************/
 	platform_init();
-	
+	timer_init();
+
 	/*************** Init Task ****************/
 	kmalloc_init(&__heap, HEAP_SIZE);
 	task_init();
 	task_create_init();
 	
 	/*************** Creating TASK1 ****************/
-	task1 = task_alloc("task1", 0x800, 1);
+	task1 = task_alloc("task1", 0x2000, 1);
 	if (NULL == task1)
 	{
 		return;
@@ -96,7 +108,7 @@ void c_entry(void)
 	}
 
 	/*************** Creating TASK2 ****************/
-	task2 = task_alloc("task2", 0x800, 1);
+	task2 = task_alloc("task2", 0x2000, 1);
 	if (NULL == task2)
 	{
 		return;
@@ -108,7 +120,7 @@ void c_entry(void)
 	}
 
 	/*************** Creating TASK3 ****************/
-	task3 = task_alloc("task3", 0x800, 1);
+	task3 = task_alloc("task3", 0x2000, 1);
 	if (NULL == task3)
 	{
 		return;
@@ -119,9 +131,10 @@ void c_entry(void)
 		printf("task create error.\n");
 	}
 
+	arch_enable_ints();
 	while(1)
 	{
-		printf("main\n");
+		;
 	}
 
 	task_free(task1);

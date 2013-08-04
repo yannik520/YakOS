@@ -20,21 +20,39 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __KERNEL_TIMER_H__
+#define __KERNEL_TIMER_H__
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
+#include <compiler.h>
+#include <kernel/list.h>
+#include <kernel/type.h>
+#include <arch/interrupts.h>
 
-#include <arch/types.h>
+struct timer;
+typedef enum handler_return (*timer_function)(struct timer *timer, unsigned long current_time, void *arg);
 
-#undef offsetof
-#ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
-#else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
-#endif
+typedef volatile struct timer {
+	struct list_head	entry;
+	unsigned long		expired_time;
+	unsigned long		periodic_time;
+	timer_function		function;
+	void *arg;
+}timer_t;
 
-#define container_of(ptr, type, member) ({			\
-	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-	(type *)( (char *)__mptr - offsetof(type,member) );})
+
+
+static __always_inline void init_timer_value(timer_t *t)
+{
+	t->expired_time = 0;
+	t->periodic_time = 0;
+	t->function = NULL;
+	t->arg = NULL;
+	INIT_LIST_HEAD(&t->entry);
+}
+
+void oneshot_timer_add(timer_t *timer, unsigned long delay, timer_function function, void *arg);
+void periodic_timer_add(timer_t *timer, unsigned long period, timer_function function, void *arg);
+void timer_delete(timer_t *timer);
+void timer_init(void);
 
 #endif

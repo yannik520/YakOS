@@ -24,7 +24,7 @@
 #ifndef _TIMER_H_
 #define _TIMER_H_
 
-#include "arch/interrupts.h"
+#include <arch/interrupts.h>
 
 typedef unsigned long time_t;
 typedef unsigned long long bigtime_t;

@@ -23,7 +23,7 @@
 
 #ifndef _STRING_H_
 #define _STRING_H_
-#include "arch/types.h"
+#include <arch/types.h>
 
 char *strcpy(char *dest, const char *src);
 char *strncpy(char *dest, const char *src, size_t count);

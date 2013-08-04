@@ -20,8 +20,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "arch/display.h"
-#include "arch/text.h"
+#include <arch/display.h>
+#include <arch/text.h>
 
 static unsigned char FONT[] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* ' ' */

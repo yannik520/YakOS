@@ -20,9 +20,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "string.h"
-#include "kernel/task.h"
-#include "arch/arch_task.h"
+#include <string.h>
+#include <kernel/task.h>
+#include <arch/arch_task.h>
 
 #define ALIGNTO(x, y)    ((x) &= ~((y) - 1))
 
@@ -38,12 +38,12 @@ struct context_switch_frame {
 	unsigned int lr;
 };
 
+extern void arm_context_switch(unsigned long, unsigned long);
+
 void arch_task_initialize(task_t *t)
 {
 
 	unsigned int stack_top = (unsigned int)t->stack + t->stack_size;
-	unsigned int *addr;
-	unsigned int i;
 
 	/* align to 8byte */
 	ALIGNTO(stack_top, 8);
