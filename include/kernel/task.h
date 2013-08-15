@@ -25,7 +25,6 @@
 #define _TASK_H_
 
 #include <kernel/list.h>
-#include <arch/ops.h>
 #include <compiler.h>
 
 #define MAX_PRIORITY	 8
@@ -72,6 +71,9 @@ void task_sleep(unsigned long delay);
 void task_create_init(void);
 void task_init(void);
 void task_exit(int retcode);
+
+void arch_enable_ints(void);
+void arch_disable_ints(void);
 
 static __always_inline void enter_critical_section(void)
 {

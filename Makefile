@@ -1,5 +1,4 @@
 ARCH ?= arm
-#BOARD ?= armemu
 BOARD ?= demo
 TOOLCHAIN_PREFIX := arm-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
@@ -62,5 +61,7 @@ bigeye.sym: bigeye.elf
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
 
 clean:
-	echo $(ALLOBJS)
 	@rm -rf *.bin *.elf *.sym $(ALLOBJS)
+
+distclean: clean
+	@rm -rf ./include/arch/*.h
