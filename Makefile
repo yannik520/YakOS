@@ -1,6 +1,9 @@
 ARCH ?= arm
 BOARD ?= demo
-TOOLCHAIN_PREFIX := arm-elf-
+
+export TOPDIR=$(shell pwd)
+TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-elf-toolchain/bin/
+TOOLCHAIN_PREFIX := $(TOOLCHAIN_PATH)arm-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
@@ -39,7 +42,10 @@ all: prepare bigeye.bin bigeye.elf bigeye.sym
 
 prepare: prepare_include build.ld
 
-.PHONY: prepare_include build.ld
+.PHONY: prepare_env prepare_include build.ld
+prepare_env:
+	$(shell source ./env_setting.sh)
+
 prepare_include:
 	echo $(ALL_INCLUDE_FILES)
 	@cp $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h) ./include/arch
