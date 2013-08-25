@@ -139,6 +139,7 @@ void task_schedule(void)
 	task_t              *new_task;
 	int                  i;
 	struct list_head    *iterator;
+	struct list_head    *current_list;
 
 	#ifdef  DEBUG
 	dump_all_task();
@@ -148,45 +149,36 @@ void task_schedule(void)
 	{
 		if ((task_bitmap >> i) & 1)
 		{
-			if (list_is_singular(&all_task[i]) && ((task_t *)all_task[i].next)->state == BLOCKED)
+			if (i != current_task->priority)
 			{
-				continue;
+				current_list = &all_task[i];
 			}
 			else
 			{
-				break;
+				if ( (current_task->state == EXITED) ||
+				     (current_task->state == SLEEPING) )
+				{
+					if (NULL != next_task)
+					{
+						DBG("next_task=%s\n", next_task->name);
+						new_task = next_task;
+						next_task = NULL;
+						break;
+					}
+					else
+					{
+						continue;
+					}
+				}
+
+				current_list = list;
 			}
-		}
-	}
-	if (MAX_PRIORITY == i)
-	{
-		return;
-	}
-
-	DBG("befor select new task\n");
-
-	if ((i != current_task->priority) ||
-	    list_is_singular( &all_task[current_task->priority]))
-	{
-		DBG("select first task in Priority %d group\n", i);
-		new_task = (task_t *)all_task[i].next;
-	}
-	else
-	{
-
-		if ( (current_task->state == EXITED) ||
-		     (current_task->state == SLEEPING))
-		{
-			DBG("next_task=%s\n", next_task->name);
-			new_task = next_task;
-		}
-		else
-		{
-			//new_task = (task_t *)list->next;
-			list_for_each(iterator, list)
+				
+			list_for_each(iterator, current_list)
 			{
 				new_task = (task_t *)iterator;
-				if (iterator == &all_task[i] || new_task->state == BLOCKED)
+				DBG("new_task=%s\n", new_task->name);
+				if ((iterator == &all_task[i]) || (new_task->state == BLOCKED))
 				{
 					continue;
 				}
@@ -194,12 +186,19 @@ void task_schedule(void)
 				{
 					break;
 				}
-
-				
+			}
+			if (iterator == current_list)
+			{
+				continue;
 			}
 
-			
+			break;
 		}
+	}
+
+	if (MAX_PRIORITY == i)
+	{
+		return;
 	}
 
 	if (current_task == new_task)
@@ -238,6 +237,7 @@ static enum handler_return task_sleep_function(timer_t *timer, unsigned long now
 void task_sleep(unsigned long delay)
 {
 	timer_t         *timer;
+	struct list_head    *iterator;
 	
 	DBG("start sleep\n");
 
@@ -258,12 +258,21 @@ void task_sleep(unsigned long delay)
 	oneshot_timer_add(timer, delay, task_sleep_function, (void *)current_task);
 	current_task->state = SLEEPING;
 
-	if (!list_is_last(&current_task->list,
-			  &all_task[current_task->priority]))
+	list_for_each(iterator, &current_task->list)
 	{
-		DBG("current_task=%s\n", current_task->name);		
-		next_task = (task_t *)current_task->list.next;
-		DBG("next_task=%s\n", next_task->name);
+		next_task = (task_t *)iterator;
+		if ((iterator == &all_task[current_task->priority]) || (next_task->state == BLOCKED))
+		{
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (iterator == &current_task->list)
+	{
+		next_task = NULL;
 	}
 
 	list_del(&current_task->list);
@@ -322,6 +331,7 @@ void task_init(void)
 
 void task_exit(int retcode)
 {
+	struct list_head    *iterator;
 
 	enter_critical_section();
 
@@ -332,12 +342,21 @@ void task_exit(int retcode)
 	dump_all_task();
 	#endif
 
-	if (!list_is_last(&current_task->list,
-			  &all_task[current_task->priority]))
+	list_for_each(iterator, &current_task->list)
 	{
-		DBG("current_task=%s\n", current_task->name);
-		next_task = (task_t *)current_task->list.next;
-		DBG("next_task=%s\n", next_task->name);
+		next_task = (task_t *)iterator;
+		if ((iterator == &all_task[current_task->priority]) || (next_task->state == BLOCKED))
+		{
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (iterator == &current_task->list)
+	{
+		next_task = NULL;
 	}
 
 	list_del(&current_task->list);

@@ -38,7 +38,7 @@ static noinline void __up(struct semaphore *sem)
 	struct semaphore_waiter *waiter = list_first_entry(&sem->wait_list, struct semaphore_waiter, list);
 	list_del(&waiter->list);
 	waiter->up = 1;
-	set_task_state(current_task, READY);
+	set_task_state(waiter->task, READY);
 }
 
 void down(struct semaphore *sem)
