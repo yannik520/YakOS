@@ -27,6 +27,7 @@ ALLOBJS := \
 	kernel/printf.o \
 	kernel/malloc.o \
 	kernel/timer.o \
+	kernel/semaphore.o \
 	lib/string.o
 
 include arch/$(ARCH)/Makefile

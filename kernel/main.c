@@ -26,10 +26,13 @@
 #include <arch/platform.h>
 #include <kernel/type.h>
 #include <kernel/timer.h>
+#include <kernel/semaphore.h>
 
 #define HEAP_SIZE		0x100000 //1M
 
 extern unsigned int		__heap;
+int sum = 0;
+struct semaphore sem;
 
 int func1(void *arg)
 {
@@ -37,8 +40,13 @@ int func1(void *arg)
 
 	for (i=0;;i++)
 	{
+		if(sum == 0)
+			down(&sem);
+		sum++;
 		printf("%d: tfunc1 running\n", i);
 		task_sleep(150);
+		if(sum == 30)
+			up(&sem);
 
 	}
 	
@@ -68,6 +76,9 @@ int func3(void *arg)
 
 	for (i=0;;i++)
 	{
+		down(&sem);
+		printf("sum=%d\n", sum);
+		up(&sem);
 		printf("%d: tfunc3 running\n", i);
 		task_sleep(200);
 
@@ -130,6 +141,8 @@ void c_entry(void)
 	{
 		printf("task create error.\n");
 	}
+
+	sema_init(&sem, 1);
 
 	arch_enable_ints();
 	while(1)

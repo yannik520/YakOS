@@ -138,6 +138,7 @@ void task_schedule(void)
 	task_t              *old_task = current_task;
 	task_t              *new_task;
 	int                  i;
+	struct list_head    *iterator;
 
 	#ifdef  DEBUG
 	dump_all_task();
@@ -147,7 +148,14 @@ void task_schedule(void)
 	{
 		if ((task_bitmap >> i) & 1)
 		{
-			break;
+			if (list_is_singular(&all_task[i]) && ((task_t *)all_task[i].next)->state == BLOCKED)
+			{
+				continue;
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 	if (MAX_PRIORITY == i)
@@ -174,7 +182,22 @@ void task_schedule(void)
 		}
 		else
 		{
-			new_task = (task_t *)list->next;
+			//new_task = (task_t *)list->next;
+			list_for_each(iterator, list)
+			{
+				new_task = (task_t *)iterator;
+				if (iterator == &all_task[i] || new_task->state == BLOCKED)
+				{
+					continue;
+				}
+				else
+				{
+					break;
+				}
+
+				
+			}
+
 			
 		}
 	}

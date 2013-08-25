@@ -29,6 +29,12 @@
 
 #define MAX_PRIORITY	 8
 
+#define set_task_state(tsk, state_value)		\
+	do { (tsk)->state = (state_value); } while (0)
+#define set_current_state(state_value)			\
+	do { current_task->state = (state_value); } while (0)
+
+
 enum task_state {                // Task state values
         
         RUNNING    = 0,          // Task is runnable or running
@@ -36,6 +42,7 @@ enum task_state {                // Task state values
         SUSPENDED  = 2,          // Suspend count is non-zero
 	READY      = 3,
         CREATING   = 4,          // Task is being created
+	BLOCKED    = 5,
         EXITED     = 8,         // Task has exited
 };
 
