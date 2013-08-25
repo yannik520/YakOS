@@ -132,13 +132,38 @@ void dump_all_task(void)
 	printf("\n");
 }
 
+task_t *find_next_task(unsigned int priority, struct list_head *start)
+{
+	task_t           *task;
+	struct list_head *iterator;
+
+	list_for_each(iterator, start)
+	{
+		task = (task_t *)iterator;
+		DBG("new_task=%s\n", new_task->name);
+		if ((iterator == &all_task[priority]) || (task->state == BLOCKED))
+		{
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (iterator == start)
+	{
+		task = NULL;
+	}
+	
+	return task;
+}
+
 void task_schedule(void)
 {
 	struct list_head    *list     = &current_task->list;
 	task_t              *old_task = current_task;
 	task_t              *new_task;
 	int                  i;
-	struct list_head    *iterator;
 	struct list_head    *current_list;
 
 	#ifdef  DEBUG
@@ -173,25 +198,12 @@ void task_schedule(void)
 
 				current_list = list;
 			}
-				
-			list_for_each(iterator, current_list)
-			{
-				new_task = (task_t *)iterator;
-				DBG("new_task=%s\n", new_task->name);
-				if ((iterator == &all_task[i]) || (new_task->state == BLOCKED))
-				{
-					continue;
-				}
-				else
-				{
-					break;
-				}
-			}
-			if (iterator == current_list)
+			
+			new_task = find_next_task(i, current_list);
+			if (NULL == new_task)
 			{
 				continue;
 			}
-
 			break;
 		}
 	}
@@ -237,7 +249,6 @@ static enum handler_return task_sleep_function(timer_t *timer, unsigned long now
 void task_sleep(unsigned long delay)
 {
 	timer_t         *timer;
-	struct list_head    *iterator;
 	
 	DBG("start sleep\n");
 
@@ -258,22 +269,7 @@ void task_sleep(unsigned long delay)
 	oneshot_timer_add(timer, delay, task_sleep_function, (void *)current_task);
 	current_task->state = SLEEPING;
 
-	list_for_each(iterator, &current_task->list)
-	{
-		next_task = (task_t *)iterator;
-		if ((iterator == &all_task[current_task->priority]) || (next_task->state == BLOCKED))
-		{
-			continue;
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (iterator == &current_task->list)
-	{
-		next_task = NULL;
-	}
+	next_task = find_next_task(current_task->priority, &current_task->list);
 
 	list_del(&current_task->list);
 	if (list_empty(&all_task[current_task->priority]))
@@ -342,22 +338,7 @@ void task_exit(int retcode)
 	dump_all_task();
 	#endif
 
-	list_for_each(iterator, &current_task->list)
-	{
-		next_task = (task_t *)iterator;
-		if ((iterator == &all_task[current_task->priority]) || (next_task->state == BLOCKED))
-		{
-			continue;
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (iterator == &current_task->list)
-	{
-		next_task = NULL;
-	}
+	next_task = find_next_task(current_task->priority, &current_task->list);
 
 	list_del(&current_task->list);
 	if (list_empty(&all_task[current_task->priority]))
