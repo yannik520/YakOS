@@ -21,13 +21,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _MALLOC_H_
-#define _MALLOC_H_
+#ifndef _SCHED_H_
+#define _SCHED_H_
+#include <kernel/task.h>
 
-#include <kernel/list.h>
+struct sched_class {
+	const struct sched_class *next;
+	void (*init) ();
+	void (*enqueue_task) (task_t *p, int flags);
+	void (*dequeue_task) (task_t *p, int flags);
+	task_t * (*pick_next_task) ();
+	void (*dump) ();
+};
 
-void kmalloc_init(unsigned int *addr, unsigned int size);
-void *kmalloc(unsigned int size);
-void kfree(void *addr);
+void sched_init();
 
 #endif

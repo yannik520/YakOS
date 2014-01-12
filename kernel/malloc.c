@@ -110,7 +110,7 @@ void *kmalloc(unsigned int size)
 			/* if the block size bigger than needed, looped devide the block into
 			   two half, and add second half to lower index group, looped till
 			   suitable block gotted*/
-			for (j = i; j > idx - MIN_POWER; j--)
+			for (j = i; j > (int)(idx - MIN_POWER); j--)
 			{
 				half_size = 1 << (j  - 1 + MIN_POWER);
 				tmp = (mem_head *)((unsigned int)cur_area->list.next + half_size);
@@ -129,7 +129,7 @@ void *kmalloc(unsigned int size)
 	return mem;
 }
 
-void kfree(unsigned int *addr)
+void kfree(void *addr)
 {
 	int			 i;
 	int			 combine = 0;

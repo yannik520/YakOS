@@ -30,9 +30,9 @@
 
 #define HEAP_SIZE		0x100000 //1M
 
-extern unsigned int		__heap;
-int sum = 0;
-struct semaphore sem;
+extern unsigned int	__heap;
+int			sum = 0;
+struct semaphore	sem;
 
 int func1(void *arg)
 {
@@ -89,11 +89,10 @@ int func3(void *arg)
 
 void c_entry(void)
 {
-	task_t *task1;
-	task_t *task2;
-	task_t *task3;
-	int ret;
-	int i;
+	task_t	*task1;
+	task_t	*task2;
+	task_t	*task3;
+	int	 ret;
 
 	printf("start ...!\n");
 

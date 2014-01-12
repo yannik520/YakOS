@@ -27,6 +27,7 @@
 #include <kernel/type.h>
 #include <kernel/timer.h>
 #include <arch/arch_task.h>
+#include <kernel/sched.h>
 
 //#define DEBUG           1
 #include <kernel/debug.h>
@@ -35,20 +36,17 @@
 #define DEFAULT_PRIORITY  (MAX_PRIORITY - 2)
 #define INIT_TASK_NAME    "init"
 
-struct list_head	 all_task[MAX_PRIORITY];
-unsigned int		 task_bitmap;
-task_t			*current_task;
-task_t			*next_task;
-int                      critical_section_count = 0;
+task_t				*current_task;
+task_t				*next_task;
+int				 critical_section_count = 0;
+extern struct sched_class	*scheduler;
 
 void initial_task_func(void)
 {
 	int ret;
 
 	exit_critical_section();
-
 	ret = current_task->entry(current_task->args);
-
 	task_exit(ret);
 }
 
@@ -109,122 +107,24 @@ int task_create(task_t *task, task_routine entry, void *args)
 	arch_task_initialize(task);
 	INIT_LIST_HEAD(&task->list);
 
-	enter_critical_section();
-	list_add_tail(&task->list, &all_task[task->priority]);
-	exit_critical_section();
-
-	task_bitmap |= 1 << task->priority;
+	scheduler->enqueue_task(task, 0);
 
 	return 0;
 }
 
-void dump_all_task(void)
-{
-	task_t                  *task;
-	struct list_head        *list;
-
-	printf("\ntasks:");
-	list_for_each(list, &all_task[current_task->priority])
-	{
-		task = (task_t *)list;
-		printf(" %s ", task->name);
-	}
-	printf("\n");
-}
-
-task_t *find_next_task(unsigned int priority, struct list_head *start)
-{
-	task_t           *task;
-	struct list_head *iterator;
-
-	list_for_each(iterator, start)
-	{
-		task = (task_t *)iterator;
-		DBG("new_task=%s\n", new_task->name);
-		if ((iterator == &all_task[priority]) || (task->state == BLOCKED))
-		{
-			continue;
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (iterator == start)
-	{
-		task = NULL;
-	}
-	
-	return task;
-}
-
 void task_schedule(void)
 {
-	struct list_head    *list     = &current_task->list;
-	task_t              *old_task = current_task;
 	task_t              *new_task;
-	int                  i;
-	struct list_head    *current_list;
+	task_t              *old_task = current_task;
 
-	#ifdef  DEBUG
-	dump_all_task();
-	#endif
+	new_task = scheduler->pick_next_task();
 
-	for (i=0; i<MAX_PRIORITY; i++)
-	{
-		if ((task_bitmap >> i) & 1)
-		{
-			if (i != current_task->priority)
-			{
-				current_list = &all_task[i];
-			}
-			else
-			{
-				if ( (current_task->state == EXITED) ||
-				     (current_task->state == SLEEPING) )
-				{
-					if (NULL != next_task)
-					{
-						DBG("next_task=%s\n", next_task->name);
-						new_task = next_task;
-						next_task = NULL;
-						break;
-					}
-					else
-					{
-						continue;
-					}
-				}
-
-				current_list = list;
-			}
-			
-			new_task = find_next_task(i, current_list);
-			if (NULL == new_task)
-			{
-				continue;
-			}
-			break;
-		}
-	}
-
-	if (MAX_PRIORITY == i)
+	if ((NULL == new_task) || (old_task == new_task))
 	{
 		return;
 	}
-
-	if (current_task == new_task)
-	{
-		return;
-	}
-
-	new_task->state = RUNNING;
-	current_task    = new_task;
-
-	DBG("old_task=%s, new_task=%s\n", old_task->name, new_task->name);
 
 	arch_context_switch(old_task, new_task);
-
 }
 
 static enum handler_return task_sleep_function(timer_t *timer, unsigned long now, void *arg)
@@ -237,8 +137,7 @@ static enum handler_return task_sleep_function(timer_t *timer, unsigned long now
 
 	enter_critical_section();
 
-	list_add_tail(&t->list, &all_task[t->priority]);
-	task_bitmap |= 1 << t->priority;
+	scheduler->enqueue_task(t, 0);
 	kfree(timer);
 
 	exit_critical_section();
@@ -253,7 +152,7 @@ void task_sleep(unsigned long delay)
 	DBG("start sleep\n");
 
 	#ifdef DEBUG
-	dump_all_task();
+	scheduler->dump();
 	#endif
 	
 	timer = (timer_t *)kmalloc(sizeof(*timer));
@@ -269,13 +168,7 @@ void task_sleep(unsigned long delay)
 	oneshot_timer_add(timer, delay, task_sleep_function, (void *)current_task);
 	current_task->state = SLEEPING;
 
-	next_task = find_next_task(current_task->priority, &current_task->list);
-
-	list_del(&current_task->list);
-	if (list_empty(&all_task[current_task->priority]))
-	{
-		task_bitmap &= ~(1 << current_task->priority);
-	}
+	scheduler->dequeue_task(current_task, 0);
 
 	task_schedule();
 	exit_critical_section();
@@ -308,21 +201,15 @@ void task_create_init(void)
 	memcpy(init->name, INIT_TASK_NAME, strlen(INIT_TASK_NAME) + 1);
 
 	INIT_LIST_HEAD(&init->list);
-	list_add_tail(&init->list, &all_task[init->priority]);
 
-	task_bitmap |= 1 << (MAX_PRIORITY-1);
+	scheduler->enqueue_task(init, 0);
 
 	current_task = init;
 }
 
 void task_init(void)
 {
-	int i;
-	
-	for (i=0; i< MAX_PRIORITY; i++)
-	{
-		INIT_LIST_HEAD(&all_task[i]);
-	}
+	sched_init();
 }
 
 void task_exit(int retcode)
@@ -335,16 +222,10 @@ void task_exit(int retcode)
 	current_task->ret   = retcode;
 
 	#ifdef DEBUG
-	dump_all_task();
+	scheduler->dump();
 	#endif
 
-	next_task = find_next_task(current_task->priority, &current_task->list);
-
-	list_del(&current_task->list);
-	if (list_empty(&all_task[current_task->priority]))
-	{
-		task_bitmap &= ~(1 << current_task->priority);
-	}
+	scheduler->dequeue_task(current_task, 0);
 
 	task_schedule();
 }

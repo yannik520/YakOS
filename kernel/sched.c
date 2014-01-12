@@ -20,14 +20,20 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <string.h>
+#include <kernel/task.h>
+#include <kernel/printf.h>
+#include <kernel/type.h>
+#include <kernel/sched.h>
 
-#ifndef _MALLOC_H_
-#define _MALLOC_H_
+//#define DEBUG           1
+#include <kernel/debug.h>
 
-#include <kernel/list.h>
+struct sched_class		*scheduler = NULL;
+extern struct sched_class	 sched_class_fifo;
 
-void kmalloc_init(unsigned int *addr, unsigned int size);
-void *kmalloc(unsigned int size);
-void kfree(void *addr);
-
-#endif
+void sched_init()
+{
+	scheduler = &sched_class_fifo;
+	scheduler->init();
+}

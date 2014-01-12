@@ -23,6 +23,8 @@ NOECHO ?= @
 
 ALLOBJS := \
 	kernel/main.o \
+	kernel/sched_fifo.o \
+	kernel/sched.o \
 	kernel/task.o \
 	kernel/printf.o \
 	kernel/malloc.o \

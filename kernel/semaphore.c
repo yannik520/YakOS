@@ -53,8 +53,6 @@ void down(struct semaphore *sem)
 
 void up(struct semaphore *sem)
 {
-	unsigned long flags;
-
 	enter_critical_section();
 	if (likely(list_empty(&sem->wait_list)))
 		sem->count++;
