@@ -24,6 +24,8 @@
 #ifndef _PLATFORM_H_
 #define _PLATFORM_H_
 
+void arch_idle(void);
+void arch_cpu_reset(unsigned long addr);
 void platform_init(void);
 
 #endif

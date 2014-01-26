@@ -82,7 +82,10 @@ void c_entry(void)
 
 	while(1)
 	{
-		;
+		enter_critical_section();
+		arch_idle();
+		exit_critical_section();
+		task_schedule();
 	}
 
 	task_free(task_shell);

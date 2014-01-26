@@ -20,37 +20,28 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <arch/text.h>
-#include <arch/interrupts.h>
-#include <arch/timer.h>
-#include <arch/platform.h>
-#include <arch/cpu.h>
-#include <kernel/printk.h>
 
-void arch_idle(void)
-{
-	cpu_do_idle();
-}
+#ifndef __CPU_H__
+#define __CPU_H__
 
-void arch_cpu_reset(unsigned long addr)
-{
-	cpu_reset(addr);
-}
+#ifdef __STDC__
+#define __catify_fn(name,x)	name##x
+#else
+#define __catify_fn(name,x)	name/**/x
+#endif
+#define __cpu_fn(name,x)	__catify_fn(name,x)
 
-void console_init(void)
-{
-	__console_init();
-}
+/*
+ * If we are supporting multiple CPUs, then we must use a table of
+ * function pointers for this lot.  Otherwise, we can optimise the
+ * table away.
+ */
+#define CPU_NAME                        cpu_arm926 /* tmp define it here */
+#define cpu_reset			__cpu_fn(CPU_NAME,_reset)
+#define cpu_do_idle			__cpu_fn(CPU_NAME,_do_idle)
 
-void platform_init(void)
-{
-	/* init serial port */
-	console_init();
-	
-	/* init interrupt controller */
-	platform_init_interrupts();
+/* declare all the functions as extern */
+extern int cpu_do_idle(void);
+extern void cpu_reset(unsigned long addr) __attribute__((noreturn));
 
-	/* init timmer for kernel tick */
-	platform_init_timer();
-	//platform_set_periodic_timer(timer_tick, 0, 10); /* 10ms */
-}
+#endif /* __CPU_H__ */
