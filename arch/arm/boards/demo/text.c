@@ -25,25 +25,41 @@
 void __puts(const char *str)
 {
 	while (*str) {
-		while (UART_FR & (1 << 5));
+		while (UART_FR & UART_FR_TXFF);
 
 		UART_DR = *str;
 
 		if (*str == '\n') {
-			while (UART_FR & (1 << 5));
+			while (UART_FR & UART_FR_TXFF);
 
 			UART_DR = '\r';
 		}
 		str++;
 	}
-	while (UART_FR & (1 << 3));
+	while (UART_FR & UART_FR_BUSY);
 }
 
 void putchar(char c)
 {
-	while (UART_FR & (1 << 5));
+	while (UART_FR & UART_FR_TXFF);
 	UART_DR = c;
-	while (UART_FR & (1 << 3));
+	while (UART_FR & UART_FR_BUSY);
+}
+
+int getchar(void)
+{
+	unsigned int data;
+
+	while (UART_FR & UART_FR_RXFE);
+	
+	data = UART_DR;
+
+	if (data & 0xFFFFFF00) {
+		UART_ECR = 0xFFFFFFFF;
+		return -1;
+	}
+	
+	return (int) data;
 }
 
 void __console_init(void)

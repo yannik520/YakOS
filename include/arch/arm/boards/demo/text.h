@@ -27,12 +27,21 @@
 
 #define BOOTUP_UART_BASE REG_BASE_UART0
 #define UART_DR	         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x000))
+#define UART_ECR         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x004))
 #define UART_LCRH	 (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x02C))
 #define UART_CR	         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x030))
 #define UART_FR	         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x018))
 
+#define UART_FR_TXFE              0x80
+#define UART_FR_RXFF              0x40
+#define UART_FR_TXFF              0x20
+#define UART_FR_RXFE              0x10
+#define UART_FR_BUSY              0x08
+#define UART_FR_TMSK              (UART_FR_TXFF + UART_FR_BUSY)
+
 void __console_init(void);
 void __puts(const char *str);
 void putchar(char c);
+int getchar(void);
 
 #endif

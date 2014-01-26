@@ -20,10 +20,10 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdarg.h>
+#include <kernel/kernel.h>
 #include <string.h>
 #include <kernel/task.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 
 #define LONGFLAG		0x00000001
 #define LONGLONGFLAG		0x00000002
@@ -36,6 +36,111 @@
 #define SIGNEDFLAG		0x00000100
 #define LEFTFORMATFLAG		0x00000200
 #define LEADZEROFLAG		0x00000400
+
+#define LOG_BUF_LEN             1024
+#define LOG_ALIGN               __alignof__(struct printk_log)
+
+struct printk_log {
+	u32 len;                /* length of entire record */
+	u16 text_len;		/* length of text buffer */
+	u16 level;		/* syslog level */
+};
+
+static char __log_buf[LOG_BUF_LEN];
+static char *log_buf = __log_buf;
+/* index and sequence number of the first record stored in the buffer */
+static u64 log_first_seq;
+static u32 log_first_idx;
+
+/* index and sequence number of the next record to store in the buffer */
+static u64 log_next_seq;
+static u32 log_next_idx;
+
+/* human readable text of the record */
+static char *log_text(const struct printk_log *msg)
+{
+	return (char *)msg + sizeof(struct printk_log);
+}
+
+/* get record by index; idx must point to valid msg */
+static struct printk_log *log_from_idx(u32 idx)
+{
+	struct printk_log *msg = (struct printk_log *)(log_buf + idx);
+
+	/*
+	 * A length == 0 record is the end of buffer marker. Wrap around and
+	 * read the message at the start of the buffer.
+	 */
+	if (!msg->len)
+		return (struct printk_log *)log_buf;
+	return msg;
+}
+
+/* get next record; idx must point to valid msg */
+static u32 log_next(u32 idx)
+{
+	struct printk_log *msg = (struct printk_log *)(log_buf + idx);
+
+	/* length == 0 indicates the end of the buffer; wrap */
+	/*
+	 * A length == 0 record is the end of buffer marker. Wrap around and
+	 * read the message at the start of the buffer as *this* one, and
+	 * return the one after that.
+	 */
+	if (!msg->len) {
+		msg = (struct printk_log *)log_buf;
+		return msg->len;
+	}
+	return idx + msg->len;
+}
+
+static void log_store(int level, const char *text, u16 text_len)
+{
+	struct printk_log *msg;
+	u32 size, pad_len;
+
+	/* number of '\0' padding bytes to next message */
+	size = sizeof(struct printk_log) + text_len;
+	pad_len = (-size) & (LOG_ALIGN - 1);
+	size += pad_len;
+
+	while (log_first_seq < log_next_seq) {
+		u32 free;
+
+		if (log_next_idx > log_first_idx)
+			free = max(LOG_BUF_LEN - log_next_idx, log_first_idx);
+		else
+			free = log_first_idx - log_next_idx;
+
+		if (free > size + sizeof(struct printk_log))
+			break;
+
+		/* drop old messages until we have enough contiuous space */
+		log_first_idx = log_next(log_first_idx);
+		log_first_seq++;
+	}
+
+	if (log_next_idx + size + sizeof(struct printk_log) >= LOG_BUF_LEN) {
+		/*
+		 * This message + an additional empty header does not fit
+		 * at the end of the buffer. Add an empty header with len == 0
+		 * to signify a wrap around.
+		 */
+		memset(log_buf + log_next_idx, 0, sizeof(struct printk_log));
+		log_next_idx = 0;
+	}
+
+	/* fill message */
+	msg = (struct printk_log *)(log_buf + log_next_idx);
+	memcpy(log_text(msg), text, text_len);
+	msg->text_len = text_len;
+	msg->level    = level;
+	msg->len = sizeof(struct printk_log) + text_len + pad_len;
+
+	/* insert message */
+	log_next_idx += msg->len;
+	log_next_seq++;
+}
 
 void puts(const char *s)
 {
@@ -287,19 +392,22 @@ done:
 int _dvprintf(const char *fmt, va_list ap)
 {
 	char	buf[256];
-	int	err;
+	int	len;
 
 	enter_critical_section();
 
-	err = vsnprintf(buf, sizeof(buf), fmt, ap);
-	puts(buf);
+	len = vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (0 < len) {
+		log_store(0, buf, len+1);
+		puts(buf);
+	}
 
 	exit_critical_section();
 
-	return err;
+	return len;
 }
 
-int printf(const char *fmt, ...)
+int printk(const char *fmt, ...)
 {
 	int	err;
 	va_list ap;
@@ -309,4 +417,19 @@ int printf(const char *fmt, ...)
 	va_end(ap);
 
 	return err;
+}
+
+void kmsg_dump(void)
+{
+	u32	 current_idx = log_first_idx;
+	char	*current_text;
+
+	if (current_idx == log_next_idx) {
+		return;
+	}
+	
+	while ((current_idx = log_next(current_idx)) != log_next_idx) {
+		current_text = log_text(log_from_idx(current_idx));
+		puts(current_text);
+	}
 }

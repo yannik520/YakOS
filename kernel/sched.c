@@ -22,7 +22,7 @@
  */
 #include <string.h>
 #include <kernel/task.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 #include <kernel/type.h>
 #include <kernel/sched.h>
 

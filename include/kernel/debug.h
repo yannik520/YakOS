@@ -23,11 +23,11 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 
 #ifdef DEBUG
 #define DBG(fmt,args...) \
-	printf("%s %s: " fmt , "DEBUG", \
+	printk("%s %s: " fmt , "DEBUG", \
 	       __FUNCTION__, ## args)
 #else
 #define DBG(fmt,args...) \
@@ -35,7 +35,7 @@
 #endif
 
 #define ERROR(fmt, args...) \
-	printf("%s %s: " fmt , "ERROR", \
+	printk("%s %s: " fmt , "ERROR", \
 	       __FUNCTION__, ## args)
 
 #endif /* __DEBUG_H__ */

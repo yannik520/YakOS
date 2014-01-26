@@ -22,7 +22,7 @@
  */
 #include <string.h>
 #include <kernel/task.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 #include <kernel/malloc.h>
 #include <kernel/type.h>
 #include <kernel/timer.h>
@@ -62,7 +62,7 @@ task_t *task_alloc(char *name, int stack_size, unsigned int priority)
 	task = (task_t *)kmalloc(sizeof(task_t));
 	if (task == (task_t *)0)
 	{
-		printf("Alloc task_t error!\n");
+		printk("Alloc task_t error!\n");
 		return NULL;
 	}
 	memset(task, 0, sizeof(task_t));

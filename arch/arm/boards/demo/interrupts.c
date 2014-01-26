@@ -25,7 +25,7 @@
 #include <arch/chip_regs.h>
 #include <kernel/task.h>
 #include <kernel/reg.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 
 struct arm_iframe {
 	unsigned int spsr;
@@ -103,13 +103,13 @@ handler_return platform_irq(struct arm_iframe *frame)
 
 void platform_fiq(struct arm_iframe *frame)
 {
-	printf("FIQ: unimplemented\n");
+	printk("FIQ: unimplemented\n");
 }
 
 void register_int_handler(unsigned int vector, int_handler handler, void *arg)
 {
 	if (vector > INTNR_IRQ_END)
-		printf("register_int_handler: vector out of range %d\n", vector);
+		printk("register_int_handler: vector out of range %d\n", vector);
 
 	enter_critical_section();
 

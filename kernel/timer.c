@@ -25,7 +25,7 @@
 #include <arch/interrupts.h>
 #include <kernel/timer.h>
 #include <kernel/task.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 
 //#define DEBUG    1
 #include <kernel/debug.h>
@@ -36,14 +36,14 @@ static void dump_timers(void)
 {
 	timer_t *timer;
 
-	printf("all timers:\n");
+	printk("all timers:\n");
 	list_for_each_entry(timer, &timer_list, entry)
 	{
-		printf(" %s timer: 0x%x %d ",
+		printk(" %s timer: 0x%x %d ",
 		       ((task_t *)(timer->arg))->name,
 		       (unsigned int)timer, timer->expired_time);
 	}
-	printf("\n");
+	printk("\n");
 }
 
 static void timer_list_add(timer_t *timer)

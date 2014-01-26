@@ -23,7 +23,7 @@
 #include <arch/timer.h>
 #include <kernel/task.h>
 #include <kernel/reg.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 #include <arch/memmap.h>
 #include <arch/interrupts.h>
 
@@ -104,7 +104,7 @@ static unsigned long gettimeoffset(void)
 	} while ((ticks2 > ticks1) || (ticks2 == 0));
 
 	ticks1 = timer_reload - ticks2;
-	//printf("ticks1=%d, ticks2=%d, status=0x%x\n", ticks1, ticks2, status);
+	//printk("ticks1=%d, ticks2=%d, status=0x%x\n", ticks1, ticks2, status);
 
 	if(status & (1<<CFG_TIMER_INTNR))
 		ticks1 += timer_reload;

@@ -21,7 +21,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <kernel/task.h>
-#include <kernel/printf.h>
+#include <kernel/printk.h>
 #include <kernel/type.h>
 #include <kernel/sched.h>
 
@@ -48,13 +48,13 @@ static void sched_fifo_dump ()
 	task_t                  *task;
 	struct list_head        *list;
 
-	printf("\ntasks:");
+	printk("\ntasks:");
 	list_for_each(list, &all_task[current_task->priority])
 	{
 		task = (task_t *)list;
-		printf(" %s ", task->name);
+		printk(" %s ", task->name);
 	}
-	printf("\n");
+	printk("\n");
 
 }
 

@@ -122,27 +122,27 @@ ENTRY(arm_irq)
 
 ENTRY(undefined)
 	ldr	r0, =undefined_str
-	bl	printf
+	bl	printk
 	b 	undefined
 	
 ENTRY(syscall)
 	ldr	r0, =syscall_str
-	bl	printf
+	bl	printk
 	b	syscall
 
 ENTRY(prefetch_abort)
 	ldr	r0, =prefetch_abort
-	bl	printf
+	bl	printk
 	b	prefetch_abort
 
 ENTRY(data_abort)
 	ldr	r0, =data_abort_str
-	bl	printf
+	bl	printk
 	b	data_abort
 
 ENTRY(reserved)
 	ldr	r0, =reserved_str
-	bl	printf
+	bl	printk
 	b	reserved
 
 ENTRY(irq)
@@ -150,7 +150,7 @@ ENTRY(irq)
 
 ENTRY(fiq)
 	ldr	r0, =fiq_str
-	bl	printf
+	bl	printk
 	b	fiq
 
 .bss

@@ -59,7 +59,7 @@ void arch_task_initialize(task_t *t)
 
 void arch_context_switch(task_t *oldtask, task_t *newtask)
 {
-	/* printf("oldtask->sp=0x%x, newtask->sp=0x%x\n", */
+	/* printk("oldtask->sp=0x%x, newtask->sp=0x%x\n", */
 	/*        oldtask->sp, newtask->sp); */
 	arm_context_switch(&oldtask->sp, newtask->sp);
 }

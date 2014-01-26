@@ -1,0 +1,4693 @@
+
+lynx_kimage.elf:     file format elf32-littlearm
+
+Disassembly of section .text:
+
+c0000000 <_start>:
+c0000000:	e59ff018 	ldr	r15, [pc, #24]	; c0000020 <_reset>
+c0000004:	e59ff018 	ldr	r15, [pc, #24]	; c0000024 <_undefined>
+c0000008:	e59ff018 	ldr	r15, [pc, #24]	; c0000028 <_syscall>
+c000000c:	e59ff018 	ldr	r15, [pc, #24]	; c000002c <_prefetch_abort>
+c0000010:	e59ff018 	ldr	r15, [pc, #24]	; c0000030 <_data_abort>
+c0000014:	e59ff018 	ldr	r15, [pc, #24]	; c0000034 <_reserved>
+c0000018:	e59ff018 	ldr	r15, [pc, #24]	; c0000038 <_irq>
+c000001c:	e59ff018 	ldr	r15, [pc, #24]	; c000003c <_fiq>
+
+c0000020 <_reset>:
+c0000020:	c0000040 	andgt	r0, r0, r0, asr #32
+
+c0000024 <_undefined>:
+c0000024:	c0002050 	andgt	r2, r0, r0, asr r0
+
+c0000028 <_syscall>:
+c0000028:	c0002060 	andgt	r2, r0, r0, rrx
+
+c000002c <_prefetch_abort>:
+c000002c:	c0002070 	andgt	r2, r0, r0, ror r0
+
+c0000030 <_data_abort>:
+c0000030:	c0002080 	andgt	r2, r0, r0, lsl #1
+
+c0000034 <_reserved>:
+c0000034:	c0002090 	mulgt	r0, r0, r0
+
+c0000038 <_irq>:
+c0000038:	c0001ff0 	strgtd	r1, [r0], -r0
+
+c000003c <_fiq>:
+c000003c:	c00020b0 	strgth	r2, [r0], -r0
+
+c0000040 <reset>:
+c0000040:	ee110f10 	mrc	15, 0, r0, cr1, cr0, {0}
+c0000044:	e3c00a0b 	bic	r0, r0, #45056	; 0xb000
+c0000048:	e3c00005 	bic	r0, r0, #5	; 0x5
+c000004c:	e3800002 	orr	r0, r0, #2	; 0x2
+c0000050:	ee010f10 	mcr	15, 0, r0, cr1, cr0, {0}
+
+c0000054 <relocate_vectors>:
+c0000054:	e24f005c 	sub	r0, r15, #92	; 0x5c
+c0000058:	e3a01000 	mov	r1, #0	; 0x0
+c000005c:	e1500001 	cmp	r0, r1
+c0000060:	0a000004 	beq	c0000078 <stack_setup>
+c0000064:	e24f202c 	sub	r2, r15, #44	; 0x2c
+
+c0000068 <copy_loop>:
+c0000068:	e8b007f8 	ldmia	r0!, {r3, r4, r5, r6, r7, r8, r9, r10}
+c000006c:	e8a107f8 	stmia	r1!, {r3, r4, r5, r6, r7, r8, r9, r10}
+c0000070:	e1500002 	cmp	r0, r2
+c0000074:	3afffffb 	bcc	c0000068 <copy_loop>
+
+c0000078 <stack_setup>:
+c0000078:	e10f0000 	mrs	r0, CPSR
+c000007c:	e3c0001f 	bic	r0, r0, #31	; 0x1f
+c0000080:	e3801012 	orr	r1, r0, #18	; 0x12
+c0000084:	e121f001 	msr	CPSR_c, r1
+c0000088:	e59fd044 	ldr	r13, [pc, #68]	; c00000d4 <.text+0xd4>
+c000008c:	e3801013 	orr	r1, r0, #19	; 0x13
+c0000090:	e121f001 	msr	CPSR_c, r1
+c0000094:	e59fd03c 	ldr	r13, [pc, #60]	; c00000d8 <.text+0xd8>
+
+c0000098 <clear_bss>:
+c0000098:	e59f003c 	ldr	r0, [pc, #60]	; c00000dc <.text+0xdc>
+c000009c:	e59f103c 	ldr	r1, [pc, #60]	; c00000e0 <.text+0xe0>
+c00000a0:	e3a02000 	mov	r2, #0	; 0x0
+
+c00000a4 <__bss_loop>:
+c00000a4:	e1500001 	cmp	r0, r1
+c00000a8:	b4802004 	strlt	r2, [r0], #4
+c00000ac:	bafffffc 	blt	c00000a4 <__bss_loop>
+c00000b0:	eb000028 	bl	c0000158 <c_entry>
+c00000b4:	eafffffe 	b	c00000b4 <__bss_loop+0x10>
+c00000b8:	90909090 	umulllss	r9, r0, r0, r0
+c00000bc:	90909090 	umulllss	r9, r0, r0, r0
+
+c00000c0 <arm_context_switch>:
+c00000c0:	e92d4ff0 	stmdb	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+c00000c4:	e580d000 	str	r13, [r0]
+c00000c8:	e1a0d001 	mov	r13, r1
+c00000cc:	e8bd4ff0 	ldmia	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+c00000d0:	e12fff1e 	bx	r14
+c00000d4:	c0003110 	andgt	r3, r0, r0, lsl r1
+c00000d8:	c0203388 	eorgt	r3, r0, r8, lsl #7
+c00000dc:	c0002b30 	andgt	r2, r0, r0, lsr r11
+c00000e0:	c0003388 	andgt	r3, r0, r8, lsl #7
+c00000e4:	e1a00000 	nop			(mov r0,r0)
+c00000e8:	e1a00000 	nop			(mov r0,r0)
+c00000ec:	e1a00000 	nop			(mov r0,r0)
+
+c00000f0 <show_logo>:
+int			sum = 0;
+struct semaphore	sem;
+
+void show_logo(void)
+{
+c00000f0:	e92d4010 	stmdb	r13!, {r4, r14}
+	printk("\n\n");
+c00000f4:	e59f4040 	ldr	r4, [pc, #64]	; c000013c <.text+0x13c>
+c00000f8:	e1a00004 	mov	r0, r4
+c00000fc:	eb0004c3 	bl	c0001410 <printk>
+	printk(" _                       _  __                    _ \n");
+c0000100:	e59f0038 	ldr	r0, [pc, #56]	; c0000140 <.text+0x140>
+c0000104:	eb0004c1 	bl	c0001410 <printk>
+	printk("| |   _   _ _ __ __  __ | |/ /___  __ _ __   ___| |\n");
+c0000108:	e59f0034 	ldr	r0, [pc, #52]	; c0000144 <.text+0x144>
+c000010c:	eb0004bf 	bl	c0001410 <printk>
+	printk("| |  | | | | '_ \\\\ \\/ / | ' // _ \\ '__| '_ \\ / _ \\ |\n");
+c0000110:	e59f0030 	ldr	r0, [pc, #48]	; c0000148 <.text+0x148>
+c0000114:	eb0004bd 	bl	c0001410 <printk>
+	printk("| |__| |_| | | | |>  <  | . \\  __/ |  | | | |  __/ |\n");
+c0000118:	e59f002c 	ldr	r0, [pc, #44]	; c000014c <.text+0x14c>
+c000011c:	eb0004bb 	bl	c0001410 <printk>
+	printk("|_____\\__, |_| |_/_/\\_\\ |_|\\_\\___||  || ||\\___||\n");
+c0000120:	e59f0028 	ldr	r0, [pc, #40]	; c0000150 <.text+0x150>
+c0000124:	eb0004b9 	bl	c0001410 <printk>
+	printk("      |___/                                         \n");
+c0000128:	e59f0024 	ldr	r0, [pc, #36]	; c0000154 <.text+0x154>
+c000012c:	eb0004b7 	bl	c0001410 <printk>
+	printk("\n\n");
+c0000130:	e1a00004 	mov	r0, r4
+}
+c0000134:	e8bd4010 	ldmia	r13!, {r4, r14}
+c0000138:	ea0004b4 	b	c0001410 <printk>
+c000013c:	c0002794 	mulgt	r0, r4, r7
+c0000140:	c0002798 	mulgt	r0, r8, r7
+c0000144:	c00027d0 	ldrgtd	r2, [r0], -r0
+c0000148:	c0002808 	andgt	r2, r0, r8, lsl #16
+c000014c:	c0002840 	andgt	r2, r0, r0, asr #16
+c0000150:	c0002878 	andgt	r2, r0, r8, ror r8
+c0000154:	c00028b0 	strgth	r2, [r0], -r0
+
+c0000158 <c_entry>:
+
+
+void c_entry(void)
+{
+c0000158:	e52de004 	str	r14, [r13, #-4]!
+	task_t	*task_shell;
+	int	 ret;
+
+	show_logo();
+c000015c:	ebffffe3 	bl	c00000f0 <show_logo>
+
+	/*************** Init Platform ****************/
+	platform_init();
+c0000160:	eb000941 	bl	c000266c <platform_init>
+	timer_init();
+c0000164:	eb0005be 	bl	c0001864 <timer_init>
+
+	/*************** Init Task ****************/
+	kmalloc_init(&__heap, HEAP_SIZE);
+c0000168:	e59f0064 	ldr	r0, [pc, #100]	; c00001d4 <.text+0x1d4>
+c000016c:	e3a01601 	mov	r1, #1048576	; 0x100000
+c0000170:	eb0004ff 	bl	c0001574 <kmalloc_init>
+	task_init();
+c0000174:	eb0000b8 	bl	c000045c <task_init>
+	task_create_init();
+c0000178:	eb0000c0 	bl	c0000480 <task_create_init>
+	
+	/*************** Creating TASK1 ****************/
+	task_shell = task_alloc("shell", 0x2000, 1);
+c000017c:	e59f0054 	ldr	r0, [pc, #84]	; c00001d8 <.text+0x1d8>
+c0000180:	e3a01a02 	mov	r1, #8192	; 0x2000
+c0000184:	e3a02001 	mov	r2, #1	; 0x1
+c0000188:	eb00014d 	bl	c00006c4 <task_alloc>
+	if (NULL == task_shell)
+c000018c:	e3500000 	cmp	r0, #0	; 0x0
+c0000190:	049df004 	ldreq	r15, [r13], #4
+	{
+		return;
+	}
+
+	ret = task_create(task_shell, init_shell, 0);
+c0000194:	e59f1040 	ldr	r1, [pc, #64]	; c00001dc <.text+0x1dc>
+c0000198:	e3a02000 	mov	r2, #0	; 0x0
+c000019c:	eb00019c 	bl	c0000814 <task_create>
+	if (ret) {
+c00001a0:	e3500000 	cmp	r0, #0	; 0x0
+c00001a4:	1a000007 	bne	c00001c8 <c_entry+0x70>
+	struct semaphore name = __SEMAPHORE_INITIALIZER(name, 1)
+
+static inline void sema_init(struct semaphore *sem, int val)
+{
+	*sem = (struct semaphore) __SEMAPHORE_INITIALIZER(*sem, val);
+c00001a8:	e59f3030 	ldr	r3, [pc, #48]	; c00001e0 <.text+0x1e0>
+c00001ac:	e3a02001 	mov	r2, #1	; 0x1
+c00001b0:	e2831004 	add	r1, r3, #4	; 0x4
+c00001b4:	e5832000 	str	r2, [r3]
+c00001b8:	e5831004 	str	r1, [r3, #4]
+c00001bc:	e5831008 	str	r1, [r3, #8]
+		printk("Create init shell task failed\n");
+	}
+
+	sema_init(&sem, 1);
+
+	arch_enable_ints();
+c00001c0:	eb0007c6 	bl	c00020e0 <arch_enable_ints>
+c00001c4:	eafffffe 	b	c00001c4 <c_entry+0x6c>
+c00001c8:	e59f0014 	ldr	r0, [pc, #20]	; c00001e4 <.text+0x1e4>
+c00001cc:	eb00048f 	bl	c0001410 <printk>
+c00001d0:	eafffff4 	b	c00001a8 <c_entry+0x50>
+c00001d4:	c00033c8 	andgt	r3, r0, r8, asr #7
+c00001d8:	c00028e8 	andgt	r2, r0, r8, ror #17
+c00001dc:	c0001d60 	andgt	r1, r0, r0, ror #26
+c00001e0:	c0003228 	andgt	r3, r0, r8, lsr #4
+c00001e4:	c00028f0 	strgtd	r2, [r0], -r0
+
+c00001e8 <sched_fifo_init>:
+extern task_t		*current_task;
+extern task_t		*next_task;
+
+void sched_fifo_init (void)
+{
+c00001e8:	e59f3018 	ldr	r3, [pc, #24]	; c0000208 <.text+0x208>
+c00001ec:	e2832040 	add	r2, r3, #64	; 0x40
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c00001f0:	e5833000 	str	r3, [r3]
+	list->prev = list;
+c00001f4:	e5833004 	str	r3, [r3, #4]
+c00001f8:	e2833008 	add	r3, r3, #8	; 0x8
+	int i;
+	
+	for (i=0; i< MAX_PRIORITY; i++)
+c00001fc:	e1530002 	cmp	r3, r2
+c0000200:	1afffffa 	bne	c00001f0 <sched_fifo_init+0x8>
+	{
+		INIT_LIST_HEAD(&all_task[i]);
+	}
+}
+c0000204:	e12fff1e 	bx	r14
+c0000208:	c0003238 	andgt	r3, r0, r8, lsr r2
+
+c000020c <_find_next_task>:
+
+static void sched_fifo_dump ()
+{
+	task_t                  *task;
+	struct list_head        *list;
+
+	printk("\ntasks:");
+	list_for_each(list, &all_task[current_task->priority])
+	{
+		task = (task_t *)list;
+		printk(" %s ", task->name);
+	}
+	printk("\n");
+
+}
+
+static task_t *_find_next_task(unsigned int priority, struct list_head *start)
+{
+	task_t           *task;
+	struct list_head *iterator;
+
+	list_for_each(iterator, start)
+c000020c:	e5912000 	ldr	r2, [r1]
+c0000210:	e1510002 	cmp	r1, r2
+c0000214:	0a00000a 	beq	c0000244 <_find_next_task+0x38>
+c0000218:	e59f302c 	ldr	r3, [pc, #44]	; c000024c <.text+0x24c>
+c000021c:	e083c180 	add	r12, r3, r0, lsl #3
+	{
+		task = (task_t *)iterator;
+		DBG("new_task=%s\n", task->name);
+		if ((iterator == &all_task[priority]) || (task->state == BLOCKED))
+c0000220:	e15c0002 	cmp	r12, r2
+c0000224:	e1a00002 	mov	r0, r2
+c0000228:	0a000002 	beq	c0000238 <_find_next_task+0x2c>
+c000022c:	e5923010 	ldr	r3, [r2, #16]
+c0000230:	e3530005 	cmp	r3, #5	; 0x5
+c0000234:	112fff1e 	bxne	r14
+c0000238:	e5922000 	ldr	r2, [r2]
+c000023c:	e1510002 	cmp	r1, r2
+c0000240:	1afffff6 	bne	c0000220 <_find_next_task+0x14>
+c0000244:	e3a00000 	mov	r0, #0	; 0x0
+		{
+			continue;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (iterator == start)
+	{
+		task = NULL;
+	}
+	
+	return task;
+}
+c0000248:	e12fff1e 	bx	r14
+c000024c:	c0003238 	andgt	r3, r0, r8, lsr r2
+
+c0000250 <sched_fifo_enqueue_task>:
+
+static void sched_fifo_enqueue_task (task_t *p, int flags)
+{
+c0000250:	e52de004 	str	r14, [r13, #-4]!
+	list_add_tail(&p->list, &all_task[p->priority]);
+	task_bitmap |= 1 << p->priority;
+c0000254:	e59fe030 	ldr	r14, [pc, #48]	; c000028c <.text+0x28c>
+c0000258:	e590c00c 	ldr	r12, [r0, #12]
+c000025c:	e59e1000 	ldr	r1, [r14]
+c0000260:	e3a03001 	mov	r3, #1	; 0x1
+c0000264:	e1811c13 	orr	r1, r1, r3, lsl r12
+c0000268:	e59f2020 	ldr	r2, [pc, #32]	; c0000290 <.text+0x290>
+c000026c:	e082218c 	add	r2, r2, r12, lsl #3
+}
+
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head->prev, head);
+c0000270:	e5923004 	ldr	r3, [r2, #4]
+c0000274:	e5802000 	str	r2, [r0]
+c0000278:	e5820004 	str	r0, [r2, #4]
+c000027c:	e58e1000 	str	r1, [r14]
+{
+	next->prev = new;
+	new->next = next;
+	new->prev = prev;
+	prev->next = new;
+c0000280:	e5830000 	str	r0, [r3]
+c0000284:	e5803004 	str	r3, [r0, #4]
+}
+c0000288:	e49df004 	ldr	r15, [r13], #4
+c000028c:	c0003234 	andgt	r3, r0, r4, lsr r2
+c0000290:	c0003238 	andgt	r3, r0, r8, lsr r2
+
+c0000294 <sched_fifo_dequeue_task>:
+
+static void sched_fifo_dequeue_task (task_t *p, int flags)
+{
+c0000294:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+c0000298:	e1a04000 	mov	r4, r0
+	next_task = _find_next_task(p->priority, &p->list);
+c000029c:	e1a01004 	mov	r1, r4
+c00002a0:	e590000c 	ldr	r0, [r0, #12]
+c00002a4:	ebffffd8 	bl	c000020c <_find_next_task>
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c00002a8:	e5945004 	ldr	r5, [r4, #4]
+c00002ac:	e594e000 	ldr	r14, [r4]
+	entry->next = 0;
+c00002b0:	e3a0c000 	mov	r12, #0	; 0x0
+
+	list_del(&p->list);
+	if (list_empty(&all_task[p->priority]))
+c00002b4:	e594600c 	ldr	r6, [r4, #12]
+c00002b8:	e59f2048 	ldr	r2, [pc, #72]	; c0000308 <.text+0x308>
+
+static inline void __list_del(struct list_head * prev, struct list_head * next)
+{
+	next->prev = prev;
+	prev->next = next;
+c00002bc:	e585e000 	str	r14, [r5]
+}
+
+static inline void __list_del_entry(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+c00002c0:	e584c000 	str	r12, [r4]
+c00002c4:	e1a03186 	mov	r3, r6, lsl #3
+c00002c8:	e7931002 	ldr	r1, [r3, r2]
+c00002cc:	e0833002 	add	r3, r3, r2
+c00002d0:	e59f2034 	ldr	r2, [pc, #52]	; c000030c <.text+0x30c>
+c00002d4:	e1530001 	cmp	r3, r1
+}
+
+static inline void __list_del(struct list_head * prev, struct list_head * next)
+{
+	next->prev = prev;
+c00002d8:	e58e5004 	str	r5, [r14, #4]
+	{
+		task_bitmap &= ~(1 << p->priority);
+c00002dc:	e59f702c 	ldr	r7, [pc, #44]	; c0000310 <.text+0x310>
+c00002e0:	e5820000 	str	r0, [r2]
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+	entry->prev = 0;
+c00002e4:	e584c004 	str	r12, [r4, #4]
+c00002e8:	18bd80f0 	ldmneia	r13!, {r4, r5, r6, r7, r15}
+c00002ec:	e3a03001 	mov	r3, #1	; 0x1
+c00002f0:	e1a03613 	mov	r3, r3, lsl r6
+c00002f4:	e5972000 	ldr	r2, [r7]
+c00002f8:	e1e03003 	mvn	r3, r3
+c00002fc:	e0033002 	and	r3, r3, r2
+c0000300:	e5873000 	str	r3, [r7]
+c0000304:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c0000308:	c0003238 	andgt	r3, r0, r8, lsr r2
+c000030c:	c0003278 	andgt	r3, r0, r8, ror r2
+c0000310:	c0003234 	andgt	r3, r0, r4, lsr r2
+
+c0000314 <sched_fifo_pick_next_task>:
+	}
+}
+
+static task_t * sched_fifo_pick_next_task (void)
+{
+c0000314:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+	struct list_head    *list     = &current_task->list;
+c0000318:	e59f5094 	ldr	r5, [pc, #148]	; c00003b4 <.text+0x3b4>
+c000031c:	e59f6094 	ldr	r6, [pc, #148]	; c00003b8 <.text+0x3b8>
+c0000320:	e5957000 	ldr	r7, [r5]
+c0000324:	e3a04000 	mov	r4, #0	; 0x0
+c0000328:	ea000006 	b	c0000348 <sched_fifo_pick_next_task+0x34>
+	task_t              *old_task = current_task;
+	task_t              *new_task;
+	int                  i;
+	struct list_head    *current_list;
+
+	#ifdef  DEBUG
+	sched_fifo_dump();
+	#endif
+
+	for (i=0; i<MAX_PRIORITY; i++)
+	{
+		if ((task_bitmap >> i) & 1)
+		{
+			if (i != current_task->priority)
+			{
+				current_list = &all_task[i];
+			}
+			else
+			{
+				if ( (current_task->state == EXITED) ||
+				     (current_task->state == SLEEPING) )
+				{
+					if (NULL != next_task)
+					{
+						DBG("next_task=%s\n", next_task->name);
+						new_task = next_task;
+						next_task = NULL;
+						break;
+					}
+					else
+					{
+						continue;
+					}
+				}
+
+				current_list = list;
+			}
+			
+			new_task = _find_next_task(i, current_list);
+c000032c:	e1a00004 	mov	r0, r4
+c0000330:	ebffffb5 	bl	c000020c <_find_next_task>
+			if (NULL == new_task)
+c0000334:	e3500000 	cmp	r0, #0	; 0x0
+c0000338:	1a000017 	bne	c000039c <sched_fifo_pick_next_task+0x88>
+c000033c:	e2844001 	add	r4, r4, #1	; 0x1
+c0000340:	e3540008 	cmp	r4, #8	; 0x8
+c0000344:	0a000018 	beq	c00003ac <sched_fifo_pick_next_task+0x98>
+c0000348:	e5963000 	ldr	r3, [r6]
+c000034c:	e1a03433 	mov	r3, r3, lsr r4
+c0000350:	e3130001 	tst	r3, #1	; 0x1
+c0000354:	0afffff8 	beq	c000033c <sched_fifo_pick_next_task+0x28>
+c0000358:	e5950000 	ldr	r0, [r5]
+c000035c:	e590200c 	ldr	r2, [r0, #12]
+c0000360:	e59f3054 	ldr	r3, [pc, #84]	; c00003bc <.text+0x3bc>
+c0000364:	e1520004 	cmp	r2, r4
+c0000368:	e0831184 	add	r1, r3, r4, lsl #3
+c000036c:	1affffee 	bne	c000032c <sched_fifo_pick_next_task+0x18>
+c0000370:	e5903010 	ldr	r3, [r0, #16]
+c0000374:	e3530001 	cmp	r3, #1	; 0x1
+c0000378:	13530008 	cmpne	r3, #8	; 0x8
+c000037c:	e59f203c 	ldr	r2, [pc, #60]	; c00003c0 <.text+0x3c0>
+c0000380:	e1a01007 	mov	r1, r7
+c0000384:	1affffe8 	bne	c000032c <sched_fifo_pick_next_task+0x18>
+c0000388:	e5920000 	ldr	r0, [r2]
+c000038c:	e3500000 	cmp	r0, #0	; 0x0
+c0000390:	0affffe9 	beq	c000033c <sched_fifo_pick_next_task+0x28>
+c0000394:	e3a03000 	mov	r3, #0	; 0x0
+c0000398:	e5823000 	str	r3, [r2]
+			{
+				continue;
+			}
+			break;
+		}
+	}
+
+	if (MAX_PRIORITY == i)
+	{
+		return NULL;
+	}
+
+	new_task->state = RUNNING;
+c000039c:	e3a03000 	mov	r3, #0	; 0x0
+c00003a0:	e5803010 	str	r3, [r0, #16]
+	current_task    = new_task;
+c00003a4:	e5850000 	str	r0, [r5]
+
+	DBG("old_task=%s, new_task=%s\n", old_task->name, new_task->name);
+
+	return current_task;
+}
+c00003a8:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c00003ac:	e3a00000 	mov	r0, #0	; 0x0
+c00003b0:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c00003b4:	c000327c 	andgt	r3, r0, r12, ror r2
+c00003b8:	c0003234 	andgt	r3, r0, r4, lsr r2
+c00003bc:	c0003238 	andgt	r3, r0, r8, lsr r2
+c00003c0:	c0003278 	andgt	r3, r0, r8, ror r2
+
+c00003c4 <sched_fifo_dump>:
+c00003c4:	e92d4070 	stmdb	r13!, {r4, r5, r6, r14}
+c00003c8:	e59f6054 	ldr	r6, [pc, #84]	; c0000424 <.text+0x424>
+c00003cc:	e59f0054 	ldr	r0, [pc, #84]	; c0000428 <.text+0x428>
+c00003d0:	eb00040e 	bl	c0001410 <printk>
+c00003d4:	e5962000 	ldr	r2, [r6]
+c00003d8:	e592300c 	ldr	r3, [r2, #12]
+c00003dc:	e59f5048 	ldr	r5, [pc, #72]	; c000042c <.text+0x42c>
+c00003e0:	e1a03183 	mov	r3, r3, lsl #3
+c00003e4:	e7934005 	ldr	r4, [r3, r5]
+c00003e8:	e0833005 	add	r3, r3, r5
+c00003ec:	e1530004 	cmp	r3, r4
+c00003f0:	0a000008 	beq	c0000418 <sched_fifo_dump+0x54>
+c00003f4:	e2841028 	add	r1, r4, #40	; 0x28
+c00003f8:	e59f0030 	ldr	r0, [pc, #48]	; c0000430 <.text+0x430>
+c00003fc:	eb000403 	bl	c0001410 <printk>
+c0000400:	e5962000 	ldr	r2, [r6]
+c0000404:	e592300c 	ldr	r3, [r2, #12]
+c0000408:	e5944000 	ldr	r4, [r4]
+c000040c:	e0853183 	add	r3, r5, r3, lsl #3
+c0000410:	e1530004 	cmp	r3, r4
+c0000414:	1afffff6 	bne	c00003f4 <sched_fifo_dump+0x30>
+c0000418:	e59f0014 	ldr	r0, [pc, #20]	; c0000434 <.text+0x434>
+c000041c:	e8bd4070 	ldmia	r13!, {r4, r5, r6, r14}
+c0000420:	ea0003fa 	b	c0001410 <printk>
+c0000424:	c000327c 	andgt	r3, r0, r12, ror r2
+c0000428:	c0002910 	andgt	r2, r0, r0, lsl r9
+c000042c:	c0003238 	andgt	r3, r0, r8, lsr r2
+c0000430:	c0002918 	andgt	r2, r0, r8, lsl r9
+c0000434:	c00028e4 	andgt	r2, r0, r4, ror #17
+
+c0000438 <sched_init>:
+extern struct sched_class	 sched_class_fifo;
+
+void sched_init()
+{
+	scheduler = &sched_class_fifo;
+c0000438:	e59f2014 	ldr	r2, [pc, #20]	; c0000454 <.text+0x454>
+c000043c:	e59f3014 	ldr	r3, [pc, #20]	; c0000458 <.text+0x458>
+c0000440:	e52de004 	str	r14, [r13, #-4]!
+c0000444:	e5832000 	str	r2, [r3]
+	scheduler->init();
+c0000448:	e1a0e00f 	mov	r14, r15
+c000044c:	e592f004 	ldr	r15, [r2, #4]
+}
+c0000450:	e49df004 	ldr	r15, [r13], #4
+c0000454:	c0002a20 	andgt	r2, r0, r0, lsr #20
+c0000458:	c0002b30 	andgt	r2, r0, r0, lsr r11
+
+c000045c <task_init>:
+}
+
+void task_init(void)
+{
+	sched_init();
+c000045c:	eafffff5 	b	c0000438 <sched_init>
+
+c0000460 <task_free>:
+c0000460:	e92d4010 	stmdb	r13!, {r4, r14}
+c0000464:	e2504000 	subs	r4, r0, #0	; 0x0
+c0000468:	08bd8010 	ldmeqia	r13!, {r4, r15}
+c000046c:	e5940014 	ldr	r0, [r4, #20]
+c0000470:	eb000454 	bl	c00015c8 <kfree>
+c0000474:	e1a00004 	mov	r0, r4
+c0000478:	e8bd4010 	ldmia	r13!, {r4, r14}
+c000047c:	ea000451 	b	c00015c8 <kfree>
+
+c0000480 <task_create_init>:
+c0000480:	e92d4010 	stmdb	r13!, {r4, r14}
+c0000484:	e3a00048 	mov	r0, #72	; 0x48
+c0000488:	eb0003f5 	bl	c0001464 <kmalloc>
+c000048c:	e2504000 	subs	r4, r0, #0	; 0x0
+c0000490:	e59f1090 	ldr	r1, [pc, #144]	; c0000528 <.text+0x528>
+c0000494:	e59f2090 	ldr	r2, [pc, #144]	; c000052c <.text+0x52c>
+c0000498:	e3a00a02 	mov	r0, #8192	; 0x2000
+c000049c:	0a00001b 	beq	c0000510 <task_create_init+0x90>
+c00004a0:	eb0003ef 	bl	c0001464 <kmalloc>
+c00004a4:	e3500000 	cmp	r0, #0	; 0x0
+c00004a8:	e2803a02 	add	r3, r0, #8192	; 0x2000
+c00004ac:	e59f007c 	ldr	r0, [pc, #124]	; c0000530 <.text+0x530>
+c00004b0:	0a000019 	beq	c000051c <task_create_init+0x9c>
+c00004b4:	e5843008 	str	r3, [r4, #8]
+c00004b8:	e3a03a02 	mov	r3, #8192	; 0x2000
+c00004bc:	e3a02007 	mov	r2, #7	; 0x7
+c00004c0:	e5843018 	str	r3, [r4, #24]
+c00004c4:	e3a03004 	mov	r3, #4	; 0x4
+c00004c8:	e5843010 	str	r3, [r4, #16]
+c00004cc:	e584200c 	str	r2, [r4, #12]
+c00004d0:	eb00067a 	bl	c0001ec0 <strlen>
+c00004d4:	e59f1054 	ldr	r1, [pc, #84]	; c0000530 <.text+0x530>
+c00004d8:	e2802001 	add	r2, r0, #1	; 0x1
+c00004dc:	e2840028 	add	r0, r4, #40	; 0x28
+c00004e0:	eb000689 	bl	c0001f0c <memcpy>
+c00004e4:	e59f3048 	ldr	r3, [pc, #72]	; c0000534 <.text+0x534>
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c00004e8:	e5844000 	str	r4, [r4]
+c00004ec:	e5932000 	ldr	r2, [r3]
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+	list->prev = list;
+c00004f0:	e5844004 	str	r4, [r4, #4]
+c00004f4:	e1a00004 	mov	r0, r4
+c00004f8:	e3a01000 	mov	r1, #0	; 0x0
+c00004fc:	e1a0e00f 	mov	r14, r15
+c0000500:	e592f008 	ldr	r15, [r2, #8]
+c0000504:	e59f302c 	ldr	r3, [pc, #44]	; c0000538 <.text+0x538>
+c0000508:	e5834000 	str	r4, [r3]
+c000050c:	e8bd8010 	ldmia	r13!, {r4, r15}
+c0000510:	e59f0024 	ldr	r0, [pc, #36]	; c000053c <.text+0x53c>
+c0000514:	e8bd4010 	ldmia	r13!, {r4, r14}
+c0000518:	ea0003bc 	b	c0001410 <printk>
+c000051c:	e1a00004 	mov	r0, r4
+c0000520:	e8bd4010 	ldmia	r13!, {r4, r14}
+c0000524:	ea000427 	b	c00015c8 <kfree>
+c0000528:	c000293c 	andgt	r2, r0, r12, lsr r9
+c000052c:	c0002a38 	andgt	r2, r0, r8, lsr r10
+c0000530:	c0002944 	andgt	r2, r0, r4, asr #18
+c0000534:	c0002b30 	andgt	r2, r0, r0, lsr r11
+c0000538:	c000327c 	andgt	r3, r0, r12, ror r2
+c000053c:	c0002920 	andgt	r2, r0, r0, lsr #18
+
+c0000540 <task_schedule>:
+c0000540:	e59f3030 	ldr	r3, [pc, #48]	; c0000578 <.text+0x578>
+c0000544:	e59f2030 	ldr	r2, [pc, #48]	; c000057c <.text+0x57c>
+c0000548:	e92d4010 	stmdb	r13!, {r4, r14}
+c000054c:	e5931000 	ldr	r1, [r3]
+c0000550:	e5924000 	ldr	r4, [r2]
+c0000554:	e1a0e00f 	mov	r14, r15
+c0000558:	e591f010 	ldr	r15, [r1, #16]
+c000055c:	e1540000 	cmp	r4, r0
+c0000560:	13500000 	cmpne	r0, #0	; 0x0
+c0000564:	e1a01000 	mov	r1, r0
+c0000568:	e1a00004 	mov	r0, r4
+c000056c:	08bd8010 	ldmeqia	r13!, {r4, r15}
+c0000570:	e8bd4010 	ldmia	r13!, {r4, r14}
+c0000574:	ea000687 	b	c0001f98 <arch_context_switch>
+c0000578:	c0002b30 	andgt	r2, r0, r0, lsr r11
+c000057c:	c000327c 	andgt	r3, r0, r12, ror r2
+
+c0000580 <task_exit>:
+}
+
+void task_exit(int retcode)
+{
+c0000580:	e92d4030 	stmdb	r13!, {r4, r5, r14}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0000584:	e59f404c 	ldr	r4, [pc, #76]	; c00005d8 <.text+0x5d8>
+c0000588:	e5942000 	ldr	r2, [r4]
+c000058c:	e3520000 	cmp	r2, #0	; 0x0
+c0000590:	e1a05000 	mov	r5, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0000594:	1a000001 	bne	c00005a0 <task_exit+0x20>
+	{
+		arch_disable_ints();
+c0000598:	eb0006d4 	bl	c00020f0 <arch_disable_ints>
+c000059c:	e5942000 	ldr	r2, [r4]
+	struct list_head    *iterator;
+
+	enter_critical_section();
+
+	current_task->state = EXITED;
+c00005a0:	e59f3034 	ldr	r3, [pc, #52]	; c00005dc <.text+0x5dc>
+c00005a4:	e5930000 	ldr	r0, [r3]
+c00005a8:	e3a03008 	mov	r3, #8	; 0x8
+c00005ac:	e5803010 	str	r3, [r0, #16]
+	current_task->ret   = retcode;
+
+	#ifdef DEBUG
+	scheduler->dump();
+	#endif
+
+	scheduler->dequeue_task(current_task, 0);
+c00005b0:	e59f3028 	ldr	r3, [pc, #40]	; c00005e0 <.text+0x5e0>
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00005b4:	e2822001 	add	r2, r2, #1	; 0x1
+c00005b8:	e5842000 	str	r2, [r4]
+c00005bc:	e3a01000 	mov	r1, #0	; 0x0
+c00005c0:	e5805024 	str	r5, [r0, #36]
+c00005c4:	e5932000 	ldr	r2, [r3]
+c00005c8:	e1a0e00f 	mov	r14, r15
+c00005cc:	e592f00c 	ldr	r15, [r2, #12]
+
+	task_schedule();
+}
+c00005d0:	e8bd4030 	ldmia	r13!, {r4, r5, r14}
+c00005d4:	eaffffd9 	b	c0000540 <task_schedule>
+c00005d8:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c00005dc:	c000327c 	andgt	r3, r0, r12, ror r2
+c00005e0:	c0002b30 	andgt	r2, r0, r0, lsr r11
+
+c00005e4 <task_sleep>:
+c00005e4:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c00005e8:	e1a07000 	mov	r7, r0
+c00005ec:	e3a00018 	mov	r0, #24	; 0x18
+c00005f0:	eb00039b 	bl	c0001464 <kmalloc>
+c00005f4:	e2504000 	subs	r4, r0, #0	; 0x0
+c00005f8:	e59f80a8 	ldr	r8, [pc, #168]	; c00006a8 <.text+0x6a8>
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00005fc:	e59f60a8 	ldr	r6, [pc, #168]	; c00006ac <.text+0x6ac>
+
+
+static __always_inline void init_timer_value(timer_t *t)
+{
+	t->expired_time = 0;
+c0000600:	e3a05000 	mov	r5, #0	; 0x0
+c0000604:	e59f10a4 	ldr	r1, [pc, #164]	; c00006b0 <.text+0x6b0>
+c0000608:	e59f20a4 	ldr	r2, [pc, #164]	; c00006b4 <.text+0x6b4>
+c000060c:	e59f00a4 	ldr	r0, [pc, #164]	; c00006b8 <.text+0x6b8>
+c0000610:	0a000022 	beq	c00006a0 <task_sleep+0xbc>
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0000614:	e596c000 	ldr	r12, [r6]
+c0000618:	e35c0000 	cmp	r12, #0	; 0x0
+
+
+static __always_inline void init_timer_value(timer_t *t)
+{
+	t->expired_time = 0;
+c000061c:	e5845008 	str	r5, [r4, #8]
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c0000620:	e5844000 	str	r4, [r4]
+
+static __always_inline void init_timer_value(timer_t *t)
+{
+	t->expired_time = 0;
+	t->periodic_time = 0;
+c0000624:	e584500c 	str	r5, [r4, #12]
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+	list->prev = list;
+c0000628:	e5844004 	str	r4, [r4, #4]
+static __always_inline void init_timer_value(timer_t *t)
+{
+	t->expired_time = 0;
+	t->periodic_time = 0;
+	t->function = NULL;
+c000062c:	e5845010 	str	r5, [r4, #16]
+	t->arg = NULL;
+c0000630:	e5845014 	str	r5, [r4, #20]
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0000634:	0a000016 	beq	c0000694 <task_sleep+0xb0>
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c0000638:	e28cc001 	add	r12, r12, #1	; 0x1
+c000063c:	e1a00004 	mov	r0, r4
+c0000640:	e1a01007 	mov	r1, r7
+c0000644:	e59f2070 	ldr	r2, [pc, #112]	; c00006bc <.text+0x6bc>
+c0000648:	e5983000 	ldr	r3, [r8]
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c000064c:	e586c000 	str	r12, [r6]
+c0000650:	eb0004c0 	bl	c0001958 <oneshot_timer_add>
+c0000654:	e5980000 	ldr	r0, [r8]
+c0000658:	e3a03001 	mov	r3, #1	; 0x1
+c000065c:	e5803010 	str	r3, [r0, #16]
+c0000660:	e59f3058 	ldr	r3, [pc, #88]	; c00006c0 <.text+0x6c0>
+c0000664:	e1a01005 	mov	r1, r5
+c0000668:	e5932000 	ldr	r2, [r3]
+c000066c:	e1a0e00f 	mov	r14, r15
+c0000670:	e592f00c 	ldr	r15, [r2, #12]
+c0000674:	ebffffb1 	bl	c0000540 <task_schedule>
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0000678:	e5963000 	ldr	r3, [r6]
+c000067c:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c0000680:	e3530000 	cmp	r3, #0	; 0x0
+c0000684:	e5863000 	str	r3, [r6]
+c0000688:	18bd81f0 	ldmneia	r13!, {r4, r5, r6, r7, r8, r15}
+c000068c:	e8bd41f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r14}
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+c0000690:	ea000692 	b	c00020e0 <arch_enable_ints>
+c0000694:	eb000695 	bl	c00020f0 <arch_disable_ints>
+c0000698:	e596c000 	ldr	r12, [r6]
+c000069c:	eaffffe5 	b	c0000638 <task_sleep+0x54>
+c00006a0:	eb00035a 	bl	c0001410 <printk>
+c00006a4:	eaffffda 	b	c0000614 <task_sleep+0x30>
+c00006a8:	c000327c 	andgt	r3, r0, r12, ror r2
+c00006ac:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c00006b0:	c000293c 	andgt	r2, r0, r12, lsr r9
+c00006b4:	c0002a4c 	andgt	r2, r0, r12, asr #20
+c00006b8:	c000294c 	andgt	r2, r0, r12, asr #18
+c00006bc:	c0000798 	mulgt	r0, r8, r7
+c00006c0:	c0002b30 	andgt	r2, r0, r0, lsr r11
+
+c00006c4 <task_alloc>:
+c00006c4:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c00006c8:	e3520007 	cmp	r2, #7	; 0x7
+c00006cc:	93a03000 	movls	r3, #0	; 0x0
+c00006d0:	83a03001 	movhi	r3, #1	; 0x1
+c00006d4:	e1a05000 	mov	r5, r0
+c00006d8:	e3550000 	cmp	r5, #0	; 0x0
+c00006dc:	11a04003 	movne	r4, r3
+c00006e0:	03834001 	orreq	r4, r3, #1	; 0x1
+c00006e4:	e3540000 	cmp	r4, #0	; 0x0
+c00006e8:	e1a07002 	mov	r7, r2
+c00006ec:	e3a00048 	mov	r0, #72	; 0x48
+c00006f0:	e3a06000 	mov	r6, #0	; 0x0
+c00006f4:	e1a08001 	mov	r8, r1
+c00006f8:	0a000001 	beq	c0000704 <task_alloc+0x40>
+c00006fc:	e1a00006 	mov	r0, r6
+c0000700:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c0000704:	eb000356 	bl	c0001464 <kmalloc>
+c0000708:	e1a01004 	mov	r1, r4
+c000070c:	e2504000 	subs	r4, r0, #0	; 0x0
+c0000710:	e3a02048 	mov	r2, #72	; 0x48
+c0000714:	e1a06004 	mov	r6, r4
+c0000718:	0a00000a 	beq	c0000748 <task_alloc+0x84>
+c000071c:	eb0005f1 	bl	c0001ee8 <memset>
+c0000720:	e1a00005 	mov	r0, r5
+c0000724:	eb0005e5 	bl	c0001ec0 <strlen>
+c0000728:	e1a01005 	mov	r1, r5
+c000072c:	e2802001 	add	r2, r0, #1	; 0x1
+c0000730:	e2840028 	add	r0, r4, #40	; 0x28
+c0000734:	eb0005f4 	bl	c0001f0c <memcpy>
+c0000738:	e1a00006 	mov	r0, r6
+c000073c:	e5848018 	str	r8, [r4, #24]
+c0000740:	e584700c 	str	r7, [r4, #12]
+c0000744:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c0000748:	e59f0004 	ldr	r0, [pc, #4]	; c0000754 <.text+0x754>
+c000074c:	eb00032f 	bl	c0001410 <printk>
+c0000750:	eaffffe9 	b	c00006fc <task_alloc+0x38>
+c0000754:	c000296c 	andgt	r2, r0, r12, ror #18
+
+c0000758 <initial_task_func>:
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0000758:	e59f2030 	ldr	r2, [pc, #48]	; c0000790 <.text+0x790>
+c000075c:	e5923000 	ldr	r3, [r2]
+c0000760:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c0000764:	e3530000 	cmp	r3, #0	; 0x0
+c0000768:	e52de004 	str	r14, [r13, #-4]!
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c000076c:	e5823000 	str	r3, [r2]
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+c0000770:	0b00065a 	bleq	c00020e0 <arch_enable_ints>
+c0000774:	e59f3018 	ldr	r3, [pc, #24]	; c0000794 <.text+0x794>
+c0000778:	e5932000 	ldr	r2, [r3]
+c000077c:	e5920020 	ldr	r0, [r2, #32]
+c0000780:	e1a0e00f 	mov	r14, r15
+c0000784:	e592f01c 	ldr	r15, [r2, #28]
+c0000788:	e49de004 	ldr	r14, [r13], #4
+c000078c:	eaffff7b 	b	c0000580 <task_exit>
+c0000790:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c0000794:	c000327c 	andgt	r3, r0, r12, ror r2
+
+c0000798 <task_sleep_function>:
+c0000798:	e92d4070 	stmdb	r13!, {r4, r5, r6, r14}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c000079c:	e59f5068 	ldr	r5, [pc, #104]	; c000080c <.text+0x80c>
+c00007a0:	e5951000 	ldr	r1, [r5]
+c00007a4:	e3a03003 	mov	r3, #3	; 0x3
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00007a8:	e3510000 	cmp	r1, #0	; 0x0
+c00007ac:	e1a04002 	mov	r4, r2
+c00007b0:	e5823010 	str	r3, [r2, #16]
+c00007b4:	e1a06000 	mov	r6, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00007b8:	0a000010 	beq	c0000800 <task_sleep_function+0x68>
+c00007bc:	e59f304c 	ldr	r3, [pc, #76]	; c0000810 <.text+0x810>
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00007c0:	e2811001 	add	r1, r1, #1	; 0x1
+c00007c4:	e5932000 	ldr	r2, [r3]
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00007c8:	e5851000 	str	r1, [r5]
+c00007cc:	e1a00004 	mov	r0, r4
+c00007d0:	e3a01000 	mov	r1, #0	; 0x0
+c00007d4:	e1a0e00f 	mov	r14, r15
+c00007d8:	e592f008 	ldr	r15, [r2, #8]
+c00007dc:	e1a00006 	mov	r0, r6
+c00007e0:	eb000378 	bl	c00015c8 <kfree>
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00007e4:	e5953000 	ldr	r3, [r5]
+c00007e8:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c00007ec:	e3530000 	cmp	r3, #0	; 0x0
+c00007f0:	e5853000 	str	r3, [r5]
+	{
+		arch_enable_ints();
+c00007f4:	0b000639 	bleq	c00020e0 <arch_enable_ints>
+c00007f8:	e3a00001 	mov	r0, #1	; 0x1
+c00007fc:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+c0000800:	eb00063a 	bl	c00020f0 <arch_disable_ints>
+c0000804:	e5951000 	ldr	r1, [r5]
+c0000808:	eaffffeb 	b	c00007bc <task_sleep_function+0x24>
+c000080c:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c0000810:	c0002b30 	andgt	r2, r0, r0, lsr r11
+
+c0000814 <task_create>:
+c0000814:	e92d4070 	stmdb	r13!, {r4, r5, r6, r14}
+c0000818:	e1a04000 	mov	r4, r0
+c000081c:	e5900018 	ldr	r0, [r0, #24]
+c0000820:	e3500000 	cmp	r0, #0	; 0x0
+c0000824:	02800a02 	addeq	r0, r0, #8192	; 0x2000
+c0000828:	05840018 	streq	r0, [r4, #24]
+c000082c:	e1a06002 	mov	r6, r2
+c0000830:	e1a05001 	mov	r5, r1
+c0000834:	eb00030a 	bl	c0001464 <kmalloc>
+c0000838:	e2503000 	subs	r3, r0, #0	; 0x0
+c000083c:	e3e02000 	mvn	r2, #0	; 0x0
+c0000840:	e1a00004 	mov	r0, r4
+c0000844:	0a00000e 	beq	c0000884 <task_create+0x70>
+c0000848:	e5843014 	str	r3, [r4, #20]
+c000084c:	e3a03004 	mov	r3, #4	; 0x4
+c0000850:	e5843010 	str	r3, [r4, #16]
+c0000854:	e584501c 	str	r5, [r4, #28]
+c0000858:	e5846020 	str	r6, [r4, #32]
+c000085c:	eb0005d0 	bl	c0001fa4 <arch_task_initialize>
+c0000860:	e59f3024 	ldr	r3, [pc, #36]	; c000088c <.text+0x88c>
+c0000864:	e1a00004 	mov	r0, r4
+c0000868:	e5932000 	ldr	r2, [r3]
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c000086c:	e5844000 	str	r4, [r4]
+	list->prev = list;
+c0000870:	e5844004 	str	r4, [r4, #4]
+c0000874:	e3a01000 	mov	r1, #0	; 0x0
+c0000878:	e1a0e00f 	mov	r14, r15
+c000087c:	e592f008 	ldr	r15, [r2, #8]
+c0000880:	e3a02000 	mov	r2, #0	; 0x0
+c0000884:	e1a00002 	mov	r0, r2
+c0000888:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+c000088c:	c0002b30 	andgt	r2, r0, r0, lsr r11
+
+c0000890 <log_text>:
+/* human readable text of the record */
+static char *log_text(const struct printk_log *msg)
+{
+	return (char *)msg + sizeof(struct printk_log);
+}
+c0000890:	e2800008 	add	r0, r0, #8	; 0x8
+c0000894:	e12fff1e 	bx	r14
+
+c0000898 <log_next>:
+
+/* get record by index; idx must point to valid msg */
+static struct printk_log *log_from_idx(u32 idx)
+{
+	struct printk_log *msg = (struct printk_log *)(log_buf + idx);
+
+	/*
+	 * A length == 0 record is the end of buffer marker. Wrap around and
+	 * read the message at the start of the buffer.
+	 */
+	if (!msg->len)
+		return (struct printk_log *)log_buf;
+	return msg;
+}
+
+/* get next record; idx must point to valid msg */
+static u32 log_next(u32 idx)
+{
+	struct printk_log *msg = (struct printk_log *)(log_buf + idx);
+
+	/* length == 0 indicates the end of the buffer; wrap */
+	/*
+	 * A length == 0 record is the end of buffer marker. Wrap around and
+	 * read the message at the start of the buffer as *this* one, and
+	 * return the one after that.
+	 */
+	if (!msg->len) {
+c0000898:	e59f2014 	ldr	r2, [pc, #20]	; c00008b4 <.text+0x8b4>
+c000089c:	e1a03000 	mov	r3, r0
+c00008a0:	e7900002 	ldr	r0, [r0, r2]
+c00008a4:	e3500000 	cmp	r0, #0	; 0x0
+		msg = (struct printk_log *)log_buf;
+		return msg->len;
+c00008a8:	05920000 	ldreq	r0, [r2]
+	}
+	return idx + msg->len;
+c00008ac:	10830000 	addne	r0, r3, r0
+}
+c00008b0:	e12fff1e 	bx	r14
+c00008b4:	c0002b38 	andgt	r2, r0, r8, lsr r11
+
+c00008b8 <longlong_to_string>:
+
+static void log_store(int level, const char *text, u16 text_len)
+{
+	struct printk_log *msg;
+	u32 size, pad_len;
+
+	/* number of '\0' padding bytes to next message */
+	size = sizeof(struct printk_log) + text_len;
+	pad_len = (-size) & (LOG_ALIGN - 1);
+	size += pad_len;
+
+	while (log_first_seq < log_next_seq) {
+		u32 free;
+
+		if (log_next_idx > log_first_idx)
+			free = max(LOG_BUF_LEN - log_next_idx, log_first_idx);
+		else
+			free = log_first_idx - log_next_idx;
+
+		if (free > size + sizeof(struct printk_log))
+			break;
+
+		/* drop old messages until we have enough contiuous space */
+		log_first_idx = log_next(log_first_idx);
+		log_first_seq++;
+	}
+
+	if (log_next_idx + size + sizeof(struct printk_log) >= LOG_BUF_LEN) {
+		/*
+		 * This message + an additional empty header does not fit
+		 * at the end of the buffer. Add an empty header with len == 0
+		 * to signify a wrap around.
+		 */
+		memset(log_buf + log_next_idx, 0, sizeof(struct printk_log));
+		log_next_idx = 0;
+	}
+
+	/* fill message */
+	msg = (struct printk_log *)(log_buf + log_next_idx);
+	memcpy(log_text(msg), text, text_len);
+	msg->text_len = text_len;
+	msg->level    = level;
+	msg->len = sizeof(struct printk_log) + text_len + pad_len;
+
+	/* insert message */
+	log_next_idx += msg->len;
+	log_next_seq++;
+}
+
+void puts(const char *s)
+{
+	__puts(s);
+}
+
+static char *longlong_to_string(char *buf, unsigned long long n, int len, unsigned int flag)
+{
+c00008b8:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c00008bc:	e59d8018 	ldr	r8, [r13, #24]
+c00008c0:	e1a04001 	mov	r4, r1
+	int	pos	 = len;
+	int	negative = 0;
+	int	digit;
+
+	if((flag & SIGNEDFLAG) && (long long)n < 0) {
+c00008c4:	e1a01428 	mov	r1, r8, lsr #8
+c00008c8:	e1a05002 	mov	r5, r2
+c00008cc:	e2011001 	and	r1, r1, #1	; 0x1
+c00008d0:	e1a02fa2 	mov	r2, r2, lsr #31
+c00008d4:	e0111002 	ands	r1, r1, r2
+c00008d8:	e1a06000 	mov	r6, r0
+c00008dc:	e1a02003 	mov	r2, r3
+c00008e0:	01a07001 	moveq	r7, r1
+c00008e4:	0a000002 	beq	c00008f4 <longlong_to_string+0x3c>
+		negative = 1;
+		n = -n;
+c00008e8:	e2744000 	rsbs	r4, r4, #0	; 0x0
+c00008ec:	e2e55000 	rsc	r5, r5, #0	; 0x0
+c00008f0:	e3a07001 	mov	r7, #1	; 0x1
+	}
+
+	buf[--pos] = 0;
+c00008f4:	e242e001 	sub	r14, r2, #1	; 0x1
+c00008f8:	e3a03000 	mov	r3, #0	; 0x0
+	
+	/* only do the math if the number is >= 10 */
+	while(n >= 10) {
+c00008fc:	e3550000 	cmp	r5, #0	; 0x0
+c0000900:	e7ce3006 	strb	r3, [r14, r6]
+c0000904:	8a000012 	bhi	c0000954 <longlong_to_string+0x9c>
+c0000908:	0a00000f 	beq	c000094c <longlong_to_string+0x94>
+		digit = (unsigned int)n % 10;
+		n = (unsigned int)n / 10;
+
+		buf[--pos] = digit + '0';
+	}
+	buf[--pos] = n + '0';
+c000090c:	e24e2001 	sub	r2, r14, #1	; 0x1
+	
+	if(negative)
+c0000910:	e3570000 	cmp	r7, #0	; 0x0
+c0000914:	e2843030 	add	r3, r4, #48	; 0x30
+c0000918:	e7c63002 	strb	r3, [r6, r2]
+c000091c:	e0860002 	add	r0, r6, r2
+		buf[--pos] = '-';
+c0000920:	13a0302d 	movne	r3, #45	; 0x2d
+c0000924:	12422001 	subne	r2, r2, #1	; 0x1
+c0000928:	10860002 	addne	r0, r6, r2
+c000092c:	17c63002 	strneb	r3, [r6, r2]
+c0000930:	18bd81f0 	ldmneia	r13!, {r4, r5, r6, r7, r8, r15}
+	else if((flag & SHOWSIGNFLAG))
+c0000934:	e3180080 	tst	r8, #128	; 0x80
+		buf[--pos] = '+';
+c0000938:	12422001 	subne	r2, r2, #1	; 0x1
+c000093c:	13a0302b 	movne	r3, #43	; 0x2b
+c0000940:	10860002 	addne	r0, r6, r2
+c0000944:	17c63002 	strneb	r3, [r6, r2]
+
+	return &buf[pos];
+}
+c0000948:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c000094c:	e3540009 	cmp	r4, #9	; 0x9
+c0000950:	9affffed 	bls	c000090c <longlong_to_string+0x54>
+c0000954:	e59f0034 	ldr	r0, [pc, #52]	; c0000990 <.text+0x990>
+c0000958:	e086c002 	add	r12, r6, r2
+c000095c:	e0821490 	umull	r1, r2, r0, r4
+c0000960:	e1a021a2 	mov	r2, r2, lsr #3
+c0000964:	e0821102 	add	r1, r2, r2, lsl #2
+c0000968:	e0443081 	sub	r3, r4, r1, lsl #1
+c000096c:	e1a04002 	mov	r4, r2
+c0000970:	e3a05000 	mov	r5, #0	; 0x0
+c0000974:	e2833030 	add	r3, r3, #48	; 0x30
+c0000978:	e3540009 	cmp	r4, #9	; 0x9
+c000097c:	e54c3002 	strb	r3, [r12, #-2]
+c0000980:	e24ee001 	sub	r14, r14, #1	; 0x1
+c0000984:	e24cc001 	sub	r12, r12, #1	; 0x1
+c0000988:	8afffff3 	bhi	c000095c <longlong_to_string+0xa4>
+c000098c:	eaffffde 	b	c000090c <longlong_to_string+0x54>
+c0000990:	cccccccd 	stcgtl	12, cr12, [r12], {205}
+
+c0000994 <vsnprintf>:
+
+static char *longlong_to_hexstring(char *buf, unsigned long long u, int len, unsigned int flag)
+{
+	int pos = len;
+	static const char hextable[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+	static const char hextable_caps[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	const char *table;
+
+	if((flag & CAPSFLAG))
+		table = hextable_caps;
+	else
+		table = hextable;
+
+	buf[--pos] = 0;
+	do {
+		unsigned int digit = u % 16;
+		u /= 16;
+	
+		buf[--pos] = table[digit];
+	} while(u != 0);
+
+	return &buf[pos];
+}
+
+int vsnprintf(char *str, size_t len, const char *fmt, va_list ap)
+{
+c0000994:	e92d4ff0 	stmdb	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+c0000998:	e24dd030 	sub	r13, r13, #48	; 0x30
+c000099c:	e58d3008 	str	r3, [r13, #8]
+c00009a0:	e1a07000 	mov	r7, r0
+c00009a4:	e1a0b001 	mov	r11, r1
+c00009a8:	e1a0a002 	mov	r10, r2
+c00009ac:	e3a08000 	mov	r8, #0	; 0x0
+	char			 c;
+	unsigned char		 uc;
+	const char		*s;
+	unsigned long long	 n;
+	void			*ptr;
+	int			 flags;
+	unsigned int		 format_num;
+	size_t			 chars_written = 0;
+	char			 num_buffer[32];
+
+#define OUTPUT_CHAR(c) do { (*str++ = c); chars_written++; if (chars_written + 1 == len) goto done; } while(0)
+#define OUTPUT_CHAR_NOLENCHECK(c) do { (*str++ = c); chars_written++; } while(0)
+
+	for(;;) {	
+		/* handle regular chars that aren't format related */
+		while((c = *fmt++) != 0) {
+c00009b0:	e5da2000 	ldrb	r2, [r10]
+c00009b4:	e3520000 	cmp	r2, #0	; 0x0
+c00009b8:	0a000007 	beq	c00009dc <vsnprintf+0x48>
+			if(c == '%')
+c00009bc:	e3520025 	cmp	r2, #37	; 0x25
+c00009c0:	e28aa001 	add	r10, r10, #1	; 0x1
+c00009c4:	0a000009 	beq	c00009f0 <vsnprintf+0x5c>
+				break; /* we saw a '%', break and start parsing format */
+			OUTPUT_CHAR(c);
+c00009c8:	e2888001 	add	r8, r8, #1	; 0x1
+c00009cc:	e2883001 	add	r3, r8, #1	; 0x1
+c00009d0:	e15b0003 	cmp	r11, r3
+c00009d4:	e4c72001 	strb	r2, [r7], #1
+c00009d8:	1afffff4 	bne	c00009b0 <vsnprintf+0x1c>
+		}
+
+		/* make sure we haven't just hit the end of the string */
+		if(c == 0)
+			break;
+
+		/* reset the format state */
+		flags	   = 0;
+		format_num = 0;
+
+	next_format:
+		/* grab the next format character */
+		c = *fmt++;
+		if(c == 0)
+			break;
+					
+		switch(c) {
+		case '0'...'9':
+			if (c == '0' && format_num == 0)
+				flags |= LEADZEROFLAG;
+			format_num *= 10;
+			format_num += c - '0';
+			goto next_format;
+		case '.':
+			/* XXX for now eat numeric formatting */
+			goto next_format;
+		case '%':
+			OUTPUT_CHAR('%');
+			break;
+		case 'c':
+			uc = va_arg(ap, unsigned int);
+			OUTPUT_CHAR(uc);
+			break;
+		case 's':
+			s = va_arg(ap, const char *);
+			if(s == 0)
+				s = "<null>";
+			goto _output_string;
+		case '-':
+			flags |= LEFTFORMATFLAG;
+			goto next_format;
+		case '+':
+			flags |= SHOWSIGNFLAG;
+			goto next_format;
+		case '#':
+			flags |= ALTFLAG;
+			goto next_format;
+		case 'l':
+			if(flags & LONGFLAG)
+				flags |= LONGLONGFLAG;
+			flags |= LONGFLAG;
+			goto next_format;
+		case 'h':
+			if(flags & HALFFLAG)
+				flags |= HALFHALFFLAG;
+			flags |= HALFFLAG;
+			goto next_format;
+		case 'z':
+			flags |= SIZETFLAG;
+			goto next_format;
+		case 'D':
+			flags |= LONGFLAG;
+			/* fallthrough */
+		case 'i':
+		case 'd':
+			n = (flags & LONGLONGFLAG) ? va_arg(ap, long long) :
+			(flags & LONGFLAG) ? va_arg(ap, long) : 
+			(flags & HALFHALFFLAG) ? (signed char)va_arg(ap, int) :
+			(flags & HALFFLAG) ? (short)va_arg(ap, int) :
+			(flags & SIZETFLAG) ? va_arg(ap, ssize_t) :
+			va_arg(ap, int);
+			flags |= SIGNEDFLAG;
+			s = longlong_to_string(num_buffer, n, sizeof(num_buffer), flags);
+			goto _output_string;
+		case 'U':
+			flags |= LONGFLAG;
+			/* fallthrough */
+		case 'u':
+			n = (flags & LONGLONGFLAG) ? va_arg(ap, unsigned long long) :
+			(flags & LONGFLAG) ? va_arg(ap, unsigned long) : 
+			(flags & HALFHALFFLAG) ? (unsigned char)va_arg(ap, unsigned int) :
+			(flags & HALFFLAG) ? (unsigned short)va_arg(ap, unsigned int) :
+			(flags & SIZETFLAG) ? va_arg(ap, size_t) :
+			va_arg(ap, unsigned int);
+			s = longlong_to_string(num_buffer, n, sizeof(num_buffer), flags);
+			goto _output_string;
+		case 'p':
+			flags |= LONGFLAG | ALTFLAG;
+			goto hex;
+		case 'X':
+			flags |= CAPSFLAG;
+			/* fallthrough */
+		hex:
+		case 'x':
+			n = (flags & LONGLONGFLAG) ? va_arg(ap, unsigned long long) :
+			(flags & LONGFLAG) ? va_arg(ap, unsigned long) : 
+			(flags & HALFHALFFLAG) ? (unsigned char)va_arg(ap, unsigned int) :
+			(flags & HALFFLAG) ? (unsigned short)va_arg(ap, unsigned int) :
+			(flags & SIZETFLAG) ? va_arg(ap, size_t) :
+			va_arg(ap, unsigned int);
+			s = longlong_to_hexstring(num_buffer, n, sizeof(num_buffer), flags);
+			if(flags & ALTFLAG) {
+				OUTPUT_CHAR('0');
+				OUTPUT_CHAR((flags & CAPSFLAG) ? 'X': 'x');
+			}
+			goto _output_string;
+		case 'n':
+			ptr = va_arg(ap, void *);
+			if(flags & LONGLONGFLAG)
+				*(long long *)ptr = chars_written;
+			else if(flags & LONGFLAG)
+				*(long *)ptr = chars_written;
+			else if(flags & HALFHALFFLAG)
+				*(signed char *)ptr = chars_written;
+			else if(flags & HALFFLAG)
+				*(short *)ptr = chars_written;
+			else if(flags & SIZETFLAG)
+				*(size_t *)ptr = chars_written;
+			else 
+				*(int *)ptr = chars_written;
+			break;
+		default:
+			OUTPUT_CHAR('%');
+			OUTPUT_CHAR(c);
+			break;
+		}
+
+		/* move on to the next field */
+		continue;
+
+		/* shared output code */
+_output_string:
+		if (flags & LEFTFORMATFLAG) {
+			/* left justify the text */
+			unsigned int count = 0;
+			while(*s != 0) {
+				OUTPUT_CHAR(*s++);
+				count++;
+			}
+
+			/* pad to the right (if necessary) */
+			for (; format_num > count; format_num--)
+				OUTPUT_CHAR(' ');
+		} else {
+			/* right justify the text (digits) */
+			size_t string_len = strlen(s);
+			char outchar = (flags & LEADZEROFLAG) ? '0' : ' ';
+			for (; format_num > string_len; format_num--)
+				OUTPUT_CHAR(outchar);
+
+			/* output the string */
+			while(*s != 0)
+				OUTPUT_CHAR(*s++);
+		}
+		continue;
+	}
+
+done:
+	/* null terminate */
+	OUTPUT_CHAR_NOLENCHECK('\0');
+c00009dc:	e3a03000 	mov	r3, #0	; 0x0
+	chars_written--; /* don't count the null */
+
+#undef OUTPUT_CHAR
+#undef OUTPUT_CHAR_NOLENCHECK
+
+	return chars_written;
+}
+c00009e0:	e1a00008 	mov	r0, r8
+c00009e4:	e5c73000 	strb	r3, [r7]
+c00009e8:	e28dd030 	add	r13, r13, #48	; 0x30
+c00009ec:	e8bd8ff0 	ldmia	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r15}
+c00009f0:	e3a00000 	mov	r0, #0	; 0x0
+c00009f4:	e58d000c 	str	r0, [r13, #12]
+c00009f8:	e1a09000 	mov	r9, r0
+c00009fc:	e5da2000 	ldrb	r2, [r10]
+c0000a00:	e3520000 	cmp	r2, #0	; 0x0
+c0000a04:	0afffff4 	beq	c00009dc <vsnprintf+0x48>
+c0000a08:	e2423023 	sub	r3, r2, #35	; 0x23
+c0000a0c:	e28aa001 	add	r10, r10, #1	; 0x1
+c0000a10:	e3530057 	cmp	r3, #87	; 0x57
+c0000a14:	979ff103 	ldrls	r15, [r15, r3, lsl #2]
+c0000a18:	ea000143 	b	c0000f2c <.text+0xf2c>
+c0000a1c:	c0000ed4 	ldrgtd	r0, [r0], -r4
+c0000a20:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a24:	c0000eb8 	strgth	r0, [r0], -r8
+c0000a28:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a2c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a30:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a34:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a38:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a3c:	c0000eb0 	strgth	r0, [r0], -r0
+c0000a40:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a44:	c0000ea8 	andgt	r0, r0, r8, lsr #29
+c0000a48:	c00009fc 	strgtd	r0, [r0], -r12
+c0000a4c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a50:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a54:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a58:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a5c:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a60:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a64:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a68:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a6c:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a70:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a74:	c0000e80 	andgt	r0, r0, r0, lsl #29
+c0000a78:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a7c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a80:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a84:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a88:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a8c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a90:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a94:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a98:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000a9c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000aa0:	c0000d04 	andgt	r0, r0, r4, lsl #26
+c0000aa4:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000aa8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000aac:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ab0:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ab4:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ab8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000abc:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ac0:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ac4:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ac8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000acc:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ad0:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ad4:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ad8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000adc:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ae0:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000ae4:	c0000d38 	andgt	r0, r0, r8, lsr r13
+c0000ae8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000aec:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000af0:	c0000b7c 	andgt	r0, r0, r12, ror r11
+c0000af4:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000af8:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000afc:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b00:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b04:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b08:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b0c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b10:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b14:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b18:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b1c:	c0000eec 	andgt	r0, r0, r12, ror #29
+c0000b20:	c0000d08 	andgt	r0, r0, r8, lsl #26
+c0000b24:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b28:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b2c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b30:	c0000edc 	ldrgtd	r0, [r0], -r12
+c0000b34:	c0000d08 	andgt	r0, r0, r8, lsl #26
+c0000b38:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b3c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b40:	c0000f14 	andgt	r0, r0, r4, lsl r15
+c0000b44:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b48:	c0000f54 	andgt	r0, r0, r4, asr r15
+c0000b4c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b50:	c0000f4c 	andgt	r0, r0, r12, asr #30
+c0000b54:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b58:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b5c:	c0000f7c 	andgt	r0, r0, r12, ror r15
+c0000b60:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b64:	c0000d3c 	andgt	r0, r0, r12, lsr r13
+c0000b68:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b6c:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b70:	c0000b80 	andgt	r0, r0, r0, lsl #23
+c0000b74:	c0000f2c 	andgt	r0, r0, r12, lsr #30
+c0000b78:	c0000f24 	andgt	r0, r0, r4, lsr #30
+c0000b7c:	e3899040 	orr	r9, r9, #64	; 0x40
+c0000b80:	e3190002 	tst	r9, #2	; 0x2
+c0000b84:	0a0000a3 	beq	c0000e18 <.text+0xe18>
+c0000b88:	e59d3008 	ldr	r3, [r13, #8]
+c0000b8c:	e8930060 	ldmia	r3, {r5, r6}
+c0000b90:	e2833008 	add	r3, r3, #8	; 0x8
+c0000b94:	e58d3008 	str	r3, [r13, #8]
+c0000b98:	e2192040 	ands	r2, r9, #64	; 0x40
+c0000b9c:	e3a03000 	mov	r3, #0	; 0x0
+c0000ba0:	e5cd302f 	strb	r3, [r13, #47]
+c0000ba4:	e58d2004 	str	r2, [r13, #4]
+c0000ba8:	e59f35b0 	ldr	r3, [pc, #1456]	; c0001160 <.text+0x1160>
+c0000bac:	e59f25b0 	ldr	r2, [pc, #1456]	; c0001164 <.text+0x1164>
+c0000bb0:	e3a0001f 	mov	r0, #31	; 0x1f
+c0000bb4:	01a0c002 	moveq	r12, r2
+c0000bb8:	11a0c003 	movne	r12, r3
+c0000bbc:	e28de010 	add	r14, r13, #16	; 0x10
+c0000bc0:	e1a03225 	mov	r3, r5, lsr #4
+c0000bc4:	e1833e06 	orr	r3, r3, r6, lsl #28
+c0000bc8:	e205200f 	and	r2, r5, #15	; 0xf
+c0000bcc:	e1a04226 	mov	r4, r6, lsr #4
+c0000bd0:	e7dc1002 	ldrb	r1, [r12, r2]
+c0000bd4:	e1a05003 	mov	r5, r3
+c0000bd8:	e2400001 	sub	r0, r0, #1	; 0x1
+c0000bdc:	e1953004 	orrs	r3, r5, r4
+c0000be0:	e1a06004 	mov	r6, r4
+c0000be4:	e7c0100e 	strb	r1, [r0, r14]
+c0000be8:	1afffff4 	bne	c0000bc0 <.text+0xbc0>
+c0000bec:	e3190020 	tst	r9, #32	; 0x20
+c0000bf0:	e08e5000 	add	r5, r14, r0
+c0000bf4:	0a00000e 	beq	c0000c34 <.text+0xc34>
+c0000bf8:	e2888001 	add	r8, r8, #1	; 0x1
+c0000bfc:	e2881001 	add	r1, r8, #1	; 0x1
+c0000c00:	e3a03030 	mov	r3, #48	; 0x30
+c0000c04:	e15b0001 	cmp	r11, r1
+c0000c08:	e4c73001 	strb	r3, [r7], #1
+c0000c0c:	0affff72 	beq	c00009dc <vsnprintf+0x48>
+c0000c10:	e59d0004 	ldr	r0, [r13, #4]
+c0000c14:	e2813001 	add	r3, r1, #1	; 0x1
+c0000c18:	e3500000 	cmp	r0, #0	; 0x0
+c0000c1c:	03a02078 	moveq	r2, #120	; 0x78
+c0000c20:	13a02058 	movne	r2, #88	; 0x58
+c0000c24:	e15b0003 	cmp	r11, r3
+c0000c28:	e4c72001 	strb	r2, [r7], #1
+c0000c2c:	0a0000c4 	beq	c0000f44 <.text+0xf44>
+c0000c30:	e1a08001 	mov	r8, r1
+c0000c34:	e3190c02 	tst	r9, #512	; 0x200
+c0000c38:	0a00004d 	beq	c0000d74 <.text+0xd74>
+c0000c3c:	e5d52000 	ldrb	r2, [r5]
+c0000c40:	e3520000 	cmp	r2, #0	; 0x0
+c0000c44:	01a01007 	moveq	r1, r7
+c0000c48:	01a0c008 	moveq	r12, r8
+c0000c4c:	01a0e002 	moveq	r14, r2
+c0000c50:	0a000012 	beq	c0000ca0 <.text+0xca0>
+c0000c54:	e288c001 	add	r12, r8, #1	; 0x1
+c0000c58:	e28c3001 	add	r3, r12, #1	; 0x1
+c0000c5c:	e1a01007 	mov	r1, r7
+c0000c60:	e153000b 	cmp	r3, r11
+c0000c64:	e4c12001 	strb	r2, [r1], #1
+c0000c68:	0a00003e 	beq	c0000d68 <.text+0xd68>
+c0000c6c:	e068300b 	rsb	r3, r8, r11
+c0000c70:	e2430002 	sub	r0, r3, #2	; 0x2
+c0000c74:	e3a0e000 	mov	r14, #0	; 0x0
+c0000c78:	ea000004 	b	c0000c90 <.text+0xc90>
+c0000c7c:	e15e0000 	cmp	r14, r0
+c0000c80:	e7ce2007 	strb	r2, [r14, r7]
+c0000c84:	e2811001 	add	r1, r1, #1	; 0x1
+c0000c88:	e28cc001 	add	r12, r12, #1	; 0x1
+c0000c8c:	0a000035 	beq	c0000d68 <.text+0xd68>
+c0000c90:	e28ee001 	add	r14, r14, #1	; 0x1
+c0000c94:	e7de2005 	ldrb	r2, [r14, r5]
+c0000c98:	e3520000 	cmp	r2, #0	; 0x0
+c0000c9c:	1afffff6 	bne	c0000c7c <.text+0xc7c>
+c0000ca0:	e59d200c 	ldr	r2, [r13, #12]
+c0000ca4:	e152000e 	cmp	r2, r14
+c0000ca8:	91a07001 	movls	r7, r1
+c0000cac:	91a0800c 	movls	r8, r12
+c0000cb0:	9affff3e 	bls	c00009b0 <vsnprintf+0x1c>
+c0000cb4:	e3a00020 	mov	r0, #32	; 0x20
+c0000cb8:	e28c8001 	add	r8, r12, #1	; 0x1
+c0000cbc:	e4c10001 	strb	r0, [r1], #1
+c0000cc0:	e2883001 	add	r3, r8, #1	; 0x1
+c0000cc4:	e153000b 	cmp	r3, r11
+c0000cc8:	e1a07001 	mov	r7, r1
+c0000ccc:	0affff42 	beq	c00009dc <vsnprintf+0x48>
+c0000cd0:	e59d200c 	ldr	r2, [r13, #12]
+c0000cd4:	e06b300c 	rsb	r3, r11, r12
+c0000cd8:	e0823003 	add	r3, r2, r3
+c0000cdc:	e1a01000 	mov	r1, r0
+c0000ce0:	e2833002 	add	r3, r3, #2	; 0x2
+c0000ce4:	e2422001 	sub	r2, r2, #1	; 0x1
+c0000ce8:	e152000e 	cmp	r2, r14
+c0000cec:	9affff2f 	bls	c00009b0 <vsnprintf+0x1c>
+c0000cf0:	e1520003 	cmp	r2, r3
+c0000cf4:	e4c71001 	strb	r1, [r7], #1
+c0000cf8:	e2888001 	add	r8, r8, #1	; 0x1
+c0000cfc:	1afffff8 	bne	c0000ce4 <.text+0xce4>
+c0000d00:	eaffff35 	b	c00009dc <vsnprintf+0x48>
+c0000d04:	e3899001 	orr	r9, r9, #1	; 0x1
+c0000d08:	e3190002 	tst	r9, #2	; 0x2
+c0000d0c:	1a000055 	bne	c0000e68 <.text+0xe68>
+c0000d10:	e3190001 	tst	r9, #1	; 0x1
+c0000d14:	0a0000c0 	beq	c000101c <.text+0x101c>
+c0000d18:	e59d0008 	ldr	r0, [r13, #8]
+c0000d1c:	e5903000 	ldr	r3, [r0]
+c0000d20:	e3899c01 	orr	r9, r9, #256	; 0x100
+c0000d24:	e2800004 	add	r0, r0, #4	; 0x4
+c0000d28:	e1a01003 	mov	r1, r3
+c0000d2c:	e1a02fc1 	mov	r2, r1, asr #31
+c0000d30:	e58d0008 	str	r0, [r13, #8]
+c0000d34:	ea000045 	b	c0000e50 <.text+0xe50>
+c0000d38:	e3899001 	orr	r9, r9, #1	; 0x1
+c0000d3c:	e3190002 	tst	r9, #2	; 0x2
+c0000d40:	1a00003e 	bne	c0000e40 <.text+0xe40>
+c0000d44:	e3190001 	tst	r9, #1	; 0x1
+c0000d48:	0a0000a7 	beq	c0000fec <.text+0xfec>
+c0000d4c:	e59d0008 	ldr	r0, [r13, #8]
+c0000d50:	e5903000 	ldr	r3, [r0]
+c0000d54:	e2800004 	add	r0, r0, #4	; 0x4
+c0000d58:	e1a01003 	mov	r1, r3
+c0000d5c:	e3a02000 	mov	r2, #0	; 0x0
+c0000d60:	e58d0008 	str	r0, [r13, #8]
+c0000d64:	ea000039 	b	c0000e50 <.text+0xe50>
+c0000d68:	e1a07001 	mov	r7, r1
+c0000d6c:	e1a0800c 	mov	r8, r12
+c0000d70:	eaffff19 	b	c00009dc <vsnprintf+0x48>
+c0000d74:	e1a00005 	mov	r0, r5
+c0000d78:	eb000450 	bl	c0001ec0 <strlen>
+c0000d7c:	e59d300c 	ldr	r3, [r13, #12]
+c0000d80:	e3190b01 	tst	r9, #1024	; 0x400
+c0000d84:	03a0c020 	moveq	r12, #32	; 0x20
+c0000d88:	13a0c030 	movne	r12, #48	; 0x30
+c0000d8c:	e1530000 	cmp	r3, r0
+c0000d90:	e1a0e000 	mov	r14, r0
+c0000d94:	9a0000ef 	bls	c0001158 <.text+0x1158>
+c0000d98:	e2881001 	add	r1, r8, #1	; 0x1
+c0000d9c:	e2813001 	add	r3, r1, #1	; 0x1
+c0000da0:	e153000b 	cmp	r3, r11
+c0000da4:	e4c7c001 	strb	r12, [r7], #1
+c0000da8:	0a000065 	beq	c0000f44 <.text+0xf44>
+c0000dac:	e59d200c 	ldr	r2, [r13, #12]
+c0000db0:	e06b3008 	rsb	r3, r11, r8
+c0000db4:	e0823003 	add	r3, r2, r3
+c0000db8:	e2830002 	add	r0, r3, #2	; 0x2
+c0000dbc:	ea000003 	b	c0000dd0 <.text+0xdd0>
+c0000dc0:	e1520000 	cmp	r2, r0
+c0000dc4:	e4c7c001 	strb	r12, [r7], #1
+c0000dc8:	e2811001 	add	r1, r1, #1	; 0x1
+c0000dcc:	0a00005c 	beq	c0000f44 <.text+0xf44>
+c0000dd0:	e2422001 	sub	r2, r2, #1	; 0x1
+c0000dd4:	e15e0002 	cmp	r14, r2
+c0000dd8:	3afffff8 	bcc	c0000dc0 <.text+0xdc0>
+c0000ddc:	e1a00007 	mov	r0, r7
+c0000de0:	e1a08001 	mov	r8, r1
+c0000de4:	e5d52000 	ldrb	r2, [r5]
+c0000de8:	e061300b 	rsb	r3, r1, r11
+c0000dec:	e0873003 	add	r3, r7, r3
+c0000df0:	e3520000 	cmp	r2, #0	; 0x0
+c0000df4:	e2433001 	sub	r3, r3, #1	; 0x1
+c0000df8:	e2855001 	add	r5, r5, #1	; 0x1
+c0000dfc:	0a000093 	beq	c0001050 <.text+0x1050>
+c0000e00:	e4c02001 	strb	r2, [r0], #1
+c0000e04:	e1500003 	cmp	r0, r3
+c0000e08:	e2888001 	add	r8, r8, #1	; 0x1
+c0000e0c:	1afffff4 	bne	c0000de4 <.text+0xde4>
+c0000e10:	e1a07000 	mov	r7, r0
+c0000e14:	eafffef0 	b	c00009dc <vsnprintf+0x48>
+c0000e18:	e3190001 	tst	r9, #1	; 0x1
+c0000e1c:	1a00005e 	bne	c0000f9c <.text+0xf9c>
+c0000e20:	e3190008 	tst	r9, #8	; 0x8
+c0000e24:	0a00008b 	beq	c0001058 <.text+0x1058>
+c0000e28:	e59d1008 	ldr	r1, [r13, #8]
+c0000e2c:	e5d15000 	ldrb	r5, [r1]
+c0000e30:	e3a06000 	mov	r6, #0	; 0x0
+c0000e34:	e2811004 	add	r1, r1, #4	; 0x4
+c0000e38:	e58d1008 	str	r1, [r13, #8]
+c0000e3c:	eaffff55 	b	c0000b98 <.text+0xb98>
+c0000e40:	e59d3008 	ldr	r3, [r13, #8]
+c0000e44:	e8930006 	ldmia	r3, {r1, r2}
+c0000e48:	e2833008 	add	r3, r3, #8	; 0x8
+c0000e4c:	e58d3008 	str	r3, [r13, #8]
+c0000e50:	e28d0010 	add	r0, r13, #16	; 0x10
+c0000e54:	e3a03020 	mov	r3, #32	; 0x20
+c0000e58:	e58d9000 	str	r9, [r13]
+c0000e5c:	ebfffe95 	bl	c00008b8 <longlong_to_string>
+c0000e60:	e1a05000 	mov	r5, r0
+c0000e64:	eaffff72 	b	c0000c34 <.text+0xc34>
+c0000e68:	e59d3008 	ldr	r3, [r13, #8]
+c0000e6c:	e8930006 	ldmia	r3, {r1, r2}
+c0000e70:	e3899c01 	orr	r9, r9, #256	; 0x100
+c0000e74:	e2833008 	add	r3, r3, #8	; 0x8
+c0000e78:	e58d3008 	str	r3, [r13, #8]
+c0000e7c:	eafffff3 	b	c0000e50 <.text+0xe50>
+c0000e80:	e59d000c 	ldr	r0, [r13, #12]
+c0000e84:	e59d100c 	ldr	r1, [r13, #12]
+c0000e88:	e0803100 	add	r3, r0, r0, lsl #2
+c0000e8c:	e3520030 	cmp	r2, #48	; 0x30
+c0000e90:	03510000 	cmpeq	r1, #0	; 0x0
+c0000e94:	e0823083 	add	r3, r2, r3, lsl #1
+c0000e98:	e2433030 	sub	r3, r3, #48	; 0x30
+c0000e9c:	03899b01 	orreq	r9, r9, #1024	; 0x400
+c0000ea0:	e58d300c 	str	r3, [r13, #12]
+c0000ea4:	eafffed4 	b	c00009fc <vsnprintf+0x68>
+c0000ea8:	e3899c02 	orr	r9, r9, #512	; 0x200
+c0000eac:	eafffed2 	b	c00009fc <vsnprintf+0x68>
+c0000eb0:	e3899080 	orr	r9, r9, #128	; 0x80
+c0000eb4:	eafffed0 	b	c00009fc <vsnprintf+0x68>
+c0000eb8:	e2888001 	add	r8, r8, #1	; 0x1
+c0000ebc:	e2883001 	add	r3, r8, #1	; 0x1
+c0000ec0:	e3a02025 	mov	r2, #37	; 0x25
+c0000ec4:	e15b0003 	cmp	r11, r3
+c0000ec8:	e4c72001 	strb	r2, [r7], #1
+c0000ecc:	1afffeb7 	bne	c00009b0 <vsnprintf+0x1c>
+c0000ed0:	eafffec1 	b	c00009dc <vsnprintf+0x48>
+c0000ed4:	e3899020 	orr	r9, r9, #32	; 0x20
+c0000ed8:	eafffec7 	b	c00009fc <vsnprintf+0x68>
+c0000edc:	e3190004 	tst	r9, #4	; 0x4
+c0000ee0:	13899008 	orrne	r9, r9, #8	; 0x8
+c0000ee4:	e3899004 	orr	r9, r9, #4	; 0x4
+c0000ee8:	eafffec3 	b	c00009fc <vsnprintf+0x68>
+c0000eec:	e59d1008 	ldr	r1, [r13, #8]
+c0000ef0:	e2888001 	add	r8, r8, #1	; 0x1
+c0000ef4:	e5912000 	ldr	r2, [r1]
+c0000ef8:	e2883001 	add	r3, r8, #1	; 0x1
+c0000efc:	e15b0003 	cmp	r11, r3
+c0000f00:	e4c72001 	strb	r2, [r7], #1
+c0000f04:	0afffeb4 	beq	c00009dc <vsnprintf+0x48>
+c0000f08:	e2811004 	add	r1, r1, #4	; 0x4
+c0000f0c:	e58d1008 	str	r1, [r13, #8]
+c0000f10:	eafffea6 	b	c00009b0 <vsnprintf+0x1c>
+c0000f14:	e3190001 	tst	r9, #1	; 0x1
+c0000f18:	13899002 	orrne	r9, r9, #2	; 0x2
+c0000f1c:	e3899001 	orr	r9, r9, #1	; 0x1
+c0000f20:	eafffeb5 	b	c00009fc <vsnprintf+0x68>
+c0000f24:	e3899010 	orr	r9, r9, #16	; 0x10
+c0000f28:	eafffeb3 	b	c00009fc <vsnprintf+0x68>
+c0000f2c:	e2881001 	add	r1, r8, #1	; 0x1
+c0000f30:	e2818001 	add	r8, r1, #1	; 0x1
+c0000f34:	e3a03025 	mov	r3, #37	; 0x25
+c0000f38:	e15b0008 	cmp	r11, r8
+c0000f3c:	e4c73001 	strb	r3, [r7], #1
+c0000f40:	1afffea1 	bne	c00009cc <vsnprintf+0x38>
+c0000f44:	e1a08001 	mov	r8, r1
+c0000f48:	eafffea3 	b	c00009dc <vsnprintf+0x48>
+c0000f4c:	e3899021 	orr	r9, r9, #33	; 0x21
+c0000f50:	eaffff0a 	b	c0000b80 <.text+0xb80>
+c0000f54:	e59d1008 	ldr	r1, [r13, #8]
+c0000f58:	e3190002 	tst	r9, #2	; 0x2
+c0000f5c:	e5912000 	ldr	r2, [r1]
+c0000f60:	e2813004 	add	r3, r1, #4	; 0x4
+c0000f64:	0a000013 	beq	c0000fb8 <.text+0xfb8>
+c0000f68:	e58d3008 	str	r3, [r13, #8]
+c0000f6c:	e1a03008 	mov	r3, r8
+c0000f70:	e3a04000 	mov	r4, #0	; 0x0
+c0000f74:	e8820018 	stmia	r2, {r3, r4}
+c0000f78:	eafffe8c 	b	c00009b0 <vsnprintf+0x1c>
+c0000f7c:	e59d2008 	ldr	r2, [r13, #8]
+c0000f80:	e5925000 	ldr	r5, [r2]
+c0000f84:	e2823004 	add	r3, r2, #4	; 0x4
+c0000f88:	e3550000 	cmp	r5, #0	; 0x0
+c0000f8c:	059f51d4 	ldreq	r5, [pc, #468]	; c0001168 <.text+0x1168>
+c0000f90:	058d3008 	streq	r3, [r13, #8]
+c0000f94:	158d3008 	strne	r3, [r13, #8]
+c0000f98:	eaffff25 	b	c0000c34 <.text+0xc34>
+c0000f9c:	e59d0008 	ldr	r0, [r13, #8]
+c0000fa0:	e5903000 	ldr	r3, [r0]
+c0000fa4:	e2800004 	add	r0, r0, #4	; 0x4
+c0000fa8:	e1a05003 	mov	r5, r3
+c0000fac:	e3a06000 	mov	r6, #0	; 0x0
+c0000fb0:	e58d0008 	str	r0, [r13, #8]
+c0000fb4:	eafffef7 	b	c0000b98 <.text+0xb98>
+c0000fb8:	e3190001 	tst	r9, #1	; 0x1
+c0000fbc:	1a000007 	bne	c0000fe0 <.text+0xfe0>
+c0000fc0:	e3190008 	tst	r9, #8	; 0x8
+c0000fc4:	158d3008 	strne	r3, [r13, #8]
+c0000fc8:	15c28000 	strneb	r8, [r2]
+c0000fcc:	1afffe77 	bne	c00009b0 <vsnprintf+0x1c>
+c0000fd0:	e3190004 	tst	r9, #4	; 0x4
+c0000fd4:	158d3008 	strne	r3, [r13, #8]
+c0000fd8:	11c280b0 	strneh	r8, [r2]
+c0000fdc:	1afffe73 	bne	c00009b0 <vsnprintf+0x1c>
+c0000fe0:	e58d3008 	str	r3, [r13, #8]
+c0000fe4:	e5828000 	str	r8, [r2]
+c0000fe8:	eafffe70 	b	c00009b0 <vsnprintf+0x1c>
+c0000fec:	e3190008 	tst	r9, #8	; 0x8
+c0000ff0:	1a00002d 	bne	c00010ac <.text+0x10ac>
+c0000ff4:	e3190004 	tst	r9, #4	; 0x4
+c0000ff8:	0a000039 	beq	c00010e4 <.text+0x10e4>
+c0000ffc:	e59d0008 	ldr	r0, [r13, #8]
+c0001000:	e5903000 	ldr	r3, [r0]
+c0001004:	e1a03803 	mov	r3, r3, lsl #16
+c0001008:	e1a01823 	mov	r1, r3, lsr #16
+c000100c:	e2800004 	add	r0, r0, #4	; 0x4
+c0001010:	e3a02000 	mov	r2, #0	; 0x0
+c0001014:	e58d0008 	str	r0, [r13, #8]
+c0001018:	eaffff8c 	b	c0000e50 <.text+0xe50>
+c000101c:	e3190008 	tst	r9, #8	; 0x8
+c0001020:	1a000017 	bne	c0001084 <.text+0x1084>
+c0001024:	e3190004 	tst	r9, #4	; 0x4
+c0001028:	0a00003b 	beq	c000111c <.text+0x111c>
+c000102c:	e59d0008 	ldr	r0, [r13, #8]
+c0001030:	e5903000 	ldr	r3, [r0]
+c0001034:	e1a03803 	mov	r3, r3, lsl #16
+c0001038:	e1a01843 	mov	r1, r3, asr #16
+c000103c:	e2800004 	add	r0, r0, #4	; 0x4
+c0001040:	e1a02fc1 	mov	r2, r1, asr #31
+c0001044:	e3899c01 	orr	r9, r9, #256	; 0x100
+c0001048:	e58d0008 	str	r0, [r13, #8]
+c000104c:	eaffff7f 	b	c0000e50 <.text+0xe50>
+c0001050:	e1a07000 	mov	r7, r0
+c0001054:	eafffe55 	b	c00009b0 <vsnprintf+0x1c>
+c0001058:	e3190004 	tst	r9, #4	; 0x4
+c000105c:	1a000018 	bne	c00010c4 <.text+0x10c4>
+c0001060:	e3190010 	tst	r9, #16	; 0x10
+c0001064:	1affffcc 	bne	c0000f9c <.text+0xf9c>
+c0001068:	e59d1008 	ldr	r1, [r13, #8]
+c000106c:	e5913000 	ldr	r3, [r1]
+c0001070:	e2811004 	add	r1, r1, #4	; 0x4
+c0001074:	e1a05003 	mov	r5, r3
+c0001078:	e3a06000 	mov	r6, #0	; 0x0
+c000107c:	e58d1008 	str	r1, [r13, #8]
+c0001080:	eafffec4 	b	c0000b98 <.text+0xb98>
+c0001084:	e59d1008 	ldr	r1, [r13, #8]
+c0001088:	e5913000 	ldr	r3, [r1]
+c000108c:	e1a03c03 	mov	r3, r3, lsl #24
+c0001090:	e1a01c43 	mov	r1, r3, asr #24
+c0001094:	e59d3008 	ldr	r3, [r13, #8]
+c0001098:	e1a02fc1 	mov	r2, r1, asr #31
+c000109c:	e2833004 	add	r3, r3, #4	; 0x4
+c00010a0:	e3899c01 	orr	r9, r9, #256	; 0x100
+c00010a4:	e58d3008 	str	r3, [r13, #8]
+c00010a8:	eaffff68 	b	c0000e50 <.text+0xe50>
+c00010ac:	e59d3008 	ldr	r3, [r13, #8]
+c00010b0:	e5d31000 	ldrb	r1, [r3]
+c00010b4:	e3a02000 	mov	r2, #0	; 0x0
+c00010b8:	e2833004 	add	r3, r3, #4	; 0x4
+c00010bc:	e58d3008 	str	r3, [r13, #8]
+c00010c0:	eaffff62 	b	c0000e50 <.text+0xe50>
+c00010c4:	e59d2008 	ldr	r2, [r13, #8]
+c00010c8:	e5923000 	ldr	r3, [r2]
+c00010cc:	e1a03803 	mov	r3, r3, lsl #16
+c00010d0:	e1a05823 	mov	r5, r3, lsr #16
+c00010d4:	e2822004 	add	r2, r2, #4	; 0x4
+c00010d8:	e3a06000 	mov	r6, #0	; 0x0
+c00010dc:	e58d2008 	str	r2, [r13, #8]
+c00010e0:	eafffeac 	b	c0000b98 <.text+0xb98>
+c00010e4:	e3190010 	tst	r9, #16	; 0x10
+c00010e8:	159d1008 	ldrne	r1, [r13, #8]
+c00010ec:	059d2008 	ldreq	r2, [r13, #8]
+c00010f0:	15913000 	ldrne	r3, [r1]
+c00010f4:	05923000 	ldreq	r3, [r2]
+c00010f8:	12811004 	addne	r1, r1, #4	; 0x4
+c00010fc:	02822004 	addeq	r2, r2, #4	; 0x4
+c0001100:	158d1008 	strne	r1, [r13, #8]
+c0001104:	058d2008 	streq	r2, [r13, #8]
+c0001108:	11a01003 	movne	r1, r3
+c000110c:	13a02000 	movne	r2, #0	; 0x0
+c0001110:	01a01003 	moveq	r1, r3
+c0001114:	03a02000 	moveq	r2, #0	; 0x0
+c0001118:	eaffff4c 	b	c0000e50 <.text+0xe50>
+c000111c:	e3190010 	tst	r9, #16	; 0x10
+c0001120:	159d1008 	ldrne	r1, [r13, #8]
+c0001124:	059d2008 	ldreq	r2, [r13, #8]
+c0001128:	15913000 	ldrne	r3, [r1]
+c000112c:	05923000 	ldreq	r3, [r2]
+c0001130:	12811004 	addne	r1, r1, #4	; 0x4
+c0001134:	02822004 	addeq	r2, r2, #4	; 0x4
+c0001138:	158d1008 	strne	r1, [r13, #8]
+c000113c:	058d2008 	streq	r2, [r13, #8]
+c0001140:	11a01003 	movne	r1, r3
+c0001144:	11a02fc1 	movne	r2, r1, asr #31
+c0001148:	01a01003 	moveq	r1, r3
+c000114c:	01a02fc1 	moveq	r2, r1, asr #31
+c0001150:	e3899c01 	orr	r9, r9, #256	; 0x100
+c0001154:	eaffff3d 	b	c0000e50 <.text+0xe50>
+c0001158:	e1a01008 	mov	r1, r8
+c000115c:	eaffff1e 	b	c0000ddc <.text+0xddc>
+c0001160:	c0002a58 	andgt	r2, r0, r8, asr r10
+c0001164:	c0002a68 	andgt	r2, r0, r8, ror #20
+c0001168:	c0002984 	andgt	r2, r0, r4, lsl #19
+
+c000116c <puts>:
+c000116c:	ea0003e7 	b	c0002110 <__puts>
+
+c0001170 <kmsg_dump>:
+
+int _dvprintf(const char *fmt, va_list ap)
+{
+	char	buf[256];
+	int	len;
+
+	enter_critical_section();
+
+	len = vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (0 < len) {
+		log_store(0, buf, len+1);
+		puts(buf);
+	}
+
+	exit_critical_section();
+
+	return len;
+}
+
+int printk(const char *fmt, ...)
+{
+	int	err;
+	va_list ap;
+
+	va_start(ap, fmt);
+	err = _dvprintf(fmt, ap);
+	va_end(ap);
+
+	return err;
+}
+
+void kmsg_dump(void)
+{
+c0001170:	e92d4030 	stmdb	r13!, {r4, r5, r14}
+	u32	 current_idx = log_first_idx;
+c0001174:	e59f3050 	ldr	r3, [pc, #80]	; c00011cc <.text+0x11cc>
+	char	*current_text;
+
+	if (current_idx == log_next_idx) {
+c0001178:	e59f5050 	ldr	r5, [pc, #80]	; c00011d0 <.text+0x11d0>
+c000117c:	e5934000 	ldr	r4, [r3]
+c0001180:	e5952000 	ldr	r2, [r5]
+c0001184:	e1540002 	cmp	r4, r2
+c0001188:	1a000006 	bne	c00011a8 <kmsg_dump+0x38>
+c000118c:	e8bd8030 	ldmia	r13!, {r4, r5, r15}
+c0001190:	e7940002 	ldr	r0, [r4, r2]
+		return;
+	}
+	
+	while ((current_idx = log_next(current_idx)) != log_next_idx) {
+		current_text = log_text(log_from_idx(current_idx));
+c0001194:	e3500000 	cmp	r0, #0	; 0x0
+c0001198:	11a00001 	movne	r0, r1
+c000119c:	01a00002 	moveq	r0, r2
+c00011a0:	ebfffdba 	bl	c0000890 <log_text>
+c00011a4:	ebfffff0 	bl	c000116c <puts>
+c00011a8:	e1a00004 	mov	r0, r4
+c00011ac:	ebfffdb9 	bl	c0000898 <log_next>
+c00011b0:	e5953000 	ldr	r3, [r5]
+c00011b4:	e59f2018 	ldr	r2, [pc, #24]	; c00011d4 <.text+0x11d4>
+c00011b8:	e1500003 	cmp	r0, r3
+c00011bc:	e1a04000 	mov	r4, r0
+c00011c0:	e0801002 	add	r1, r0, r2
+c00011c4:	1afffff1 	bne	c0001190 <kmsg_dump+0x20>
+c00011c8:	e8bd8030 	ldmia	r13!, {r4, r5, r15}
+c00011cc:	c0002f40 	andgt	r2, r0, r0, asr #30
+c00011d0:	c0002f4c 	andgt	r2, r0, r12, asr #30
+c00011d4:	c0002b38 	andgt	r2, r0, r8, lsr r11
+
+c00011d8 <_dvprintf>:
+c00011d8:	e92d4ff0 	stmdb	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r14}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00011dc:	e59f2214 	ldr	r2, [pc, #532]	; c00013f8 <.text+0x13f8>
+c00011e0:	e592c000 	ldr	r12, [r2]
+c00011e4:	e35c0000 	cmp	r12, #0	; 0x0
+c00011e8:	e24ddf47 	sub	r13, r13, #284	; 0x11c
+c00011ec:	e1a05000 	mov	r5, r0
+c00011f0:	e1a06001 	mov	r6, r1
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00011f4:	0a000075 	beq	c00013d0 <_dvprintf+0x1f8>
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00011f8:	e59f41f8 	ldr	r4, [pc, #504]	; c00013f8 <.text+0x13f8>
+c00011fc:	e28cc001 	add	r12, r12, #1	; 0x1
+c0001200:	e1a02005 	mov	r2, r5
+c0001204:	e1a03006 	mov	r3, r6
+c0001208:	e28d001c 	add	r0, r13, #28	; 0x1c
+c000120c:	e3a01c01 	mov	r1, #256	; 0x100
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c0001210:	e584c000 	str	r12, [r4]
+c0001214:	ebfffdde 	bl	c0000994 <vsnprintf>
+c0001218:	e3500000 	cmp	r0, #0	; 0x0
+c000121c:	e58d0008 	str	r0, [r13, #8]
+c0001220:	da00004f 	ble	c0001364 <_dvprintf+0x18c>
+c0001224:	e2803001 	add	r3, r0, #1	; 0x1
+c0001228:	e1a03803 	mov	r3, r3, lsl #16
+c000122c:	e1a03823 	mov	r3, r3, lsr #16
+c0001230:	e2832008 	add	r2, r3, #8	; 0x8
+c0001234:	e58d3018 	str	r3, [r13, #24]
+c0001238:	e59f11bc 	ldr	r1, [pc, #444]	; c00013fc <.text+0x13fc>
+c000123c:	e59f31bc 	ldr	r3, [pc, #444]	; c0001400 <.text+0x1400>
+c0001240:	e8910003 	ldmia	r1, {r0, r1}
+c0001244:	e8930180 	ldmia	r3, {r7, r8}
+c0001248:	e2623000 	rsb	r3, r2, #0	; 0x0
+c000124c:	e2033003 	and	r3, r3, #3	; 0x3
+c0001250:	e0822003 	add	r2, r2, r3
+c0001254:	e1580001 	cmp	r8, r1
+c0001258:	e58d0010 	str	r0, [r13, #16]
+c000125c:	e58d1014 	str	r1, [r13, #20]
+c0001260:	e58d2004 	str	r2, [r13, #4]
+c0001264:	9a000047 	bls	c0001388 <_dvprintf+0x1b0>
+c0001268:	e59f1194 	ldr	r1, [pc, #404]	; c0001404 <.text+0x1404>
+c000126c:	e591a000 	ldr	r10, [r1]
+c0001270:	e59d4004 	ldr	r4, [r13, #4]
+c0001274:	e26aeb01 	rsb	r14, r10, #1024	; 0x400
+c0001278:	e59fb188 	ldr	r11, [pc, #392]	; c0001408 <.text+0x1408>
+c000127c:	e58de00c 	str	r14, [r13, #12]
+c0001280:	e28d5010 	add	r5, r13, #16	; 0x10
+c0001284:	e8950060 	ldmia	r5, {r5, r6}
+c0001288:	e2849008 	add	r9, r4, #8	; 0x8
+c000128c:	e59b0000 	ldr	r0, [r11]
+c0001290:	e15a0000 	cmp	r10, r0
+c0001294:	906a3000 	rsbls	r3, r10, r0
+c0001298:	9a000002 	bls	c00012a8 <_dvprintf+0xd0>
+c000129c:	e59d300c 	ldr	r3, [r13, #12]
+c00012a0:	e1500003 	cmp	r0, r3
+c00012a4:	21a03000 	movcs	r3, r0
+c00012a8:	e1530009 	cmp	r3, r9
+c00012ac:	8a00000d 	bhi	c00012e8 <_dvprintf+0x110>
+c00012b0:	e58d1000 	str	r1, [r13]
+c00012b4:	ebfffd77 	bl	c0000898 <log_next>
+c00012b8:	e3a03001 	mov	r3, #1	; 0x1
+c00012bc:	e0955003 	adds	r5, r5, r3
+c00012c0:	e3a04000 	mov	r4, #0	; 0x0
+c00012c4:	e58b0000 	str	r0, [r11]
+c00012c8:	e59f012c 	ldr	r0, [pc, #300]	; c00013fc <.text+0x13fc>
+c00012cc:	e0a66004 	adc	r6, r6, r4
+c00012d0:	e1570005 	cmp	r7, r5
+c00012d4:	e8800060 	stmia	r0, {r5, r6}
+c00012d8:	e59d1000 	ldr	r1, [r13]
+c00012dc:	1affffea 	bne	c000128c <_dvprintf+0xb4>
+c00012e0:	e1580006 	cmp	r8, r6
+c00012e4:	1affffe8 	bne	c000128c <_dvprintf+0xb4>
+c00012e8:	e5916000 	ldr	r6, [r1]
+c00012ec:	e0863009 	add	r3, r6, r9
+c00012f0:	e3530b01 	cmp	r3, #1024	; 0x400
+c00012f4:	e59f7108 	ldr	r7, [pc, #264]	; c0001404 <.text+0x1404>
+c00012f8:	359f810c 	ldrcc	r8, [pc, #268]	; c000140c <.text+0x140c>
+c00012fc:	2a00002b 	bcs	c00013b0 <_dvprintf+0x1d8>
+c0001300:	e0865008 	add	r5, r6, r8
+c0001304:	e59f40f4 	ldr	r4, [pc, #244]	; c0001400 <.text+0x1400>
+c0001308:	e1a00005 	mov	r0, r5
+c000130c:	ebfffd5f 	bl	c0000890 <log_text>
+c0001310:	e28d101c 	add	r1, r13, #28	; 0x1c
+c0001314:	e59d2018 	ldr	r2, [r13, #24]
+c0001318:	eb0002fb 	bl	c0001f0c <memcpy>
+c000131c:	e8940006 	ldmia	r4, {r1, r2}
+c0001320:	e3a03001 	mov	r3, #1	; 0x1
+c0001324:	e597c000 	ldr	r12, [r7]
+c0001328:	e0911003 	adds	r1, r1, r3
+c000132c:	e59de004 	ldr	r14, [r13, #4]
+c0001330:	e3a04000 	mov	r4, #0	; 0x0
+c0001334:	e0a22004 	adc	r2, r2, r4
+c0001338:	e59f30c0 	ldr	r3, [pc, #192]	; c0001400 <.text+0x1400>
+c000133c:	e59d4018 	ldr	r4, [r13, #24]
+c0001340:	e08ec00c 	add	r12, r14, r12
+c0001344:	e786e008 	str	r14, [r6, r8]
+c0001348:	e3a0e000 	mov	r14, #0	; 0x0
+c000134c:	e28d001c 	add	r0, r13, #28	; 0x1c
+c0001350:	e587c000 	str	r12, [r7]
+c0001354:	e8830006 	stmia	r3, {r1, r2}
+c0001358:	e1c540b4 	strh	r4, [r5, #4]
+c000135c:	e1c5e0b6 	strh	r14, [r5, #6]
+c0001360:	ebffff81 	bl	c000116c <puts>
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0001364:	e59f008c 	ldr	r0, [pc, #140]	; c00013f8 <.text+0x13f8>
+c0001368:	e5903000 	ldr	r3, [r0]
+c000136c:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c0001370:	e3530000 	cmp	r3, #0	; 0x0
+c0001374:	e5803000 	str	r3, [r0]
+	{
+		arch_enable_ints();
+c0001378:	0b000358 	bleq	c00020e0 <arch_enable_ints>
+c000137c:	e59d0008 	ldr	r0, [r13, #8]
+c0001380:	e28ddf47 	add	r13, r13, #284	; 0x11c
+c0001384:	e8bd8ff0 	ldmia	r13!, {r4, r5, r6, r7, r8, r9, r10, r11, r15}
+c0001388:	0a000014 	beq	c00013e0 <_dvprintf+0x208>
+c000138c:	e59f1070 	ldr	r1, [pc, #112]	; c0001404 <.text+0x1404>
+c0001390:	e59d2004 	ldr	r2, [r13, #4]
+c0001394:	e5916000 	ldr	r6, [r1]
+c0001398:	e2829008 	add	r9, r2, #8	; 0x8
+c000139c:	e0863009 	add	r3, r6, r9
+c00013a0:	e3530b01 	cmp	r3, #1024	; 0x400
+c00013a4:	e59f7058 	ldr	r7, [pc, #88]	; c0001404 <.text+0x1404>
+c00013a8:	359f805c 	ldrcc	r8, [pc, #92]	; c000140c <.text+0x140c>
+c00013ac:	3affffd3 	bcc	c0001300 <_dvprintf+0x128>
+c00013b0:	e59f8054 	ldr	r8, [pc, #84]	; c000140c <.text+0x140c>
+c00013b4:	e3a01000 	mov	r1, #0	; 0x0
+c00013b8:	e0860008 	add	r0, r6, r8
+c00013bc:	e3a02008 	mov	r2, #8	; 0x8
+c00013c0:	eb0002c8 	bl	c0001ee8 <memset>
+c00013c4:	e3a06000 	mov	r6, #0	; 0x0
+c00013c8:	e5876000 	str	r6, [r7]
+c00013cc:	eaffffcb 	b	c0001300 <_dvprintf+0x128>
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+c00013d0:	eb000346 	bl	c00020f0 <arch_disable_ints>
+c00013d4:	e59f301c 	ldr	r3, [pc, #28]	; c00013f8 <.text+0x13f8>
+c00013d8:	e593c000 	ldr	r12, [r3]
+c00013dc:	eaffff85 	b	c00011f8 <_dvprintf+0x20>
+c00013e0:	e1570000 	cmp	r7, r0
+c00013e4:	8affff9f 	bhi	c0001268 <_dvprintf+0x90>
+c00013e8:	e59d3004 	ldr	r3, [r13, #4]
+c00013ec:	e59f1010 	ldr	r1, [pc, #16]	; c0001404 <.text+0x1404>
+c00013f0:	e2839008 	add	r9, r3, #8	; 0x8
+c00013f4:	eaffffbb 	b	c00012e8 <_dvprintf+0x110>
+c00013f8:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c00013fc:	c0002f38 	andgt	r2, r0, r8, lsr r15
+c0001400:	c0002f44 	andgt	r2, r0, r4, asr #30
+c0001404:	c0002f4c 	andgt	r2, r0, r12, asr #30
+c0001408:	c0002f40 	andgt	r2, r0, r0, asr #30
+c000140c:	c0002b38 	andgt	r2, r0, r8, lsr r11
+
+c0001410 <printk>:
+c0001410:	e92d000f 	stmdb	r13!, {r0, r1, r2, r3}
+c0001414:	e52de004 	str	r14, [r13, #-4]!
+c0001418:	e24dd004 	sub	r13, r13, #4	; 0x4
+c000141c:	e28d300c 	add	r3, r13, #12	; 0xc
+c0001420:	e1a01003 	mov	r1, r3
+c0001424:	e59d0008 	ldr	r0, [r13, #8]
+c0001428:	e58d3000 	str	r3, [r13]
+c000142c:	ebffff69 	bl	c00011d8 <_dvprintf>
+c0001430:	e28dd004 	add	r13, r13, #4	; 0x4
+c0001434:	e49de004 	ldr	r14, [r13], #4
+c0001438:	e28dd010 	add	r13, r13, #16	; 0x10
+c000143c:	e12fff1e 	bx	r14
+
+c0001440 <round2power>:
+unsigned int round2power(unsigned int num)
+{
+	unsigned int count = 0;
+
+	while (num)
+c0001440:	e3500000 	cmp	r0, #0	; 0x0
+c0001444:	01a03000 	moveq	r3, r0
+c0001448:	0a000003 	beq	c000145c <round2power+0x1c>
+c000144c:	e3a03000 	mov	r3, #0	; 0x0
+c0001450:	e1b000a0 	movs	r0, r0, lsr #1
+	{
+		num >>= 1;
+		count++;
+c0001454:	e2833001 	add	r3, r3, #1	; 0x1
+c0001458:	1afffffc 	bne	c0001450 <round2power+0x10>
+	}
+	return count;
+}
+c000145c:	e1a00003 	mov	r0, r3
+c0001460:	e12fff1e 	bx	r14
+
+c0001464 <kmalloc>:
+
+void *kmalloc(unsigned int size)
+{
+	int		 i;
+	unsigned int	 idx;
+	unsigned int	*mem = NULL;
+
+	if (size == 0)
+c0001464:	e3500000 	cmp	r0, #0	; 0x0
+c0001468:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+c000146c:	1a000001 	bne	c0001478 <kmalloc+0x14>
+		return 0;
+
+	idx = round2power(size + sizeof(mem_head));
+
+	idx = MAX(idx, MIN_POWER);
+
+	if (idx > MAX_POWER)
+		return NULL;
+
+	/* frome power idx group to find free block, if no,
+	   find from  bigger group */
+	for (i = idx - MIN_POWER; i < GROUP_NUM; i++)
+	{
+		mem_head *cur_area = &free_area[i];
+
+		if (!list_empty(&cur_area->list)) //have free block
+		{
+			mem_head	*tmp;
+			unsigned int	 half_size;
+			int		 j;
+
+			/* if the block size bigger than needed, looped devide the block into
+			   two half, and add second half to lower index group, looped till
+			   suitable block gotted*/
+			for (j = i; j > (int)(idx - MIN_POWER); j--)
+			{
+				half_size = 1 << (j  - 1 + MIN_POWER);
+				tmp = (mem_head *)((unsigned int)cur_area->list.next + half_size);
+				list_add_tail(&tmp->list, &free_area[j-1].list);
+			}
+
+			tmp = (mem_head *)cur_area->list.next;
+			tmp->size = idx;
+			mem = (unsigned int *)(tmp + 1);
+
+			list_del(cur_area->list.next);
+			break;
+		}
+	}
+
+	return mem;
+c0001470:	e3a00000 	mov	r0, #0	; 0x0
+}
+c0001474:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c0001478:	e280000c 	add	r0, r0, #12	; 0xc
+c000147c:	ebffffef 	bl	c0001440 <round2power>
+c0001480:	e3500005 	cmp	r0, #5	; 0x5
+c0001484:	21a06000 	movcs	r6, r0
+c0001488:	33a06005 	movcc	r6, #5	; 0x5
+c000148c:	e3560014 	cmp	r6, #20	; 0x14
+c0001490:	8afffff6 	bhi	c0001470 <kmalloc+0xc>
+c0001494:	e2465005 	sub	r5, r6, #5	; 0x5
+c0001498:	e355000f 	cmp	r5, #15	; 0xf
+c000149c:	ca000013 	bgt	c00014f0 <kmalloc+0x8c>
+c00014a0:	e59f00c8 	ldr	r0, [pc, #200]	; c0001570 <.text+0x1570>
+c00014a4:	e0853085 	add	r3, r5, r5, lsl #1
+c00014a8:	e1a03103 	mov	r3, r3, lsl #2
+c00014ac:	e7932000 	ldr	r2, [r3, r0]
+c00014b0:	e083e000 	add	r14, r3, r0
+c00014b4:	e152000e 	cmp	r2, r14
+c00014b8:	02402030 	subeq	r2, r0, #48	; 0x30
+c00014bc:	00863086 	addeq	r3, r6, r6, lsl #1
+c00014c0:	00821103 	addeq	r1, r2, r3, lsl #2
+c00014c4:	01a02005 	moveq	r2, r5
+c00014c8:	0a000003 	beq	c00014dc <kmalloc+0x78>
+c00014cc:	ea00001d 	b	c0001548 <kmalloc+0xe4>
+c00014d0:	e59e3000 	ldr	r3, [r14]
+c00014d4:	e15e0003 	cmp	r14, r3
+c00014d8:	1a000007 	bne	c00014fc <kmalloc+0x98>
+c00014dc:	e2822001 	add	r2, r2, #1	; 0x1
+c00014e0:	e3520010 	cmp	r2, #16	; 0x10
+c00014e4:	e1a0e001 	mov	r14, r1
+c00014e8:	e281100c 	add	r1, r1, #12	; 0xc
+c00014ec:	1afffff7 	bne	c00014d0 <kmalloc+0x6c>
+c00014f0:	e3a0c000 	mov	r12, #0	; 0x0
+c00014f4:	e1a0000c 	mov	r0, r12
+c00014f8:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c00014fc:	e1550002 	cmp	r5, r2
+c0001500:	aa000010 	bge	c0001548 <kmalloc+0xe4>
+c0001504:	e0823082 	add	r3, r2, r2, lsl #1
+c0001508:	e1a04002 	mov	r4, r2
+c000150c:	e080c103 	add	r12, r0, r3, lsl #2
+c0001510:	e3a07001 	mov	r7, #1	; 0x1
+c0001514:	e2842004 	add	r2, r4, #4	; 0x4
+c0001518:	e1a02217 	mov	r2, r7, lsl r2
+c000151c:	e24cc00c 	sub	r12, r12, #12	; 0xc
+c0001520:	e59e1000 	ldr	r1, [r14]
+}
+
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head->prev, head);
+c0001524:	e59c0004 	ldr	r0, [r12, #4]
+c0001528:	e2444001 	sub	r4, r4, #1	; 0x1
+c000152c:	e0823001 	add	r3, r2, r1
+c0001530:	e1550004 	cmp	r5, r4
+			      struct list_head *prev,
+			      struct list_head *next)
+{
+	next->prev = new;
+	new->next = next;
+c0001534:	e782c001 	str	r12, [r2, r1]
+c0001538:	e58c3004 	str	r3, [r12, #4]
+	new->prev = prev;
+	prev->next = new;
+c000153c:	e5803000 	str	r3, [r0]
+c0001540:	e5830004 	str	r0, [r3, #4]
+c0001544:	bafffff2 	blt	c0001514 <kmalloc+0xb0>
+c0001548:	e59e3000 	ldr	r3, [r14]
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c000154c:	e5931004 	ldr	r1, [r3, #4]
+c0001550:	e5932000 	ldr	r2, [r3]
+	entry->next = 0;
+c0001554:	e3a00000 	mov	r0, #0	; 0x0
+c0001558:	e283c00c 	add	r12, r3, #12	; 0xc
+
+static inline void __list_del(struct list_head * prev, struct list_head * next)
+{
+	next->prev = prev;
+	prev->next = next;
+c000155c:	e5812000 	str	r2, [r1]
+c0001560:	e5821004 	str	r1, [r2, #4]
+c0001564:	e9830041 	stmib	r3, {r0, r6}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+c0001568:	e5830000 	str	r0, [r3]
+c000156c:	eaffffe0 	b	c00014f4 <kmalloc+0x90>
+c0001570:	c0002f50 	andgt	r2, r0, r0, asr r15
+
+c0001574 <kmalloc_init>:
+c0001574:	e52de004 	str	r14, [r13, #-4]!
+c0001578:	e59fe040 	ldr	r14, [pc, #64]	; c00015c0 <.text+0x15c0>
+c000157c:	e3a01000 	mov	r1, #0	; 0x0
+c0001580:	e1a0c00e 	mov	r12, r14
+c0001584:	e1a02001 	mov	r2, r1
+c0001588:	e2811001 	add	r1, r1, #1	; 0x1
+c000158c:	e082300c 	add	r3, r2, r12
+c0001590:	e3510010 	cmp	r1, #16	; 0x10
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c0001594:	e782300c 	str	r3, [r2, r12]
+	list->prev = list;
+c0001598:	e5833004 	str	r3, [r3, #4]
+c000159c:	e282200c 	add	r2, r2, #12	; 0xc
+c00015a0:	1afffff8 	bne	c0001588 <kmalloc_init+0x14>
+}
+
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head->prev, head);
+c00015a4:	e59e20b8 	ldr	r2, [r14, #184]
+c00015a8:	e59f3014 	ldr	r3, [pc, #20]	; c00015c4 <.text+0x15c4>
+c00015ac:	e58e00b8 	str	r0, [r14, #184]
+c00015b0:	e5803000 	str	r3, [r0]
+c00015b4:	e5802004 	str	r2, [r0, #4]
+c00015b8:	e5820000 	str	r0, [r2]
+c00015bc:	e49df004 	ldr	r15, [r13], #4
+c00015c0:	c0002f50 	andgt	r2, r0, r0, asr r15
+c00015c4:	c0003004 	andgt	r3, r0, r4
+
+c00015c8 <kfree>:
+
+void kfree(void *addr)
+{
+	int			 i;
+	int			 combine = 0;
+	unsigned int		 mem_size; //power index, the real size eque 1<<mem_size
+	mem_head		*cur_mem = (mem_head *)addr - 1;
+c00015c8:	e240000c 	sub	r0, r0, #12	; 0xc
+c00015cc:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+	struct list_head	*pos;
+
+	mem_size = cur_mem->size;
+c00015d0:	e5904008 	ldr	r4, [r0, #8]
+
+	for ( i = mem_size - MIN_POWER; i< GROUP_NUM; i++)
+c00015d4:	e2443005 	sub	r3, r4, #5	; 0x5
+c00015d8:	e353000f 	cmp	r3, #15	; 0xf
+c00015dc:	e1a05003 	mov	r5, r3
+c00015e0:	c59f70f0 	ldrgt	r7, [pc, #240]	; c00016d8 <.text+0x16d8>
+c00015e4:	ca00001a 	bgt	c0001654 <kfree+0x8c>
+c00015e8:	e59f70e8 	ldr	r7, [pc, #232]	; c00016d8 <.text+0x16d8>
+c00015ec:	e0843084 	add	r3, r4, r4, lsl #1
+c00015f0:	e0876103 	add	r6, r7, r3, lsl #2
+c00015f4:	e3a02000 	mov	r2, #0	; 0x0
+	{
+		list_for_each(pos, &free_area[i].list)
+c00015f8:	e516c03c 	ldr	r12, [r6, #-60]
+c00015fc:	e0853085 	add	r3, r5, r5, lsl #1
+c0001600:	e087e103 	add	r14, r7, r3, lsl #2
+c0001604:	e15c000e 	cmp	r12, r14
+c0001608:	0a00002f 	beq	c00016cc <kfree+0x104>
+		{
+
+			if ((unsigned int)cur_mem + (1 << mem_size) == (unsigned int)pos) //forward combine
+c000160c:	e3a03001 	mov	r3, #1	; 0x1
+c0001610:	e1a02413 	mov	r2, r3, lsl r4
+c0001614:	e0821000 	add	r1, r2, r0
+c0001618:	e151000c 	cmp	r1, r12
+c000161c:	0a000014 	beq	c0001674 <kfree+0xac>
+			{
+				mem_size += 1;
+				combine	  = 1;
+
+				list_del(pos);
+				break;
+			}
+			else if ((unsigned int)pos + (1 << mem_size) == (unsigned int)cur_mem) //backword combine
+c0001620:	e082300c 	add	r3, r2, r12
+c0001624:	e1500003 	cmp	r0, r3
+c0001628:	1a000004 	bne	c0001640 <kfree+0x78>
+c000162c:	ea00001d 	b	c00016a8 <kfree+0xe0>
+c0001630:	e15c0001 	cmp	r12, r1
+c0001634:	0a00000e 	beq	c0001674 <kfree+0xac>
+c0001638:	e1530000 	cmp	r3, r0
+c000163c:	0a000019 	beq	c00016a8 <kfree+0xe0>
+c0001640:	e59cc000 	ldr	r12, [r12]
+c0001644:	e15c000e 	cmp	r12, r14
+c0001648:	e08c3002 	add	r3, r12, r2
+c000164c:	1afffff7 	bne	c0001630 <kfree+0x68>
+c0001650:	e2443005 	sub	r3, r4, #5	; 0x5
+c0001654:	e0833083 	add	r3, r3, r3, lsl #1
+c0001658:	e0873103 	add	r3, r7, r3, lsl #2
+}
+
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head->prev, head);
+c000165c:	e5932004 	ldr	r2, [r3, #4]
+c0001660:	e5803000 	str	r3, [r0]
+c0001664:	e5830004 	str	r0, [r3, #4]
+c0001668:	e5820000 	str	r0, [r2]
+c000166c:	e5802004 	str	r2, [r0, #4]
+			{
+				cur_mem	  = (mem_head *)pos;
+				mem_size += 1;
+				combine	  = 1;
+
+				list_del(pos);
+				break;
+			}
+			else //can't combine
+			{
+				combine = 0;
+			}
+		}
+
+		if(combine == 0)
+			break;
+	}
+
+	list_add_tail(&cur_mem->list, &free_area[mem_size - MIN_POWER].list);
+}
+c0001670:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c0001674:	e89c000c 	ldmia	r12, {r2, r3}
+	entry->next = 0;
+c0001678:	e3a01000 	mov	r1, #0	; 0x0
+c000167c:	e5832000 	str	r2, [r3]
+c0001680:	e5823004 	str	r3, [r2, #4]
+c0001684:	e58c1000 	str	r1, [r12]
+	entry->prev = 0;
+c0001688:	e58c1004 	str	r1, [r12, #4]
+c000168c:	e2844001 	add	r4, r4, #1	; 0x1
+c0001690:	e3a02001 	mov	r2, #1	; 0x1
+c0001694:	e2855001 	add	r5, r5, #1	; 0x1
+c0001698:	e3550010 	cmp	r5, #16	; 0x10
+c000169c:	e286600c 	add	r6, r6, #12	; 0xc
+c00016a0:	1affffd4 	bne	c00015f8 <kfree+0x30>
+c00016a4:	eaffffe9 	b	c0001650 <kfree+0x88>
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c00016a8:	e89c000c 	ldmia	r12, {r2, r3}
+	entry->next = 0;
+c00016ac:	e3a01000 	mov	r1, #0	; 0x0
+c00016b0:	e1a0000c 	mov	r0, r12
+c00016b4:	e2844001 	add	r4, r4, #1	; 0x1
+
+static inline void __list_del(struct list_head * prev, struct list_head * next)
+{
+	next->prev = prev;
+	prev->next = next;
+c00016b8:	e5832000 	str	r2, [r3]
+c00016bc:	e5823004 	str	r3, [r2, #4]
+}
+
+static inline void __list_del_entry(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+c00016c0:	e58c1000 	str	r1, [r12]
+	entry->prev = 0;
+c00016c4:	e58c1004 	str	r1, [r12, #4]
+c00016c8:	eafffff0 	b	c0001690 <kfree+0xc8>
+c00016cc:	e3520000 	cmp	r2, #0	; 0x0
+c00016d0:	1affffef 	bne	c0001694 <kfree+0xcc>
+c00016d4:	eaffffdd 	b	c0001650 <kfree+0x88>
+c00016d8:	c0002f50 	andgt	r2, r0, r0, asr r15
+
+c00016dc <timer_list_add>:
+}
+
+static inline int list_empty(const struct list_head *head)
+{
+	return head->next == head;
+c00016dc:	e59fc07c 	ldr	r12, [pc, #124]	; c0001760 <.text+0x1760>
+c00016e0:	e59c3000 	ldr	r3, [r12]
+	#ifdef DEBUG
+	dump_timers();
+	#endif
+
+	if (list_empty(&timer_list))
+c00016e4:	e153000c 	cmp	r3, r12
+c00016e8:	e52de004 	str	r14, [r13, #-4]!
+c00016ec:	1a000004 	bne	c0001704 <timer_list_add+0x28>
+static inline void __list_add(struct list_head *new,
+			      struct list_head *prev,
+			      struct list_head *next)
+{
+	next->prev = new;
+c00016f0:	e58c0004 	str	r0, [r12, #4]
+	new->next = next;
+c00016f4:	e580c000 	str	r12, [r0]
+	new->prev = prev;
+c00016f8:	e580c004 	str	r12, [r0, #4]
+	prev->next = new;
+c00016fc:	e58c0000 	str	r0, [r12]
+c0001700:	e49df004 	ldr	r15, [r13], #4
+	{
+		list_add(&timer->entry, &timer_list);
+		return;
+	}
+
+	list_for_each_entry(iterator, &timer_list, entry)
+c0001704:	e15c0003 	cmp	r12, r3
+c0001708:	e1a01003 	mov	r1, r3
+c000170c:	e1a0e00c 	mov	r14, r12
+c0001710:	1a000008 	bne	c0001738 <timer_list_add+0x5c>
+}
+
+static inline void list_add_tail(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head->prev, head);
+c0001714:	e59c3004 	ldr	r3, [r12, #4]
+c0001718:	e580c000 	str	r12, [r0]
+c000171c:	e58c0004 	str	r0, [r12, #4]
+c0001720:	e5830000 	str	r0, [r3]
+c0001724:	e5803004 	str	r3, [r0, #4]
+c0001728:	e49df004 	ldr	r15, [r13], #4
+c000172c:	e5911000 	ldr	r1, [r1]
+c0001730:	e151000e 	cmp	r1, r14
+c0001734:	0afffff6 	beq	c0001714 <timer_list_add+0x38>
+	{
+		DBG("%d\n", iterator->expired_time);
+		if (iterator->expired_time < timer->expired_time)
+c0001738:	e5912008 	ldr	r2, [r1, #8]
+c000173c:	e5903008 	ldr	r3, [r0, #8]
+c0001740:	e1520003 	cmp	r2, r3
+c0001744:	2afffff8 	bcs	c000172c <timer_list_add+0x50>
+}
+
+static inline void list_add(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head, head->next);
+c0001748:	e5913000 	ldr	r3, [r1]
+c000174c:	e5803000 	str	r3, [r0]
+c0001750:	e5830004 	str	r0, [r3, #4]
+c0001754:	e5810000 	str	r0, [r1]
+c0001758:	e5801004 	str	r1, [r0, #4]
+c000175c:	e49df004 	ldr	r15, [r13], #4
+c0001760:	c0003280 	andgt	r3, r0, r0, lsl #5
+
+c0001764 <timer_tick>:
+		{
+			list_add(&timer->entry, &iterator->entry);
+			return;
+		}
+	}
+	list_add_tail(&timer->entry, &timer_list);
+
+	#ifdef DEBUG
+	dump_timers();
+	#endif
+}
+
+static void timer_add(timer_t *timer, unsigned int delay_time, unsigned int period, timer_function function, void *arg)
+{
+	unsigned long long now;
+
+	if (!list_empty(&timer->entry))
+	{
+		ERROR("timer has been added\n");
+	}
+	
+	now = current_time();
+	timer->expired_time = now + delay_time;
+	timer->periodic_time = period;
+	timer->function = function;
+	timer->arg = arg;
+
+	enter_critical_section();
+	timer_list_add(timer);
+	exit_critical_section();
+}
+
+void oneshot_timer_add(timer_t *timer, unsigned long delay, timer_function function, void *arg)
+{
+	if (0 == delay)
+	{
+		delay = 1;
+	}
+
+	timer_add(timer, delay, 0, function, arg);
+}
+
+void periodic_timer_add(timer_t *timer, unsigned long period, timer_function function, void *arg)
+{
+	if (0 == period)
+	{
+		period = 1;
+	}
+
+	timer_add(timer, period, period, function, arg);
+}
+
+void timer_delete(timer_t *timer)
+{
+	enter_critical_section();
+	
+	if (!list_empty(&timer->entry))
+	{
+		list_del_init(&timer->entry);
+	}
+	timer->periodic_time = 0;
+	timer->expired_time = 0;
+	timer->function = NULL;
+	timer->arg = NULL;
+	
+	exit_critical_section();
+}
+
+enum handler_return timer_tick(void *arg, bigtime_t now)
+{
+	timer_t *timer;
+	timer_t *timer_tmp;
+	enum handler_return ret = INT_NO_RESCHEDULE;
+	static first_time       = 1;
+
+	if (first_time)
+c0001764:	e59fc0f0 	ldr	r12, [pc, #240]	; c000185c <.text+0x185c>
+c0001768:	e59c3000 	ldr	r3, [r12]
+c000176c:	e3530000 	cmp	r3, #0	; 0x0
+	{
+	    first_time = 0;
+c0001770:	13a03000 	movne	r3, #0	; 0x0
+c0001774:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c0001778:	13a00001 	movne	r0, #1	; 0x1
+c000177c:	158c3000 	strne	r3, [r12]
+c0001780:	18bd81f0 	ldmneia	r13!, {r4, r5, r6, r7, r8, r15}
+	    return INT_RESCHEDULE;
+	}
+
+	DBG("now=%d\n", now);
+
+	#ifdef DEBUG
+	dump_timers();
+	#endif
+
+	list_for_each_entry_safe(timer, timer_tmp, &timer_list, entry)
+c0001784:	e59f30d4 	ldr	r3, [pc, #212]	; c0001860 <.text+0x1860>
+c0001788:	e5934000 	ldr	r4, [r3]
+c000178c:	e1530004 	cmp	r3, r4
+c0001790:	e1a08003 	mov	r8, r3
+c0001794:	e5940000 	ldr	r0, [r4]
+c0001798:	0a00002d 	beq	c0001854 <timer_tick+0xf0>
+	{
+		unsigned long expired_time  = timer->expired_time;
+c000179c:	e5943008 	ldr	r3, [r4, #8]
+		unsigned long periodic_time = timer->periodic_time;
+
+		/* if (&timer_tmp->entry == &timer_list) */
+		/* { */
+		/* 	break; */
+		/* } */
+
+		if ((signed long)(expired_time - now) > 0)
+c00017a0:	e0613003 	rsb	r3, r1, r3
+c00017a4:	e3530000 	cmp	r3, #0	; 0x0
+c00017a8:	e1a07001 	mov	r7, r1
+c00017ac:	e594600c 	ldr	r6, [r4, #12]
+c00017b0:	d1a05000 	movle	r5, r0
+c00017b4:	da00000a 	ble	c00017e4 <timer_tick+0x80>
+c00017b8:	ea000025 	b	c0001854 <timer_tick+0xf0>
+c00017bc:	e1550008 	cmp	r5, r8
+c00017c0:	e1a04005 	mov	r4, r5
+c00017c4:	e5952000 	ldr	r2, [r5]
+c00017c8:	0a000021 	beq	c0001854 <timer_tick+0xf0>
+c00017cc:	e5953008 	ldr	r3, [r5, #8]
+c00017d0:	e0673003 	rsb	r3, r7, r3
+c00017d4:	e3530000 	cmp	r3, #0	; 0x0
+c00017d8:	e595600c 	ldr	r6, [r5, #12]
+c00017dc:	ca00001c 	bgt	c0001854 <timer_tick+0xf0>
+c00017e0:	e1a05002 	mov	r5, r2
+}
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c00017e4:	e5940004 	ldr	r0, [r4, #4]
+c00017e8:	e5941000 	ldr	r1, [r4]
+	entry->next = 0;
+c00017ec:	e3a03000 	mov	r3, #0	; 0x0
+c00017f0:	e5801000 	str	r1, [r0]
+c00017f4:	e5810004 	str	r0, [r1, #4]
+		{
+			break;
+		}
+
+		//list_del_init(&timer->entry);
+		list_del(&timer->entry);
+
+		
+		if (timer->function(timer, now, timer->arg) == INT_RESCHEDULE)
+c00017f8:	e594c010 	ldr	r12, [r4, #16]
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+	entry->prev = 0;
+c00017fc:	e5843004 	str	r3, [r4, #4]
+c0001800:	e5942014 	ldr	r2, [r4, #20]
+
+static inline void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = 0;
+c0001804:	e5843000 	str	r3, [r4]
+c0001808:	e1a00004 	mov	r0, r4
+c000180c:	e1a01007 	mov	r1, r7
+c0001810:	e1a0e00f 	mov	r14, r15
+c0001814:	e12fff1c 	bx	r12
+c0001818:	e3500001 	cmp	r0, #1	; 0x1
+c000181c:	08bd81f0 	ldmeqia	r13!, {r4, r5, r6, r7, r8, r15}
+		{
+			ret = INT_RESCHEDULE;
+			return ret;
+		}
+
+		if (periodic_time && list_empty(&timer->entry))
+c0001820:	e3560000 	cmp	r6, #0	; 0x0
+c0001824:	0affffe4 	beq	c00017bc <timer_tick+0x58>
+c0001828:	e5943000 	ldr	r3, [r4]
+c000182c:	e1540003 	cmp	r4, r3
+		{
+			timer->expired_time = now + periodic_time;
+c0001830:	e0872006 	add	r2, r7, r6
+			timer_list_add(timer);
+c0001834:	e1a00004 	mov	r0, r4
+c0001838:	1affffdf 	bne	c00017bc <timer_tick+0x58>
+c000183c:	e5842008 	str	r2, [r4, #8]
+c0001840:	ebffffa5 	bl	c00016dc <timer_list_add>
+c0001844:	e1550008 	cmp	r5, r8
+c0001848:	e1a04005 	mov	r4, r5
+c000184c:	e5952000 	ldr	r2, [r5]
+c0001850:	1affffdd 	bne	c00017cc <timer_tick+0x68>
+c0001854:	e3a00000 	mov	r0, #0	; 0x0
+			
+		}
+
+	}
+
+	return ret;
+}
+c0001858:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c000185c:	c0002a90 	mulgt	r0, r0, r10
+c0001860:	c0003280 	andgt	r3, r0, r0, lsl #5
+
+c0001864 <timer_init>:
+	struct list_head name = LIST_HEAD_INIT(name)
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+c0001864:	e59f3014 	ldr	r3, [pc, #20]	; c0001880 <.text+0x1880>
+
+void timer_init(void)
+{
+	INIT_LIST_HEAD(&timer_list);
+
+	/* register for a periodic timer tick */
+	platform_set_periodic_timer(timer_tick, NULL, 10); /* 10ms */
+c0001868:	e59f0014 	ldr	r0, [pc, #20]	; c0001884 <.text+0x1884>
+c000186c:	e3a01000 	mov	r1, #0	; 0x0
+c0001870:	e3a0200a 	mov	r2, #10	; 0xa
+
+static inline void INIT_LIST_HEAD(struct list_head *list)
+{
+	list->next = list;
+	list->prev = list;
+c0001874:	e5833004 	str	r3, [r3, #4]
+c0001878:	e5833000 	str	r3, [r3]
+c000187c:	ea00033a 	b	c000256c <platform_set_periodic_timer>
+c0001880:	c0003280 	andgt	r3, r0, r0, lsl #5
+c0001884:	c0001764 	andgt	r1, r0, r4, ror #14
+
+c0001888 <timer_add>:
+c0001888:	e92d45f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r10, r14}
+c000188c:	e1a04000 	mov	r4, r0
+c0001890:	e5900000 	ldr	r0, [r0]
+c0001894:	e1540000 	cmp	r4, r0
+c0001898:	e1a0a002 	mov	r10, r2
+c000189c:	e1a05001 	mov	r5, r1
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00018a0:	e59f7078 	ldr	r7, [pc, #120]	; c0001920 <.text+0x1920>
+c00018a4:	e59f0078 	ldr	r0, [pc, #120]	; c0001924 <.text+0x1924>
+c00018a8:	e59f2078 	ldr	r2, [pc, #120]	; c0001928 <.text+0x1928>
+c00018ac:	e1a08003 	mov	r8, r3
+c00018b0:	e59f1074 	ldr	r1, [pc, #116]	; c000192c <.text+0x192c>
+c00018b4:	e59d601c 	ldr	r6, [r13, #28]
+c00018b8:	1a000016 	bne	c0001918 <timer_add+0x90>
+c00018bc:	eb0002f1 	bl	c0002488 <current_time>
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00018c0:	e5973000 	ldr	r3, [r7]
+c00018c4:	e0850000 	add	r0, r5, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00018c8:	e3530000 	cmp	r3, #0	; 0x0
+c00018cc:	e5840008 	str	r0, [r4, #8]
+c00018d0:	e584a00c 	str	r10, [r4, #12]
+c00018d4:	e5848010 	str	r8, [r4, #16]
+c00018d8:	e5846014 	str	r6, [r4, #20]
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00018dc:	0a00000a 	beq	c000190c <timer_add+0x84>
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00018e0:	e2833001 	add	r3, r3, #1	; 0x1
+c00018e4:	e1a00004 	mov	r0, r4
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00018e8:	e5873000 	str	r3, [r7]
+c00018ec:	ebffff7a 	bl	c00016dc <timer_list_add>
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00018f0:	e5973000 	ldr	r3, [r7]
+c00018f4:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c00018f8:	e3530000 	cmp	r3, #0	; 0x0
+c00018fc:	e5873000 	str	r3, [r7]
+c0001900:	18bd85f0 	ldmneia	r13!, {r4, r5, r6, r7, r8, r10, r15}
+c0001904:	e8bd45f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r10, r14}
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+c0001908:	ea0001f4 	b	c00020e0 <arch_enable_ints>
+c000190c:	eb0001f7 	bl	c00020f0 <arch_disable_ints>
+c0001910:	e5973000 	ldr	r3, [r7]
+c0001914:	eafffff1 	b	c00018e0 <timer_add+0x58>
+c0001918:	ebfffebc 	bl	c0001410 <printk>
+c000191c:	eaffffe6 	b	c00018bc <timer_add+0x34>
+c0001920:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c0001924:	c000298c 	andgt	r2, r0, r12, lsl #19
+c0001928:	c0002a78 	andgt	r2, r0, r8, ror r10
+c000192c:	c000293c 	andgt	r2, r0, r12, lsr r9
+
+c0001930 <periodic_timer_add>:
+c0001930:	e52de004 	str	r14, [r13, #-4]!
+c0001934:	e3510000 	cmp	r1, #0	; 0x0
+c0001938:	e24dd004 	sub	r13, r13, #4	; 0x4
+c000193c:	03a01001 	moveq	r1, #1	; 0x1
+c0001940:	e58d3000 	str	r3, [r13]
+c0001944:	e1a03002 	mov	r3, r2
+c0001948:	e1a02001 	mov	r2, r1
+c000194c:	ebffffcd 	bl	c0001888 <timer_add>
+c0001950:	e28dd004 	add	r13, r13, #4	; 0x4
+c0001954:	e8bd8000 	ldmia	r13!, {r15}
+
+c0001958 <oneshot_timer_add>:
+c0001958:	e52de004 	str	r14, [r13, #-4]!
+c000195c:	e3510000 	cmp	r1, #0	; 0x0
+c0001960:	e24dd004 	sub	r13, r13, #4	; 0x4
+c0001964:	e58d3000 	str	r3, [r13]
+c0001968:	03a01001 	moveq	r1, #1	; 0x1
+c000196c:	e1a03002 	mov	r3, r2
+c0001970:	e3a02000 	mov	r2, #0	; 0x0
+c0001974:	ebffffc3 	bl	c0001888 <timer_add>
+c0001978:	e28dd004 	add	r13, r13, #4	; 0x4
+c000197c:	e8bd8000 	ldmia	r13!, {r15}
+
+c0001980 <timer_delete>:
+c0001980:	e92d4030 	stmdb	r13!, {r4, r5, r14}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0001984:	e59f505c 	ldr	r5, [pc, #92]	; c00019e8 <.text+0x19e8>
+c0001988:	e5951000 	ldr	r1, [r5]
+c000198c:	e3510000 	cmp	r1, #0	; 0x0
+c0001990:	e1a04000 	mov	r4, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0001994:	0a000010 	beq	c00019dc <timer_delete+0x5c>
+c0001998:	e5942000 	ldr	r2, [r4]
+c000199c:	e1540002 	cmp	r4, r2
+}
+
+static inline void __list_del_entry(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+c00019a0:	15943004 	ldrne	r3, [r4, #4]
+c00019a4:	e3a00000 	mov	r0, #0	; 0x0
+
+static inline void __list_del(struct list_head * prev, struct list_head * next)
+{
+	next->prev = prev;
+	prev->next = next;
+c00019a8:	15832000 	strne	r2, [r3]
+c00019ac:	15823004 	strne	r3, [r2, #4]
+c00019b0:	15844000 	strne	r4, [r4]
+c00019b4:	15844004 	strne	r4, [r4, #4]
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00019b8:	e3510000 	cmp	r1, #0	; 0x0
+c00019bc:	e584000c 	str	r0, [r4, #12]
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00019c0:	e5851000 	str	r1, [r5]
+c00019c4:	e5840008 	str	r0, [r4, #8]
+c00019c8:	e5840010 	str	r0, [r4, #16]
+c00019cc:	e5840014 	str	r0, [r4, #20]
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00019d0:	18bd8030 	ldmneia	r13!, {r4, r5, r15}
+c00019d4:	e8bd4030 	ldmia	r13!, {r4, r5, r14}
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+c00019d8:	ea0001c0 	b	c00020e0 <arch_enable_ints>
+c00019dc:	eb0001c3 	bl	c00020f0 <arch_disable_ints>
+c00019e0:	e5951000 	ldr	r1, [r5]
+c00019e4:	eaffffeb 	b	c0001998 <timer_delete+0x18>
+c00019e8:	c0002b34 	andgt	r2, r0, r4, lsr r11
+
+c00019ec <delete_char>:
+static char erase_seq[] = "\b \b";    /* erase sequence	*/
+static char   tab_seq[] = "        "; /* used to expand TABs	*/
+
+static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen)
+{
+c00019ec:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c00019f0:	e1a07003 	mov	r7, r3
+	char *s;
+
+	if (*np == 0) {
+c00019f4:	e5933000 	ldr	r3, [r3]
+c00019f8:	e3530000 	cmp	r3, #0	; 0x0
+c00019fc:	e1a08000 	mov	r8, r0
+c0001a00:	e1a06001 	mov	r6, r1
+c0001a04:	e1a05002 	mov	r5, r2
+c0001a08:	e59d4018 	ldr	r4, [r13, #24]
+c0001a0c:	0a00000b 	beq	c0001a40 <delete_char+0x54>
+		return (p);
+	}
+
+	if (*(--p) == '\t') {			/* will retype the whole line	*/
+c0001a10:	e5763001 	ldrb	r3, [r6, #-1]!
+c0001a14:	e3530009 	cmp	r3, #9	; 0x9
+c0001a18:	0a00000a 	beq	c0001a48 <delete_char+0x5c>
+		while (*colp > plen) {
+			printk("%s", erase_seq);
+			(*colp)--;
+		}
+		for (s=buffer; s<p; ++s) {
+			if (*s == '\t') {
+				printk("%s", tab_seq+((*colp) & 07));
+				*colp += 8 - ((*colp) & 07);
+			} else {
+				++(*colp);
+				printk("%c", *s);
+			}
+		}
+	} else {
+		printk("%s", erase_seq);
+c0001a1c:	e59f00b8 	ldr	r0, [pc, #184]	; c0001adc <.text+0x1adc>
+c0001a20:	e59f10b8 	ldr	r1, [pc, #184]	; c0001ae0 <.text+0x1ae0>
+c0001a24:	ebfffe79 	bl	c0001410 <printk>
+		(*colp)--;
+c0001a28:	e5953000 	ldr	r3, [r5]
+c0001a2c:	e2433001 	sub	r3, r3, #1	; 0x1
+c0001a30:	e5853000 	str	r3, [r5]
+	}
+	(*np)--;
+c0001a34:	e5973000 	ldr	r3, [r7]
+c0001a38:	e2433001 	sub	r3, r3, #1	; 0x1
+c0001a3c:	e5873000 	str	r3, [r7]
+	return (p);
+}
+c0001a40:	e1a00006 	mov	r0, r6
+c0001a44:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c0001a48:	e5922000 	ldr	r2, [r2]
+c0001a4c:	e1540002 	cmp	r4, r2
+c0001a50:	aa000007 	bge	c0001a74 <delete_char+0x88>
+c0001a54:	e59f0080 	ldr	r0, [pc, #128]	; c0001adc <.text+0x1adc>
+c0001a58:	e59f1080 	ldr	r1, [pc, #128]	; c0001ae0 <.text+0x1ae0>
+c0001a5c:	ebfffe6b 	bl	c0001410 <printk>
+c0001a60:	e5952000 	ldr	r2, [r5]
+c0001a64:	e2422001 	sub	r2, r2, #1	; 0x1
+c0001a68:	e1540002 	cmp	r4, r2
+c0001a6c:	e5852000 	str	r2, [r5]
+c0001a70:	bafffff7 	blt	c0001a54 <delete_char+0x68>
+c0001a74:	e1560008 	cmp	r6, r8
+c0001a78:	81a04008 	movhi	r4, r8
+c0001a7c:	8a000009 	bhi	c0001aa8 <delete_char+0xbc>
+c0001a80:	eaffffeb 	b	c0001a34 <delete_char+0x48>
+c0001a84:	e2822001 	add	r2, r2, #1	; 0x1
+c0001a88:	e5852000 	str	r2, [r5]
+c0001a8c:	e59f0050 	ldr	r0, [pc, #80]	; c0001ae4 <.text+0x1ae4>
+c0001a90:	e5d41000 	ldrb	r1, [r4]
+c0001a94:	ebfffe5d 	bl	c0001410 <printk>
+c0001a98:	e2844001 	add	r4, r4, #1	; 0x1
+c0001a9c:	e1560004 	cmp	r6, r4
+c0001aa0:	9affffe3 	bls	c0001a34 <delete_char+0x48>
+c0001aa4:	e5952000 	ldr	r2, [r5]
+c0001aa8:	e59f1038 	ldr	r1, [pc, #56]	; c0001ae8 <.text+0x1ae8>
+c0001aac:	e2023007 	and	r3, r2, #7	; 0x7
+c0001ab0:	e0831001 	add	r1, r3, r1
+c0001ab4:	e5d43000 	ldrb	r3, [r4]
+c0001ab8:	e3530009 	cmp	r3, #9	; 0x9
+c0001abc:	e59f0018 	ldr	r0, [pc, #24]	; c0001adc <.text+0x1adc>
+c0001ac0:	1affffef 	bne	c0001a84 <delete_char+0x98>
+c0001ac4:	ebfffe51 	bl	c0001410 <printk>
+c0001ac8:	e5952000 	ldr	r2, [r5]
+c0001acc:	e3c23007 	bic	r3, r2, #7	; 0x7
+c0001ad0:	e2832008 	add	r2, r3, #8	; 0x8
+c0001ad4:	e5852000 	str	r2, [r5]
+c0001ad8:	eaffffee 	b	c0001a98 <delete_char+0xac>
+c0001adc:	c00029ac 	andgt	r2, r0, r12, lsr #19
+c0001ae0:	c0002a94 	mulgt	r0, r4, r10
+c0001ae4:	c00029b0 	strgth	r2, [r0], -r0
+c0001ae8:	c0002a98 	mulgt	r0, r8, r10
+
+c0001aec <run_command>:
+
+int readline(const char *const prompt)
+{
+	char *p = console_buffer;
+	char *p_buf = p;
+	int plen = 0;
+	int col;
+	char c;
+	int	n = 0;				/* buffer index		*/
+
+	if (prompt) {
+		plen = strlen(prompt);
+		printk("%s", prompt);
+	}
+	col = plen;
+
+	for (;;) {
+		c = getchar();
+		
+		switch (c) {
+		case '\r':	/* Enter		*/
+		case '\n':
+			*p = '\0';
+			printk ("\r\n");
+			return (p - p_buf);
+
+		case '\0':	/* nul			*/
+			continue;
+
+		case 0x03:				/* ^C - break		*/
+			p_buf[0] = '\0';	/* discard input */
+			return (-1);
+
+		case 0x15:	/* ^U - erase line	*/
+			while (col > plen) {
+				printk("%s", erase_seq);
+				--col;
+			}
+			p = p_buf;
+			n = 0;
+			continue;
+
+		case 0x17:/* ^W - erase word	*/
+			p=delete_char(p_buf, p, &col, &n, plen);
+			while ((n > 0) && (*p != ' ')) {
+				p=delete_char(p_buf, p, &col, &n, plen);
+			}
+			continue;
+
+		case 0x08:				/* ^H  - backspace	*/
+		case 0x7F:				/* DEL - backspace	*/
+			p=delete_char(p_buf, p, &col, &n, plen);
+			continue;
+
+		default:
+/*
+ * Must be a normal character then
+ */
+			if (n < CONSOLE_BUFFER_SIZE-2) {
+				if (c == '\t') {	/* expand TABs		*/
+					printk("%s", tab_seq+(col&07));
+					col += 8 - (col&07);
+				} else {
+					++col;		/* echo input		*/
+					printk("%c", c);
+				}
+				*p++ = c;
+				++n;
+			} else {			/* Buffer full		*/
+				printk ("%c",'\a');
+			}
+		}
+	}
+}
+
+int run_command(const char *cmd)
+{
+c0001aec:	e92d4010 	stmdb	r13!, {r4, r14}
+	char cmdbuf[CONSOLE_BUFFER_SIZE];
+	char *str = cmdbuf;
+
+	if (!cmd || !*cmd) {
+c0001af0:	e2503000 	subs	r3, r0, #0	; 0x0
+c0001af4:	e24ddc01 	sub	r13, r13, #256	; 0x100
+c0001af8:	0a000005 	beq	c0001b14 <run_command+0x28>
+		return -1;
+	}
+	
+	strcpy(cmdbuf, cmd);
+c0001afc:	e1a01003 	mov	r1, r3
+c0001b00:	e5d33000 	ldrb	r3, [r3]
+c0001b04:	e3530000 	cmp	r3, #0	; 0x0
+c0001b08:	e1a0400d 	mov	r4, r13
+c0001b0c:	e1a0000d 	mov	r0, r13
+c0001b10:	1a000002 	bne	c0001b20 <run_command+0x34>
+
+	if (0 == strcmp("kmsg", str)) {
+		kmsg_dump();
+	}
+	else {
+		printk("unknown command\n");
+	}
+		
+}
+c0001b14:	e3e00000 	mvn	r0, #0	; 0x0
+c0001b18:	e28ddc01 	add	r13, r13, #256	; 0x100
+c0001b1c:	e8bd8010 	ldmia	r13!, {r4, r15}
+c0001b20:	eb0000a6 	bl	c0001dc0 <strcpy>
+c0001b24:	e1a0100d 	mov	r1, r13
+c0001b28:	e59f001c 	ldr	r0, [pc, #28]	; c0001b4c <.text+0x1b4c>
+c0001b2c:	eb0000c1 	bl	c0001e38 <strcmp>
+c0001b30:	e3500000 	cmp	r0, #0	; 0x0
+c0001b34:	e59f0014 	ldr	r0, [pc, #20]	; c0001b50 <.text+0x1b50>
+c0001b38:	1a000001 	bne	c0001b44 <run_command+0x58>
+c0001b3c:	ebfffd8b 	bl	c0001170 <kmsg_dump>
+c0001b40:	eafffff4 	b	c0001b18 <run_command+0x2c>
+c0001b44:	ebfffe31 	bl	c0001410 <printk>
+c0001b48:	eafffff2 	b	c0001b18 <run_command+0x2c>
+c0001b4c:	c00029b4 	strgth	r2, [r0], -r4
+c0001b50:	c00029bc 	strgth	r2, [r0], -r12
+
+c0001b54 <readline>:
+c0001b54:	e92d47f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r9, r10, r14}
+c0001b58:	e3a03000 	mov	r3, #0	; 0x0
+c0001b5c:	e24dd00c 	sub	r13, r13, #12	; 0xc
+c0001b60:	e2504000 	subs	r4, r0, #0	; 0x0
+c0001b64:	e58d3004 	str	r3, [r13, #4]
+c0001b68:	01a05004 	moveq	r5, r4
+c0001b6c:	0a000004 	beq	c0001b84 <readline+0x30>
+c0001b70:	eb0000d2 	bl	c0001ec0 <strlen>
+c0001b74:	e1a01004 	mov	r1, r4
+c0001b78:	e1a05000 	mov	r5, r0
+c0001b7c:	e59f01c4 	ldr	r0, [pc, #452]	; c0001d48 <.text+0x1d48>
+c0001b80:	ebfffe22 	bl	c0001410 <printk>
+c0001b84:	e28d700c 	add	r7, r13, #12	; 0xc
+c0001b88:	e59f61bc 	ldr	r6, [pc, #444]	; c0001d4c <.text+0x1d4c>
+c0001b8c:	e5275004 	str	r5, [r7, #-4]!
+c0001b90:	e1a09006 	mov	r9, r6
+c0001b94:	e3a08000 	mov	r8, #0	; 0x0
+c0001b98:	e28da004 	add	r10, r13, #4	; 0x4
+c0001b9c:	eb000189 	bl	c00021c8 <getchar>
+c0001ba0:	e20040ff 	and	r4, r0, #255	; 0xff
+c0001ba4:	e354000a 	cmp	r4, #10	; 0xa
+c0001ba8:	0a000019 	beq	c0001c14 <readline+0xc0>
+c0001bac:	8a00001e 	bhi	c0001c2c <readline+0xd8>
+c0001bb0:	e3540003 	cmp	r4, #3	; 0x3
+c0001bb4:	0a000042 	beq	c0001cc4 <readline+0x170>
+c0001bb8:	e3540008 	cmp	r4, #8	; 0x8
+c0001bbc:	0a000021 	beq	c0001c48 <readline+0xf4>
+c0001bc0:	e3540000 	cmp	r4, #0	; 0x0
+c0001bc4:	0afffff4 	beq	c0001b9c <readline+0x48>
+c0001bc8:	e59d3004 	ldr	r3, [r13, #4]
+c0001bcc:	e35300fd 	cmp	r3, #253	; 0xfd
+c0001bd0:	ca000029 	bgt	c0001c7c <readline+0x128>
+c0001bd4:	e3540009 	cmp	r4, #9	; 0x9
+c0001bd8:	0a00003c 	beq	c0001cd0 <readline+0x17c>
+c0001bdc:	e59d3008 	ldr	r3, [r13, #8]
+c0001be0:	e59f0168 	ldr	r0, [pc, #360]	; c0001d50 <.text+0x1d50>
+c0001be4:	e2833001 	add	r3, r3, #1	; 0x1
+c0001be8:	e1a01004 	mov	r1, r4
+c0001bec:	e58d3008 	str	r3, [r13, #8]
+c0001bf0:	ebfffe06 	bl	c0001410 <printk>
+c0001bf4:	e4c64001 	strb	r4, [r6], #1
+c0001bf8:	e59d3004 	ldr	r3, [r13, #4]
+c0001bfc:	e2833001 	add	r3, r3, #1	; 0x1
+c0001c00:	e58d3004 	str	r3, [r13, #4]
+c0001c04:	eb00016f 	bl	c00021c8 <getchar>
+c0001c08:	e20040ff 	and	r4, r0, #255	; 0xff
+c0001c0c:	e354000a 	cmp	r4, #10	; 0xa
+c0001c10:	1affffe5 	bne	c0001bac <readline+0x58>
+c0001c14:	e5c68000 	strb	r8, [r6]
+c0001c18:	e59f0134 	ldr	r0, [pc, #308]	; c0001d54 <.text+0x1d54>
+c0001c1c:	ebfffdfb 	bl	c0001410 <printk>
+c0001c20:	e0690006 	rsb	r0, r9, r6
+c0001c24:	e28dd00c 	add	r13, r13, #12	; 0xc
+c0001c28:	e8bd87f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r9, r10, r15}
+c0001c2c:	e3540015 	cmp	r4, #21	; 0x15
+c0001c30:	0a000015 	beq	c0001c8c <readline+0x138>
+c0001c34:	9a00000b 	bls	c0001c68 <readline+0x114>
+c0001c38:	e3540017 	cmp	r4, #23	; 0x17
+c0001c3c:	0a00002e 	beq	c0001cfc <readline+0x1a8>
+c0001c40:	e354007f 	cmp	r4, #127	; 0x7f
+c0001c44:	1affffdf 	bne	c0001bc8 <readline+0x74>
+c0001c48:	e1a01006 	mov	r1, r6
+c0001c4c:	e59f00f8 	ldr	r0, [pc, #248]	; c0001d4c <.text+0x1d4c>
+c0001c50:	e28d2008 	add	r2, r13, #8	; 0x8
+c0001c54:	e28d3004 	add	r3, r13, #4	; 0x4
+c0001c58:	e58d5000 	str	r5, [r13]
+c0001c5c:	ebffff62 	bl	c00019ec <delete_char>
+c0001c60:	e1a06000 	mov	r6, r0
+c0001c64:	eaffffcc 	b	c0001b9c <readline+0x48>
+c0001c68:	e354000d 	cmp	r4, #13	; 0xd
+c0001c6c:	0affffe8 	beq	c0001c14 <readline+0xc0>
+c0001c70:	e59d3004 	ldr	r3, [r13, #4]
+c0001c74:	e35300fd 	cmp	r3, #253	; 0xfd
+c0001c78:	daffffd5 	ble	c0001bd4 <readline+0x80>
+c0001c7c:	e3a01007 	mov	r1, #7	; 0x7
+c0001c80:	e59f00c8 	ldr	r0, [pc, #200]	; c0001d50 <.text+0x1d50>
+c0001c84:	ebfffde1 	bl	c0001410 <printk>
+c0001c88:	eaffffc3 	b	c0001b9c <readline+0x48>
+c0001c8c:	e59d3008 	ldr	r3, [r13, #8]
+c0001c90:	e1550003 	cmp	r5, r3
+c0001c94:	aa000007 	bge	c0001cb8 <readline+0x164>
+c0001c98:	e59f00a8 	ldr	r0, [pc, #168]	; c0001d48 <.text+0x1d48>
+c0001c9c:	e59f10b4 	ldr	r1, [pc, #180]	; c0001d58 <.text+0x1d58>
+c0001ca0:	ebfffdda 	bl	c0001410 <printk>
+c0001ca4:	e59d3008 	ldr	r3, [r13, #8]
+c0001ca8:	e2433001 	sub	r3, r3, #1	; 0x1
+c0001cac:	e1550003 	cmp	r5, r3
+c0001cb0:	e58d3008 	str	r3, [r13, #8]
+c0001cb4:	bafffff7 	blt	c0001c98 <readline+0x144>
+c0001cb8:	e59f608c 	ldr	r6, [pc, #140]	; c0001d4c <.text+0x1d4c>
+c0001cbc:	e58d8004 	str	r8, [r13, #4]
+c0001cc0:	eaffffb5 	b	c0001b9c <readline+0x48>
+c0001cc4:	e3e00000 	mvn	r0, #0	; 0x0
+c0001cc8:	e5c98000 	strb	r8, [r9]
+c0001ccc:	eaffffd4 	b	c0001c24 <readline+0xd0>
+c0001cd0:	e59d1008 	ldr	r1, [r13, #8]
+c0001cd4:	e59f3080 	ldr	r3, [pc, #128]	; c0001d5c <.text+0x1d5c>
+c0001cd8:	e2011007 	and	r1, r1, #7	; 0x7
+c0001cdc:	e0811003 	add	r1, r1, r3
+c0001ce0:	e59f0060 	ldr	r0, [pc, #96]	; c0001d48 <.text+0x1d48>
+c0001ce4:	ebfffdc9 	bl	c0001410 <printk>
+c0001ce8:	e59d3008 	ldr	r3, [r13, #8]
+c0001cec:	e3c33007 	bic	r3, r3, #7	; 0x7
+c0001cf0:	e2833008 	add	r3, r3, #8	; 0x8
+c0001cf4:	e58d3008 	str	r3, [r13, #8]
+c0001cf8:	eaffffbd 	b	c0001bf4 <readline+0xa0>
+c0001cfc:	e59f0048 	ldr	r0, [pc, #72]	; c0001d4c <.text+0x1d4c>
+c0001d00:	e1a01006 	mov	r1, r6
+c0001d04:	e1a02007 	mov	r2, r7
+c0001d08:	e1a0300a 	mov	r3, r10
+c0001d0c:	ea000006 	b	c0001d2c <readline+0x1d8>
+c0001d10:	e5d03000 	ldrb	r3, [r0]
+c0001d14:	e3530020 	cmp	r3, #32	; 0x20
+c0001d18:	0affff9f 	beq	c0001b9c <readline+0x48>
+c0001d1c:	e59f0028 	ldr	r0, [pc, #40]	; c0001d4c <.text+0x1d4c>
+c0001d20:	e1a01006 	mov	r1, r6
+c0001d24:	e1a02007 	mov	r2, r7
+c0001d28:	e1a0300a 	mov	r3, r10
+c0001d2c:	e58d5000 	str	r5, [r13]
+c0001d30:	ebffff2d 	bl	c00019ec <delete_char>
+c0001d34:	e59d3004 	ldr	r3, [r13, #4]
+c0001d38:	e3530000 	cmp	r3, #0	; 0x0
+c0001d3c:	e1a06000 	mov	r6, r0
+c0001d40:	cafffff2 	bgt	c0001d10 <readline+0x1bc>
+c0001d44:	eaffff94 	b	c0001b9c <readline+0x48>
+c0001d48:	c00029ac 	andgt	r2, r0, r12, lsr #19
+c0001d4c:	c0003288 	andgt	r3, r0, r8, lsl #5
+c0001d50:	c00029b0 	strgth	r2, [r0], -r0
+c0001d54:	c00029d0 	ldrgtd	r2, [r0], -r0
+c0001d58:	c0002a94 	mulgt	r0, r4, r10
+c0001d5c:	c0002a98 	mulgt	r0, r8, r10
+
+c0001d60 <init_shell>:
+
+int init_shell(void *arg)
+{
+c0001d60:	e52de004 	str	r14, [r13, #-4]!
+	int len;
+	static char lastcommand[CONSOLE_BUFFER_SIZE] = { 0, };
+
+	for (;;) {
+		len = readline("#");
+c0001d64:	e59f0044 	ldr	r0, [pc, #68]	; c0001db0 <.text+0x1db0>
+c0001d68:	ebffff79 	bl	c0001b54 <readline>
+		
+		if (len > 0) {
+c0001d6c:	e3500000 	cmp	r0, #0	; 0x0
+			strcpy(lastcommand, console_buffer);
+c0001d70:	e59f103c 	ldr	r1, [pc, #60]	; c0001db4 <.text+0x1db4>
+c0001d74:	e59f003c 	ldr	r0, [pc, #60]	; c0001db8 <.text+0x1db8>
+c0001d78:	dafffff9 	ble	c0001d64 <init_shell+0x4>
+c0001d7c:	eb00000f 	bl	c0001dc0 <strcpy>
+			printk("%s\n", lastcommand);
+c0001d80:	e59f1030 	ldr	r1, [pc, #48]	; c0001db8 <.text+0x1db8>
+c0001d84:	e59f0030 	ldr	r0, [pc, #48]	; c0001dbc <.text+0x1dbc>
+c0001d88:	ebfffda0 	bl	c0001410 <printk>
+			run_command(lastcommand);
+c0001d8c:	e59f0024 	ldr	r0, [pc, #36]	; c0001db8 <.text+0x1db8>
+c0001d90:	ebffff55 	bl	c0001aec <run_command>
+c0001d94:	e59f0014 	ldr	r0, [pc, #20]	; c0001db0 <.text+0x1db0>
+c0001d98:	ebffff6d 	bl	c0001b54 <readline>
+c0001d9c:	e3500000 	cmp	r0, #0	; 0x0
+c0001da0:	e59f100c 	ldr	r1, [pc, #12]	; c0001db4 <.text+0x1db4>
+c0001da4:	e59f000c 	ldr	r0, [pc, #12]	; c0001db8 <.text+0x1db8>
+c0001da8:	cafffff3 	bgt	c0001d7c <init_shell+0x1c>
+c0001dac:	eaffffec 	b	c0001d64 <init_shell+0x4>
+c0001db0:	c00029d4 	ldrgtd	r2, [r0], -r4
+c0001db4:	c0003288 	andgt	r3, r0, r8, lsl #5
+c0001db8:	c0003010 	andgt	r3, r0, r0, lsl r0
+c0001dbc:	c00029d8 	ldrgtd	r2, [r0], -r8
+
+c0001dc0 <strcpy>:
+ */
+#include "string.h"
+
+char *strcpy(char *dest, const char *src)
+{
+c0001dc0:	e1a02000 	mov	r2, r0
+	char *tmp = dest;
+
+	while ((*dest++ = *src++) != '\0')
+c0001dc4:	e4d13001 	ldrb	r3, [r1], #1
+c0001dc8:	e3530000 	cmp	r3, #0	; 0x0
+c0001dcc:	e4c23001 	strb	r3, [r2], #1
+c0001dd0:	1afffffb 	bne	c0001dc4 <strcpy+0x4>
+		/* nothing */;
+	return tmp;
+}
+c0001dd4:	e12fff1e 	bx	r14
+
+c0001dd8 <strncpy>:
+
+char *strncpy(char *dest, const char *src, size_t count)
+{
+	char *tmp = dest;
+
+	while (count) {
+c0001dd8:	e3520000 	cmp	r2, #0	; 0x0
+c0001ddc:	012fff1e 	bxeq	r14
+c0001de0:	e1a0c000 	mov	r12, r0
+		if ((*tmp = *src) != 0)
+c0001de4:	e5d13000 	ldrb	r3, [r1]
+c0001de8:	e3530000 	cmp	r3, #0	; 0x0
+			src++;
+c0001dec:	12811001 	addne	r1, r1, #1	; 0x1
+c0001df0:	e2522001 	subs	r2, r2, #1	; 0x1
+c0001df4:	e5cc3000 	strb	r3, [r12]
+		tmp++;
+c0001df8:	e28cc001 	add	r12, r12, #1	; 0x1
+c0001dfc:	1afffff8 	bne	c0001de4 <strncpy+0xc>
+		count--;
+	}
+	return dest;
+}
+c0001e00:	e12fff1e 	bx	r14
+
+c0001e04 <strcat>:
+
+char *strcat(char *dest, const char *src)
+{
+	char *tmp = dest;
+
+	while (*dest)
+c0001e04:	e5d03000 	ldrb	r3, [r0]
+c0001e08:	e3530000 	cmp	r3, #0	; 0x0
+c0001e0c:	01a02000 	moveq	r2, r0
+c0001e10:	0a000003 	beq	c0001e24 <strcat+0x20>
+c0001e14:	e1a02000 	mov	r2, r0
+c0001e18:	e5f23001 	ldrb	r3, [r2, #1]!
+c0001e1c:	e3530000 	cmp	r3, #0	; 0x0
+c0001e20:	1afffffc 	bne	c0001e18 <strcat+0x14>
+		dest++;
+	while ((*dest++ = *src++) != '\0')
+c0001e24:	e4d13001 	ldrb	r3, [r1], #1
+c0001e28:	e3530000 	cmp	r3, #0	; 0x0
+c0001e2c:	e4c23001 	strb	r3, [r2], #1
+c0001e30:	1afffffb 	bne	c0001e24 <strcat+0x20>
+		;
+	return tmp;
+}
+c0001e34:	e12fff1e 	bx	r14
+
+c0001e38 <strcmp>:
+
+int strcmp(const char *cs, const char *ct)
+{
+c0001e38:	e1a02000 	mov	r2, r0
+	unsigned char c1, c2;
+
+	while (1) {
+		c1 = *cs++;
+c0001e3c:	e4d20001 	ldrb	r0, [r2], #1
+		c2 = *ct++;
+c0001e40:	e4d13001 	ldrb	r3, [r1], #1
+		if (c1 != c2)
+c0001e44:	e1500003 	cmp	r0, r3
+c0001e48:	1a000002 	bne	c0001e58 <strcmp+0x20>
+			return c1 < c2 ? -1 : 1;
+		if (!c1)
+c0001e4c:	e3500000 	cmp	r0, #0	; 0x0
+c0001e50:	1afffff9 	bne	c0001e3c <strcmp+0x4>
+			break;
+	}
+	return 0;
+}
+c0001e54:	e12fff1e 	bx	r14
+c0001e58:	33e00000 	mvncc	r0, #0	; 0x0
+c0001e5c:	23a00001 	movcs	r0, #1	; 0x1
+c0001e60:	e12fff1e 	bx	r14
+
+c0001e64 <strncmp>:
+
+int strncmp(const char *cs, const char *ct, size_t count)
+{
+	unsigned char c1, c2;
+
+	while (count) {
+c0001e64:	e3520000 	cmp	r2, #0	; 0x0
+c0001e68:	0a00000e 	beq	c0001ea8 <strncmp+0x44>
+		c1 = *cs++;
+c0001e6c:	e5d0c000 	ldrb	r12, [r0]
+		c2 = *ct++;
+c0001e70:	e5d13000 	ldrb	r3, [r1]
+		if (c1 != c2)
+c0001e74:	e15c0003 	cmp	r12, r3
+c0001e78:	0a000008 	beq	c0001ea0 <strncmp+0x3c>
+c0001e7c:	ea00000b 	b	c0001eb0 <strncmp+0x4c>
+c0001e80:	e2522001 	subs	r2, r2, #1	; 0x1
+c0001e84:	0a000007 	beq	c0001ea8 <strncmp+0x44>
+c0001e88:	e5d0c001 	ldrb	r12, [r0, #1]
+c0001e8c:	e5d13001 	ldrb	r3, [r1, #1]
+c0001e90:	e15c0003 	cmp	r12, r3
+			return c1 < c2 ? -1 : 1;
+c0001e94:	e2800001 	add	r0, r0, #1	; 0x1
+c0001e98:	e2811001 	add	r1, r1, #1	; 0x1
+c0001e9c:	1a000003 	bne	c0001eb0 <strncmp+0x4c>
+		if (!c1)
+c0001ea0:	e35c0000 	cmp	r12, #0	; 0x0
+c0001ea4:	1afffff5 	bne	c0001e80 <strncmp+0x1c>
+c0001ea8:	e3a00000 	mov	r0, #0	; 0x0
+			break;
+		count--;
+	}
+	return 0;
+}
+c0001eac:	e12fff1e 	bx	r14
+c0001eb0:	e15c0003 	cmp	r12, r3
+c0001eb4:	23a00001 	movcs	r0, #1	; 0x1
+c0001eb8:	33e00000 	mvncc	r0, #0	; 0x0
+c0001ebc:	e12fff1e 	bx	r14
+
+c0001ec0 <strlen>:
+
+size_t strlen(const char *s)
+{
+c0001ec0:	e1a02000 	mov	r2, r0
+	const char *sc;
+
+	for (sc = s; *sc != '\0'; ++sc)
+c0001ec4:	e5d00000 	ldrb	r0, [r0]
+c0001ec8:	e3500000 	cmp	r0, #0	; 0x0
+c0001ecc:	012fff1e 	bxeq	r14
+c0001ed0:	e1a00002 	mov	r0, r2
+c0001ed4:	e5f03001 	ldrb	r3, [r0, #1]!
+c0001ed8:	e3530000 	cmp	r3, #0	; 0x0
+c0001edc:	1afffffc 	bne	c0001ed4 <strlen+0x14>
+c0001ee0:	e0620000 	rsb	r0, r2, r0
+		/* nothing */;
+	return sc - s;
+}
+c0001ee4:	e12fff1e 	bx	r14
+
+c0001ee8 <memset>:
+
+void *memset(void *s, int c, size_t count)
+{
+	char *xs = s;
+
+	while (count--)
+c0001ee8:	e3520000 	cmp	r2, #0	; 0x0
+c0001eec:	012fff1e 	bxeq	r14
+c0001ef0:	e20110ff 	and	r1, r1, #255	; 0xff
+c0001ef4:	e3a03000 	mov	r3, #0	; 0x0
+		*xs++ = c;
+c0001ef8:	e7c31000 	strb	r1, [r3, r0]
+c0001efc:	e2833001 	add	r3, r3, #1	; 0x1
+c0001f00:	e1520003 	cmp	r2, r3
+c0001f04:	1afffffb 	bne	c0001ef8 <memset+0x10>
+	return s;
+}
+c0001f08:	e12fff1e 	bx	r14
+
+c0001f0c <memcpy>:
+
+void *memcpy(void *dest, const void *src, size_t count)
+{
+	char *tmp = dest;
+	const char *s = src;
+
+	while (count--)
+c0001f0c:	e3520000 	cmp	r2, #0	; 0x0
+c0001f10:	012fff1e 	bxeq	r14
+c0001f14:	e3a0c000 	mov	r12, #0	; 0x0
+		*tmp++ = *s++;
+c0001f18:	e7dc3001 	ldrb	r3, [r12, r1]
+c0001f1c:	e7cc3000 	strb	r3, [r12, r0]
+c0001f20:	e28cc001 	add	r12, r12, #1	; 0x1
+c0001f24:	e15c0002 	cmp	r12, r2
+c0001f28:	1afffffa 	bne	c0001f18 <memcpy+0xc>
+	return dest;
+}
+c0001f2c:	e12fff1e 	bx	r14
+
+c0001f30 <memmove>:
+
+void *memmove(void *dest, const void *src, size_t count)
+{
+	char *tmp;
+	const char *s;
+
+	if (dest <= src) {
+c0001f30:	e1500001 	cmp	r0, r1
+c0001f34:	8a00000d 	bhi	c0001f70 <memmove+0x40>
+		tmp = dest;
+		s = src;
+		while (count--)
+c0001f38:	e3520000 	cmp	r2, #0	; 0x0
+c0001f3c:	012fff1e 	bxeq	r14
+c0001f40:	e3a0c000 	mov	r12, #0	; 0x0
+			*tmp++ = *s++;
+c0001f44:	e7dc3001 	ldrb	r3, [r12, r1]
+c0001f48:	e7cc3000 	strb	r3, [r12, r0]
+c0001f4c:	e28cc001 	add	r12, r12, #1	; 0x1
+c0001f50:	e15c0002 	cmp	r12, r2
+c0001f54:	012fff1e 	bxeq	r14
+c0001f58:	e7dc3001 	ldrb	r3, [r12, r1]
+c0001f5c:	e7cc3000 	strb	r3, [r12, r0]
+c0001f60:	e28cc001 	add	r12, r12, #1	; 0x1
+c0001f64:	e15c0002 	cmp	r12, r2
+c0001f68:	1afffff5 	bne	c0001f44 <memmove+0x14>
+c0001f6c:	e12fff1e 	bx	r14
+	} else {
+		tmp = dest;
+		tmp += count;
+		s = src;
+		s += count;
+		while (count--)
+c0001f70:	e3520000 	cmp	r2, #0	; 0x0
+c0001f74:	012fff1e 	bxeq	r14
+c0001f78:	e080c002 	add	r12, r0, r2
+c0001f7c:	e0811002 	add	r1, r1, r2
+c0001f80:	e062200c 	rsb	r2, r2, r12
+			*--tmp = *--s;
+c0001f84:	e5713001 	ldrb	r3, [r1, #-1]!
+c0001f88:	e56c3001 	strb	r3, [r12, #-1]!
+c0001f8c:	e152000c 	cmp	r2, r12
+c0001f90:	1afffffb 	bne	c0001f84 <memmove+0x54>
+	}
+	return dest;
+}
+c0001f94:	e12fff1e 	bx	r14
+
+c0001f98 <arch_context_switch>:
+void arch_context_switch(task_t *oldtask, task_t *newtask)
+{
+	/* printk("oldtask->sp=0x%x, newtask->sp=0x%x\n", */
+	/*        oldtask->sp, newtask->sp); */
+	arm_context_switch(&oldtask->sp, newtask->sp);
+c0001f98:	e5911008 	ldr	r1, [r1, #8]
+c0001f9c:	e2800008 	add	r0, r0, #8	; 0x8
+c0001fa0:	eafff846 	b	c00000c0 <arm_context_switch>
+
+c0001fa4 <arch_task_initialize>:
+c0001fa4:	e92d4030 	stmdb	r13!, {r4, r5, r14}
+c0001fa8:	e2803014 	add	r3, r0, #20	; 0x14
+c0001fac:	e8930028 	ldmia	r3, {r3, r5}
+c0001fb0:	e0835005 	add	r5, r3, r5
+c0001fb4:	e3c55007 	bic	r5, r5, #7	; 0x7
+c0001fb8:	e2455024 	sub	r5, r5, #36	; 0x24
+c0001fbc:	e1a04000 	mov	r4, r0
+c0001fc0:	e3a01000 	mov	r1, #0	; 0x0
+c0001fc4:	e1a00005 	mov	r0, r5
+c0001fc8:	e3a02024 	mov	r2, #36	; 0x24
+c0001fcc:	ebffffc5 	bl	c0001ee8 <memset>
+c0001fd0:	e59f3008 	ldr	r3, [pc, #8]	; c0001fe0 <.text+0x1fe0>
+c0001fd4:	e5853020 	str	r3, [r5, #32]
+c0001fd8:	e5845008 	str	r5, [r4, #8]
+c0001fdc:	e8bd8030 	ldmia	r13!, {r4, r5, r15}
+c0001fe0:	c0000758 	andgt	r0, r0, r8, asr r7
+	...
+
+c0001ff0 <arm_irq>:
+c0001ff0:	e88d0070 	stmia	r13, {r4, r5, r6}
+c0001ff4:	e1a0400d 	mov	r4, r13
+c0001ff8:	e24e5004 	sub	r5, r14, #4	; 0x4
+c0001ffc:	e14f6000 	mrs	r6, SPSR
+c0002000:	e321f0d3 	msr	CPSR_c, #211	; 0xd3
+c0002004:	e92d0020 	stmdb	r13!, {r5}
+c0002008:	e92d500f 	stmdb	r13!, {r0, r1, r2, r3, r12, r14}
+c000200c:	e92d0040 	stmdb	r13!, {r6}
+c0002010:	e8940070 	ldmia	r4, {r4, r5, r6}
+c0002014:	e59f10a0 	ldr	r1, [pc, #160]	; c00020bc <.text+0x20bc>
+c0002018:	e5910000 	ldr	r0, [r1]
+c000201c:	e2800001 	add	r0, r0, #1	; 0x1
+c0002020:	e5810000 	str	r0, [r1]
+c0002024:	e1a0000d 	mov	r0, r13
+c0002028:	eb000079 	bl	c0002214 <platform_irq>
+c000202c:	e3500000 	cmp	r0, #0	; 0x0
+c0002030:	1bfff942 	blne	c0000540 <task_schedule>
+c0002034:	e59f1080 	ldr	r1, [pc, #128]	; c00020bc <.text+0x20bc>
+c0002038:	e5910000 	ldr	r0, [r1]
+c000203c:	e2400001 	sub	r0, r0, #1	; 0x1
+c0002040:	e5810000 	str	r0, [r1]
+c0002044:	e8bd0001 	ldmia	r13!, {r0}
+c0002048:	e16ff000 	msr	SPSR_fsxc, r0
+c000204c:	e8fdd00f 	ldmia	r13!, {r0, r1, r2, r3, r12, r14, r15}^
+
+c0002050 <undefined>:
+c0002050:	e59f0068 	ldr	r0, [pc, #104]	; c00020c0 <.text+0x20c0>
+c0002054:	ebfffced 	bl	c0001410 <printk>
+c0002058:	eafffffc 	b	c0002050 <undefined>
+c000205c:	90909090 	umulllss	r9, r0, r0, r0
+
+c0002060 <syscall>:
+c0002060:	e59f005c 	ldr	r0, [pc, #92]	; c00020c4 <.text+0x20c4>
+c0002064:	ebfffce9 	bl	c0001410 <printk>
+c0002068:	eafffffc 	b	c0002060 <syscall>
+c000206c:	90909090 	umulllss	r9, r0, r0, r0
+
+c0002070 <prefetch_abort>:
+c0002070:	e59f0050 	ldr	r0, [pc, #80]	; c00020c8 <.text+0x20c8>
+c0002074:	ebfffce5 	bl	c0001410 <printk>
+c0002078:	eafffffc 	b	c0002070 <prefetch_abort>
+c000207c:	90909090 	umulllss	r9, r0, r0, r0
+
+c0002080 <data_abort>:
+c0002080:	e59f0044 	ldr	r0, [pc, #68]	; c00020cc <.text+0x20cc>
+c0002084:	ebfffce1 	bl	c0001410 <printk>
+c0002088:	eafffffc 	b	c0002080 <data_abort>
+c000208c:	90909090 	umulllss	r9, r0, r0, r0
+
+c0002090 <reserved>:
+c0002090:	e59f0038 	ldr	r0, [pc, #56]	; c00020d0 <.text+0x20d0>
+c0002094:	ebfffcdd 	bl	c0001410 <printk>
+c0002098:	eafffffc 	b	c0002090 <reserved>
+c000209c:	90909090 	umulllss	r9, r0, r0, r0
+
+c00020a0 <irq>:
+c00020a0:	eaffffd2 	b	c0001ff0 <arm_irq>
+c00020a4:	90909090 	umulllss	r9, r0, r0, r0
+c00020a8:	90909090 	umulllss	r9, r0, r0, r0
+c00020ac:	90909090 	umulllss	r9, r0, r0, r0
+
+c00020b0 <fiq>:
+c00020b0:	e59f001c 	ldr	r0, [pc, #28]	; c00020d4 <.text+0x20d4>
+c00020b4:	ebfffcd5 	bl	c0001410 <printk>
+c00020b8:	eafffffc 	b	c00020b0 <fiq>
+c00020bc:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c00020c0:	c0002ab0 	strgth	r2, [r0], -r0
+c00020c4:	c0002ac5 	andgt	r2, r0, r5, asr #21
+c00020c8:	c0002070 	andgt	r2, r0, r0, ror r0
+c00020cc:	c0002af2 	strgtd	r2, [r0], -r2
+c00020d0:	c0002b08 	andgt	r2, r0, r8, lsl #22
+c00020d4:	c0002b1c 	andgt	r2, r0, r12, lsl r11
+c00020d8:	e1a00000 	nop			(mov r0,r0)
+c00020dc:	e1a00000 	nop			(mov r0,r0)
+
+c00020e0 <arch_enable_ints>:
+c00020e0:	e10f0000 	mrs	r0, CPSR
+c00020e4:	e3c00080 	bic	r0, r0, #128	; 0x80
+c00020e8:	e121f000 	msr	CPSR_c, r0
+c00020ec:	e12fff1e 	bx	r14
+
+c00020f0 <arch_disable_ints>:
+c00020f0:	e10f0000 	mrs	r0, CPSR
+c00020f4:	e3800080 	orr	r0, r0, #128	; 0x80
+c00020f8:	e121f000 	msr	CPSR_c, r0
+c00020fc:	e12fff1e 	bx	r14
+
+c0002100 <get_cpsr>:
+c0002100:	e10f1000 	mrs	r1, CPSR
+c0002104:	e5801000 	str	r1, [r0]
+c0002108:	e12fff1e 	bx	r14
+c000210c:	e1a00000 	nop			(mov r0,r0)
+
+c0002110 <__puts>:
+#include <arch/text.h>
+
+void __puts(const char *str)
+{
+	while (*str) {
+c0002110:	e5d02000 	ldrb	r2, [r0]
+c0002114:	e3520000 	cmp	r2, #0	; 0x0
+c0002118:	0a00000c 	beq	c0002150 <__puts+0x40>
+c000211c:	e3a01201 	mov	r1, #268435456	; 0x10000000
+c0002120:	e281197a 	add	r1, r1, #1998848	; 0x1e8000
+c0002124:	e2811a02 	add	r1, r1, #8192	; 0x2000
+c0002128:	e3a0c00d 	mov	r12, #13	; 0xd
+		while (UART_FR & UART_FR_TXFF);
+c000212c:	e5d13018 	ldrb	r3, [r1, #24]
+c0002130:	e3130020 	tst	r3, #32	; 0x20
+c0002134:	1afffffc 	bne	c000212c <__puts+0x1c>
+
+		UART_DR = *str;
+
+		if (*str == '\n') {
+c0002138:	e352000a 	cmp	r2, #10	; 0xa
+c000213c:	e5c12000 	strb	r2, [r1]
+c0002140:	0a000009 	beq	c000216c <__puts+0x5c>
+c0002144:	e5f02001 	ldrb	r2, [r0, #1]!
+c0002148:	e3520000 	cmp	r2, #0	; 0x0
+c000214c:	1afffff6 	bne	c000212c <__puts+0x1c>
+			while (UART_FR & UART_FR_TXFF);
+
+			UART_DR = '\r';
+		}
+		str++;
+	}
+	while (UART_FR & UART_FR_BUSY);
+c0002150:	e3a03201 	mov	r3, #268435456	; 0x10000000
+c0002154:	e283397a 	add	r3, r3, #1998848	; 0x1e8000
+c0002158:	e2833a02 	add	r3, r3, #8192	; 0x2000
+c000215c:	e5d32018 	ldrb	r2, [r3, #24]
+c0002160:	e3120008 	tst	r2, #8	; 0x8
+c0002164:	1afffff9 	bne	c0002150 <__puts+0x40>
+}
+c0002168:	e12fff1e 	bx	r14
+c000216c:	e24222af 	sub	r2, r2, #-268435446	; 0xf000000a
+c0002170:	e282297a 	add	r2, r2, #1998848	; 0x1e8000
+c0002174:	e2822a02 	add	r2, r2, #8192	; 0x2000
+c0002178:	e5d23018 	ldrb	r3, [r2, #24]
+c000217c:	e3130020 	tst	r3, #32	; 0x20
+c0002180:	1afffffc 	bne	c0002178 <__puts+0x68>
+c0002184:	e5c2c000 	strb	r12, [r2]
+c0002188:	eaffffed 	b	c0002144 <__puts+0x34>
+
+c000218c <putchar>:
+
+void putchar(char c)
+{
+c000218c:	e3a01201 	mov	r1, #268435456	; 0x10000000
+c0002190:	e281197a 	add	r1, r1, #1998848	; 0x1e8000
+c0002194:	e20000ff 	and	r0, r0, #255	; 0xff
+c0002198:	e2811a02 	add	r1, r1, #8192	; 0x2000
+	while (UART_FR & UART_FR_TXFF);
+c000219c:	e5d13018 	ldrb	r3, [r1, #24]
+c00021a0:	e3130020 	tst	r3, #32	; 0x20
+c00021a4:	1afffffc 	bne	c000219c <putchar+0x10>
+c00021a8:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c00021ac:	e282297a 	add	r2, r2, #1998848	; 0x1e8000
+	UART_DR = c;
+c00021b0:	e5c10000 	strb	r0, [r1]
+c00021b4:	e2822a02 	add	r2, r2, #8192	; 0x2000
+	while (UART_FR & UART_FR_BUSY);
+c00021b8:	e5d23018 	ldrb	r3, [r2, #24]
+c00021bc:	e3130008 	tst	r3, #8	; 0x8
+c00021c0:	1afffffc 	bne	c00021b8 <putchar+0x2c>
+}
+c00021c4:	e12fff1e 	bx	r14
+
+c00021c8 <getchar>:
+
+int getchar(void)
+{
+c00021c8:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c00021cc:	e282297a 	add	r2, r2, #1998848	; 0x1e8000
+c00021d0:	e2822a02 	add	r2, r2, #8192	; 0x2000
+	unsigned int data;
+
+	while (UART_FR & UART_FR_RXFE);
+c00021d4:	e5d23018 	ldrb	r3, [r2, #24]
+c00021d8:	e3130010 	tst	r3, #16	; 0x10
+c00021dc:	1afffffc 	bne	c00021d4 <getchar+0xc>
+	
+	data = UART_DR;
+c00021e0:	e5d20000 	ldrb	r0, [r2]
+
+	if (data & 0xFFFFFF00) {
+		UART_ECR = 0xFFFFFFFF;
+		return -1;
+	}
+	
+	return (int) data;
+}
+c00021e4:	e12fff1e 	bx	r14
+
+c00021e8 <__console_init>:
+
+void __console_init(void)
+{
+}
+c00021e8:	e12fff1e 	bx	r14
+
+c00021ec <platform_init_interrupts>:
+static struct int_handler_struct int_handler_table[INTNR_IRQ_END];
+
+void platform_init_interrupts(void)
+{
+	writel(~0, ioaddr_intc(REG_INTC_INTENCLEAR));
+c00021ec:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c00021f0:	e2822819 	add	r2, r2, #1638400	; 0x190000
+c00021f4:	e3e01000 	mvn	r1, #0	; 0x0
+	writel(0, ioaddr_intc(REG_INTC_INTSELECT));
+c00021f8:	e3a03000 	mov	r3, #0	; 0x0
+c00021fc:	e5821014 	str	r1, [r2, #20]
+c0002200:	e582300c 	str	r3, [r2, #12]
+	writel(~0, ioaddr_intc(REG_INTC_SOFTINTCLEAR));
+	writel(1, ioaddr_intc(REG_INTC_SUPERPRIV_PROT));
+c0002204:	e2833001 	add	r3, r3, #1	; 0x1
+c0002208:	e582101c 	str	r1, [r2, #28]
+c000220c:	e5823020 	str	r3, [r2, #32]
+}
+c0002210:	e12fff1e 	bx	r14
+
+c0002214 <platform_irq>:
+
+int mask_interrupt(unsigned int vector)
+{
+	if (vector > INTNR_IRQ_END)
+		return -1;
+
+	vector -= INTNR_IRQ_START;
+	enter_critical_section();
+	writel(1<<vector, ioaddr_intc(REG_INTC_INTENCLEAR));
+	exit_critical_section();
+
+	return 0;
+}
+
+int unmask_interrupt(unsigned int vector)
+{
+	if (vector > INTNR_IRQ_END)
+		return -1;
+
+	vector -= INTNR_IRQ_START;
+	enter_critical_section();
+	writel(1<<vector, ioaddr_intc(REG_INTC_INTENABLE));
+	exit_critical_section();
+
+	return 0;
+}
+
+handler_return platform_irq(struct arm_iframe *frame)
+{
+	unsigned int irq_num = 0;
+	// get the current irq status
+	unsigned int irq_status = readl(ioaddr_intc(REG_INTC_IRQSTATUS));
+c0002214:	e3a03201 	mov	r3, #268435456	; 0x10000000
+c0002218:	e2833819 	add	r3, r3, #1638400	; 0x190000
+c000221c:	e5933000 	ldr	r3, [r3]
+
+	while((irq_status & 0x1) == 0)
+c0002220:	e2132001 	ands	r2, r3, #1	; 0x1
+c0002224:	e52de004 	str	r14, [r13, #-4]!
+c0002228:	13a01000 	movne	r1, #0	; 0x0
+c000222c:	1a000004 	bne	c0002244 <platform_irq+0x30>
+c0002230:	e1a01002 	mov	r1, r2
+	{
+		irq_status >>= 1;
+c0002234:	e1a030a3 	mov	r3, r3, lsr #1
+c0002238:	e3130001 	tst	r3, #1	; 0x1
+		irq_num ++;
+c000223c:	e2811001 	add	r1, r1, #1	; 0x1
+c0002240:	0afffffb 	beq	c0002234 <platform_irq+0x20>
+	}
+
+	// deliver the interrupt
+	handler_return ret; 
+
+	ret = INT_NO_RESCHEDULE;
+	if (int_handler_table[irq_num].handler)
+c0002244:	e59f3020 	ldr	r3, [pc, #32]	; c000226c <.text+0x226c>
+c0002248:	e7932181 	ldr	r2, [r3, r1, lsl #3]
+c000224c:	e3520000 	cmp	r2, #0	; 0x0
+c0002250:	01a00002 	moveq	r0, r2
+c0002254:	049df004 	ldreq	r15, [r13], #4
+		ret = int_handler_table[irq_num].handler(int_handler_table[irq_num].arg);
+c0002258:	e0833181 	add	r3, r3, r1, lsl #3
+c000225c:	e5930004 	ldr	r0, [r3, #4]
+c0002260:	e1a0e00f 	mov	r14, r15
+c0002264:	e12fff12 	bx	r2
+
+	return ret;
+}
+c0002268:	e49df004 	ldr	r15, [r13], #4
+c000226c:	c0003120 	andgt	r3, r0, r0, lsr #2
+
+c0002270 <platform_fiq>:
+
+void platform_fiq(struct arm_iframe *frame)
+{
+	printk("FIQ: unimplemented\n");
+c0002270:	e59f0000 	ldr	r0, [pc, #0]	; c0002278 <.text+0x2278>
+c0002274:	eafffc65 	b	c0001410 <printk>
+c0002278:	c00029dc 	ldrgtd	r2, [r0], -r12
+
+c000227c <register_int_handler>:
+}
+
+void register_int_handler(unsigned int vector, int_handler handler, void *arg)
+{
+c000227c:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+	if (vector > INTNR_IRQ_END)
+c0002280:	e350001f 	cmp	r0, #31	; 0x1f
+c0002284:	e1a04000 	mov	r4, r0
+c0002288:	e1a07001 	mov	r7, r1
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c000228c:	e59f505c 	ldr	r5, [pc, #92]	; c00022f0 <.text+0x22f0>
+		printk("register_int_handler: vector out of range %d\n", vector);
+c0002290:	e59f005c 	ldr	r0, [pc, #92]	; c00022f4 <.text+0x22f4>
+c0002294:	e1a01004 	mov	r1, r4
+c0002298:	e1a06002 	mov	r6, r2
+c000229c:	8a000011 	bhi	c00022e8 <register_int_handler+0x6c>
+
+	enter_critical_section();
+
+	int_handler_table[vector].handler = handler;
+c00022a0:	e59f1050 	ldr	r1, [pc, #80]	; c00022f8 <.text+0x22f8>
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00022a4:	e5953000 	ldr	r3, [r5]
+	int_handler_table[vector].arg = arg;
+c00022a8:	e0812184 	add	r2, r1, r4, lsl #3
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00022ac:	e3530000 	cmp	r3, #0	; 0x0
+c00022b0:	15826004 	strne	r6, [r2, #4]
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00022b4:	15853000 	strne	r3, [r5]
+c00022b8:	17817184 	strne	r7, [r1, r4, lsl #3]
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00022bc:	18bd80f0 	ldmneia	r13!, {r4, r5, r6, r7, r15}
+	{
+		arch_disable_ints();
+c00022c0:	ebffff8a 	bl	c00020f0 <arch_disable_ints>
+c00022c4:	e59f202c 	ldr	r2, [pc, #44]	; c00022f8 <.text+0x22f8>
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00022c8:	e5951000 	ldr	r1, [r5]
+c00022cc:	e0823184 	add	r3, r2, r4, lsl #3
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00022d0:	e3510000 	cmp	r1, #0	; 0x0
+c00022d4:	e5836004 	str	r6, [r3, #4]
+c00022d8:	e7827184 	str	r7, [r2, r4, lsl #3]
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00022dc:	18bd80f0 	ldmneia	r13!, {r4, r5, r6, r7, r15}
+
+	exit_critical_section();
+}
+c00022e0:	e8bd40f0 	ldmia	r13!, {r4, r5, r6, r7, r14}
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+	{
+		arch_enable_ints();
+c00022e4:	eaffff7d 	b	c00020e0 <arch_enable_ints>
+c00022e8:	ebfffc48 	bl	c0001410 <printk>
+c00022ec:	eaffffeb 	b	c00022a0 <register_int_handler+0x24>
+c00022f0:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c00022f4:	c00029f0 	strgtd	r2, [r0], -r0
+c00022f8:	c0003120 	andgt	r3, r0, r0, lsr #2
+
+c00022fc <mask_interrupt>:
+c00022fc:	e350001f 	cmp	r0, #31	; 0x1f
+c0002300:	e92d4070 	stmdb	r13!, {r4, r5, r6, r14}
+c0002304:	e1a04000 	mov	r4, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002308:	e59f6068 	ldr	r6, [pc, #104]	; c0002378 <.text+0x2378>
+c000230c:	e3e00000 	mvn	r0, #0	; 0x0
+c0002310:	88bd8070 	ldmhiia	r13!, {r4, r5, r6, r15}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002314:	e5965000 	ldr	r5, [r6]
+c0002318:	e3a02201 	mov	r2, #268435456	; 0x10000000
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c000231c:	e3550000 	cmp	r5, #0	; 0x0
+c0002320:	e2822819 	add	r2, r2, #1638400	; 0x190000
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002324:	0a000005 	beq	c0002340 <mask_interrupt+0x44>
+c0002328:	e3a03001 	mov	r3, #1	; 0x1
+c000232c:	e1a03413 	mov	r3, r3, lsl r4
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0002330:	e3a00000 	mov	r0, #0	; 0x0
+c0002334:	e5823014 	str	r3, [r2, #20]
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0002338:	e5865000 	str	r5, [r6]
+c000233c:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+c0002340:	ebffff6a 	bl	c00020f0 <arch_disable_ints>
+c0002344:	e3a03001 	mov	r3, #1	; 0x1
+c0002348:	e1a03413 	mov	r3, r3, lsl r4
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c000234c:	e5961000 	ldr	r1, [r6]
+c0002350:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c0002354:	e2822819 	add	r2, r2, #1638400	; 0x190000
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c0002358:	e3510000 	cmp	r1, #0	; 0x0
+c000235c:	e5823014 	str	r3, [r2, #20]
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c0002360:	e1a00005 	mov	r0, r5
+c0002364:	e5861000 	str	r1, [r6]
+c0002368:	18bd8070 	ldmneia	r13!, {r4, r5, r6, r15}
+	{
+		arch_enable_ints();
+c000236c:	ebffff5b 	bl	c00020e0 <arch_enable_ints>
+c0002370:	e1a00005 	mov	r0, r5
+c0002374:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+c0002378:	c0002b34 	andgt	r2, r0, r4, lsr r11
+
+c000237c <unmask_interrupt>:
+c000237c:	e350001f 	cmp	r0, #31	; 0x1f
+c0002380:	e92d4070 	stmdb	r13!, {r4, r5, r6, r14}
+c0002384:	e1a04000 	mov	r4, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002388:	e59f6068 	ldr	r6, [pc, #104]	; c00023f8 <.text+0x23f8>
+c000238c:	e3e00000 	mvn	r0, #0	; 0x0
+c0002390:	88bd8070 	ldmhiia	r13!, {r4, r5, r6, r15}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002394:	e5965000 	ldr	r5, [r6]
+c0002398:	e3a02201 	mov	r2, #268435456	; 0x10000000
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c000239c:	e3550000 	cmp	r5, #0	; 0x0
+c00023a0:	e2822819 	add	r2, r2, #1638400	; 0x190000
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c00023a4:	0a000005 	beq	c00023c0 <unmask_interrupt+0x44>
+c00023a8:	e3a03001 	mov	r3, #1	; 0x1
+c00023ac:	e1a03413 	mov	r3, r3, lsl r4
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00023b0:	e3a00000 	mov	r0, #0	; 0x0
+c00023b4:	e5823010 	str	r3, [r2, #16]
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c00023b8:	e5865000 	str	r5, [r6]
+c00023bc:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+c00023c0:	ebffff4a 	bl	c00020f0 <arch_disable_ints>
+c00023c4:	e3a03001 	mov	r3, #1	; 0x1
+c00023c8:	e1a03413 	mov	r3, r3, lsl r4
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c00023cc:	e5961000 	ldr	r1, [r6]
+c00023d0:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c00023d4:	e2822819 	add	r2, r2, #1638400	; 0x190000
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00023d8:	e3510000 	cmp	r1, #0	; 0x0
+c00023dc:	e5823010 	str	r3, [r2, #16]
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+	if (critical_section_count == 0)
+c00023e0:	e1a00005 	mov	r0, r5
+c00023e4:	e5861000 	str	r1, [r6]
+c00023e8:	18bd8070 	ldmneia	r13!, {r4, r5, r6, r15}
+	{
+		arch_enable_ints();
+c00023ec:	ebffff3b 	bl	c00020e0 <arch_enable_ints>
+c00023f0:	e1a00005 	mov	r0, r5
+c00023f4:	e8bd8070 	ldmia	r13!, {r4, r5, r6, r15}
+c00023f8:	c0002b34 	andgt	r2, r0, r4, lsr r11
+
+c00023fc <pllc_to_busclk>:
+
+static volatile unsigned long long ticks = 0;
+
+unsigned long pllc_to_busclk(unsigned long pllc, unsigned long fxin)
+{
+c00023fc:	e1a02620 	mov	r2, r0, lsr #12
+c0002400:	e3a03eff 	mov	r3, #4080	; 0xff0
+c0002404:	e92d4010 	stmdb	r13!, {r4, r14}
+c0002408:	e283300f 	add	r3, r3, #15	; 0xf
+c000240c:	e1a04000 	mov	r4, r0
+c0002410:	e1a00001 	mov	r0, r1
+c0002414:	e202103f 	and	r1, r2, #63	; 0x3f
+c0002418:	e0044003 	and	r4, r4, r3
+c000241c:	eb000097 	bl	c0002680 <__aeabi_uidiv>
+c0002420:	e0020490 	mul	r2, r0, r4
+c0002424:	e59f3008 	ldr	r3, [pc, #8]	; c0002434 <.text+0x2434>
+c0002428:	e0801293 	umull	r1, r0, r3, r2
+	unsigned long REFDIV,FBDIV;
+	
+	PLLC_TO_REFDIV_FBDIV(REFDIV,FBDIV,pllc); 	
+
+	return REFDIV_FBDIV_TO_BUSCLK(REFDIV,FBDIV,fxin);
+}
+c000242c:	e1a001a0 	mov	r0, r0, lsr #3
+c0002430:	e8bd8010 	ldmia	r13!, {r4, r15}
+c0002434:	aaaaaaab 	bge	beaacee8 <_start-0x1553118>
+
+c0002438 <is_pllc_invalid>:
+
+int is_pllc_invalid(unsigned long pllc, unsigned long fxin)
+{
+c0002438:	e1a02620 	mov	r2, r0, lsr #12
+c000243c:	e3a03eff 	mov	r3, #4080	; 0xff0
+c0002440:	e92d4010 	stmdb	r13!, {r4, r14}
+c0002444:	e283300f 	add	r3, r3, #15	; 0xf
+c0002448:	e1a04000 	mov	r4, r0
+c000244c:	e1a00001 	mov	r0, r1
+c0002450:	e202103f 	and	r1, r2, #63	; 0x3f
+c0002454:	e0044003 	and	r4, r4, r3
+c0002458:	eb000088 	bl	c0002680 <__aeabi_uidiv>
+c000245c:	e3e035be 	mvn	r3, #796917760	; 0x2f800000
+c0002460:	e243382f 	sub	r3, r3, #3080192	; 0x2f0000
+c0002464:	e2433b02 	sub	r3, r3, #2048	; 0x800
+c0002468:	e0223490 	mla	r2, r0, r4, r3
+c000246c:	e3e0020a 	mvn	r0, #-1610612736	; 0xa0000000
+c0002470:	e24008a1 	sub	r0, r0, #10551296	; 0xa10000
+c0002474:	e2400a0f 	sub	r0, r0, #61440	; 0xf000
+	
+	unsigned long REFDIV,FBDIV,value;
+	
+	PLLC_TO_REFDIV_FBDIV(REFDIV,FBDIV,pllc); 	
+	value = fxin/REFDIV*FBDIV;
+	if((value>(2400*MHZ)) || (value <= 800*MHZ))
+	{
+		return 1;
+	}
+	return 0;
+}
+c0002478:	e1520000 	cmp	r2, r0
+c000247c:	93a00000 	movls	r0, #0	; 0x0
+c0002480:	83a00001 	movhi	r0, #1	; 0x1
+c0002484:	e8bd8010 	ldmia	r13!, {r4, r15}
+
+c0002488 <current_time>:
+
+
+int platform_set_periodic_timer(platform_timer_callback callback, void *arg, time_t interval)
+{
+	unsigned long pllc;
+	unsigned long busclock;
+
+	enter_critical_section();
+
+	t_callback = callback;
+
+	writel(0, CFG_TIMER_VABASE + REG_TIMER_CONTROL);
+	
+	pllc = readl(REG_BASE_SC + REG_SC_APLLCFGSTAT1);
+	if(!is_pllc_invalid(pllc, DEFAULT_MPLLIN)) {
+		busclock =pllc_to_busclk(pllc, DEFAULT_MPLLIN);
+		timer_reload = BUSCLK_TO_TIMER_RELOAD(busclock);
+		
+	}
+	else
+	{
+		timer_reload = BUSCLK_TO_TIMER_RELOAD(DEFAULT_BUSCLK);
+	}
+	timer_reload = 6800000;
+	writel(timer_reload, CFG_TIMER_VABASE + REG_TIMER_RELOAD);
+	writel(CFG_TIMER_CONTROL, CFG_TIMER_VABASE + REG_TIMER_CONTROL);
+
+	unmask_interrupt(CFG_TIMER_INTNR);
+
+	exit_critical_section();
+
+	return 0;
+}
+
+static unsigned long gettimeoffset(void)
+{
+	unsigned long ticks1, ticks2, status;
+
+	ticks2 = readl(CFG_TIMER_VABASE + REG_TIMER_VALUE);
+	do {
+		ticks1 = ticks2;
+		status = readl(ioaddr_intc(REG_INTC_RAWSTATUS));
+		ticks2 = readl(CFG_TIMER_VABASE + REG_TIMER_VALUE);
+
+	} while ((ticks2 > ticks1) || (ticks2 == 0));
+
+	ticks1 = timer_reload - ticks2;
+	//printk("ticks1=%d, ticks2=%d, status=0x%x\n", ticks1, ticks2, status);
+
+	if(status & (1<<CFG_TIMER_INTNR))
+		ticks1 += timer_reload;
+
+	return ticks2ms(ticks1);
+}
+
+unsigned long long current_time(void)
+{
+	return ticks;
+}
+c0002488:	e59f3004 	ldr	r3, [pc, #4]	; c0002494 <.text+0x2494>
+c000248c:	e8930003 	ldmia	r3, {r0, r1}
+c0002490:	e12fff1e 	bx	r14
+c0002494:	c0003218 	andgt	r3, r0, r8, lsl r2
+
+c0002498 <platform_tick>:
+c0002498:	e3a03201 	mov	r3, #268435456	; 0x10000000
+c000249c:	e283381e 	add	r3, r3, #1966080	; 0x1e0000
+c00024a0:	e2833a02 	add	r3, r3, #8192	; 0x2000
+c00024a4:	e3a01201 	mov	r1, #268435456	; 0x10000000
+c00024a8:	e5932004 	ldr	r2, [r3, #4]
+
+static handler_return platform_tick(void *arg)
+{
+c00024ac:	e92d41f0 	stmdb	r13!, {r4, r5, r6, r7, r8, r14}
+c00024b0:	e2811819 	add	r1, r1, #1638400	; 0x190000
+c00024b4:	e1a08000 	mov	r8, r0
+c00024b8:	e1a07003 	mov	r7, r3
+c00024bc:	e591c008 	ldr	r12, [r1, #8]
+c00024c0:	e5970004 	ldr	r0, [r7, #4]
+c00024c4:	e2703001 	rsbs	r3, r0, #1	; 0x1
+c00024c8:	33a03000 	movcc	r3, #0	; 0x0
+c00024cc:	e1520000 	cmp	r2, r0
+c00024d0:	33833001 	orrcc	r3, r3, #1	; 0x1
+c00024d4:	e3530000 	cmp	r3, #0	; 0x0
+c00024d8:	e1a02000 	mov	r2, r0
+c00024dc:	1afffff6 	bne	c00024bc <platform_tick+0x24>
+c00024e0:	e59f3064 	ldr	r3, [pc, #100]	; c000254c <.text+0x254c>
+c00024e4:	e5931000 	ldr	r1, [r3]
+c00024e8:	e31c0004 	tst	r12, #4	; 0x4
+c00024ec:	e0600001 	rsb	r0, r0, r1
+c00024f0:	10800001 	addne	r0, r0, r1
+	ticks += gettimeoffset();
+c00024f4:	e1a00080 	mov	r0, r0, lsl #1
+c00024f8:	e1a01121 	mov	r1, r1, lsr #2
+c00024fc:	eb00005f 	bl	c0002680 <__aeabi_uidiv>
+c0002500:	e59f2048 	ldr	r2, [pc, #72]	; c0002550 <.text+0x2550>
+	writel(~0, CFG_TIMER_VABASE + REG_TIMER_INTCLR);
+
+	if (t_callback) {
+c0002504:	e59f3048 	ldr	r3, [pc, #72]	; c0002554 <.text+0x2554>
+c0002508:	e8920030 	ldmia	r2, {r4, r5}
+c000250c:	e5936000 	ldr	r6, [r3]
+c0002510:	e3a01000 	mov	r1, #0	; 0x0
+c0002514:	e0900004 	adds	r0, r0, r4
+c0002518:	e0a11005 	adc	r1, r1, r5
+c000251c:	e3e03000 	mvn	r3, #0	; 0x0
+c0002520:	e3560000 	cmp	r6, #0	; 0x0
+c0002524:	e8820003 	stmia	r2, {r0, r1}
+c0002528:	e587300c 	str	r3, [r7, #12]
+c000252c:	01a00006 	moveq	r0, r6
+c0002530:	08bd81f0 	ldmeqia	r13!, {r4, r5, r6, r7, r8, r15}
+		return t_callback(arg, current_time());
+c0002534:	ebffffd3 	bl	c0002488 <current_time>
+c0002538:	e1a01000 	mov	r1, r0
+c000253c:	e1a00008 	mov	r0, r8
+c0002540:	e1a0e00f 	mov	r14, r15
+c0002544:	e12fff16 	bx	r6
+	} else {
+		return INT_NO_RESCHEDULE;
+	}
+}
+c0002548:	e8bd81f0 	ldmia	r13!, {r4, r5, r6, r7, r8, r15}
+c000254c:	c0003220 	andgt	r3, r0, r0, lsr #4
+c0002550:	c0003218 	andgt	r3, r0, r8, lsl r2
+c0002554:	c0003224 	andgt	r3, r0, r4, lsr #4
+
+c0002558 <platform_init_timer>:
+
+void platform_init_timer(void)
+{
+	register_int_handler(CFG_TIMER_INTNR, &platform_tick, 0);
+c0002558:	e59f1008 	ldr	r1, [pc, #8]	; c0002568 <.text+0x2568>
+c000255c:	e3a00002 	mov	r0, #2	; 0x2
+c0002560:	e3a02000 	mov	r2, #0	; 0x0
+c0002564:	eaffff44 	b	c000227c <register_int_handler>
+c0002568:	c0002498 	mulgt	r0, r8, r4
+
+c000256c <platform_set_periodic_timer>:
+c000256c:	e92d40f0 	stmdb	r13!, {r4, r5, r6, r7, r14}
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002570:	e59f60e0 	ldr	r6, [pc, #224]	; c0002658 <.text+0x2658>
+c0002574:	e5963000 	ldr	r3, [r6]
+c0002578:	e3530000 	cmp	r3, #0	; 0x0
+c000257c:	e59f70d8 	ldr	r7, [pc, #216]	; c000265c <.text+0x265c>
+c0002580:	e1a05000 	mov	r5, r0
+void arch_disable_ints(void);
+
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+c0002584:	0a000030 	beq	c000264c <platform_set_periodic_timer+0xe0>
+c0002588:	e3a02201 	mov	r2, #268435456	; 0x10000000
+c000258c:	e282281e 	add	r2, r2, #1966080	; 0x1e0000
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c0002590:	e2833001 	add	r3, r3, #1	; 0x1
+c0002594:	e2822a02 	add	r2, r2, #8192	; 0x2000
+c0002598:	e3a01000 	mov	r1, #0	; 0x0
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+	}
+	critical_section_count++;
+c000259c:	e5863000 	str	r3, [r6]
+c00025a0:	e5821008 	str	r1, [r2, #8]
+c00025a4:	e3a03201 	mov	r3, #268435456	; 0x10000000
+c00025a8:	e283381e 	add	r3, r3, #1966080	; 0x1e0000
+c00025ac:	e5934018 	ldr	r4, [r3, #24]
+c00025b0:	e59f30a8 	ldr	r3, [pc, #168]	; c0002660 <.text+0x2660>
+c00025b4:	e28118b7 	add	r1, r1, #11993088	; 0xb70000
+c00025b8:	e2811c1b 	add	r1, r1, #6912	; 0x1b00
+c00025bc:	e5835000 	str	r5, [r3]
+c00025c0:	e1a00004 	mov	r0, r4
+c00025c4:	ebffff9b 	bl	c0002438 <is_pllc_invalid>
+c00025c8:	e3500000 	cmp	r0, #0	; 0x0
+c00025cc:	e3a03943 	mov	r3, #1097728	; 0x10c000
+c00025d0:	159f7084 	ldrne	r7, [pc, #132]	; c000265c <.text+0x265c>
+c00025d4:	e3a018b7 	mov	r1, #11993088	; 0xb70000
+c00025d8:	e2833e8e 	add	r3, r3, #2272	; 0x8e0
+c00025dc:	e2811c1b 	add	r1, r1, #6912	; 0x1b00
+c00025e0:	e1a00004 	mov	r0, r4
+c00025e4:	15873000 	strne	r3, [r7]
+c00025e8:	0a000011 	beq	c0002634 <platform_set_periodic_timer+0xc8>
+c00025ec:	e3a01201 	mov	r1, #268435456	; 0x10000000
+c00025f0:	e281181e 	add	r1, r1, #1966080	; 0x1e0000
+c00025f4:	e3a0371a 	mov	r3, #6815744	; 0x680000
+c00025f8:	e2433df6 	sub	r3, r3, #15744	; 0x3d80
+c00025fc:	e2811a02 	add	r1, r1, #8192	; 0x2000
+c0002600:	e3a020e2 	mov	r2, #226	; 0xe2
+c0002604:	e5813000 	str	r3, [r1]
+c0002608:	e3a00002 	mov	r0, #2	; 0x2
+c000260c:	e5812008 	str	r2, [r1, #8]
+c0002610:	e5873000 	str	r3, [r7]
+c0002614:	ebffff58 	bl	c000237c <unmask_interrupt>
+}
+
+static __always_inline void exit_critical_section(void)
+{
+	critical_section_count--;
+c0002618:	e5963000 	ldr	r3, [r6]
+c000261c:	e2433001 	sub	r3, r3, #1	; 0x1
+	if (critical_section_count == 0)
+c0002620:	e3530000 	cmp	r3, #0	; 0x0
+c0002624:	e5863000 	str	r3, [r6]
+	{
+		arch_enable_ints();
+c0002628:	0bfffeac 	bleq	c00020e0 <arch_enable_ints>
+c000262c:	e3a00000 	mov	r0, #0	; 0x0
+c0002630:	e8bd80f0 	ldmia	r13!, {r4, r5, r6, r7, r15}
+c0002634:	ebffff70 	bl	c00023fc <pllc_to_busclk>
+c0002638:	e59f2024 	ldr	r2, [pc, #36]	; c0002664 <.text+0x2664>
+c000263c:	e0831092 	umull	r1, r3, r2, r0
+c0002640:	e1a032a3 	mov	r3, r3, lsr #5
+c0002644:	e5873000 	str	r3, [r7]
+c0002648:	eaffffe7 	b	c00025ec <platform_set_periodic_timer+0x80>
+static __always_inline void enter_critical_section(void)
+{
+	if (critical_section_count == 0)
+	{
+		arch_disable_ints();
+c000264c:	ebfffea7 	bl	c00020f0 <arch_disable_ints>
+c0002650:	e5963000 	ldr	r3, [r6]
+c0002654:	eaffffcb 	b	c0002588 <platform_set_periodic_timer+0x1c>
+c0002658:	c0002b34 	andgt	r2, r0, r4, lsr r11
+c000265c:	c0003220 	andgt	r3, r0, r0, lsr #4
+c0002660:	c0003224 	andgt	r3, r0, r4, lsr #4
+c0002664:	51eb851f 	mvnpl	r8, r15, lsl r5
+
+c0002668 <console_init>:
+#include <kernel/printk.h>
+
+void console_init(void)
+{
+	__console_init();
+c0002668:	eafffede 	b	c00021e8 <__console_init>
+
+c000266c <platform_init>:
+}
+
+void platform_init(void)
+{
+c000266c:	e52de004 	str	r14, [r13, #-4]!
+	/* init serial port */
+	console_init();
+c0002670:	ebfffffc 	bl	c0002668 <console_init>
+	
+	/* init interrupt controller */
+	platform_init_interrupts();
+c0002674:	ebfffedc 	bl	c00021ec <platform_init_interrupts>
+
+	/* init timmer for kernel tick */
+	platform_init_timer();
+	//platform_set_periodic_timer(timer_tick, 0, 10); /* 10ms */
+}
+c0002678:	e49de004 	ldr	r14, [r13], #4
+c000267c:	eaffffb5 	b	c0002558 <platform_init_timer>
+
+c0002680 <__aeabi_uidiv>:
+c0002680:	e2512001 	subs	r2, r1, #1	; 0x1
+c0002684:	012fff1e 	bxeq	r14
+c0002688:	3a000036 	bcc	c0002768 <__aeabi_uidiv+0xe8>
+c000268c:	e1500001 	cmp	r0, r1
+c0002690:	9a000022 	bls	c0002720 <__aeabi_uidiv+0xa0>
+c0002694:	e1110002 	tst	r1, r2
+c0002698:	0a000023 	beq	c000272c <__aeabi_uidiv+0xac>
+c000269c:	e311020e 	tst	r1, #-536870912	; 0xe0000000
+c00026a0:	01a01181 	moveq	r1, r1, lsl #3
+c00026a4:	03a03008 	moveq	r3, #8	; 0x8
+c00026a8:	13a03001 	movne	r3, #1	; 0x1
+c00026ac:	e3510201 	cmp	r1, #268435456	; 0x10000000
+c00026b0:	31510000 	cmpcc	r1, r0
+c00026b4:	31a01201 	movcc	r1, r1, lsl #4
+c00026b8:	31a03203 	movcc	r3, r3, lsl #4
+c00026bc:	3afffffa 	bcc	c00026ac <__aeabi_uidiv+0x2c>
+c00026c0:	e3510102 	cmp	r1, #-2147483648	; 0x80000000
+c00026c4:	31510000 	cmpcc	r1, r0
+c00026c8:	31a01081 	movcc	r1, r1, lsl #1
+c00026cc:	31a03083 	movcc	r3, r3, lsl #1
+c00026d0:	3afffffa 	bcc	c00026c0 <__aeabi_uidiv+0x40>
+c00026d4:	e3a02000 	mov	r2, #0	; 0x0
+c00026d8:	e1500001 	cmp	r0, r1
+c00026dc:	20400001 	subcs	r0, r0, r1
+c00026e0:	21822003 	orrcs	r2, r2, r3
+c00026e4:	e15000a1 	cmp	r0, r1, lsr #1
+c00026e8:	204000a1 	subcs	r0, r0, r1, lsr #1
+c00026ec:	218220a3 	orrcs	r2, r2, r3, lsr #1
+c00026f0:	e1500121 	cmp	r0, r1, lsr #2
+c00026f4:	20400121 	subcs	r0, r0, r1, lsr #2
+c00026f8:	21822123 	orrcs	r2, r2, r3, lsr #2
+c00026fc:	e15001a1 	cmp	r0, r1, lsr #3
+c0002700:	204001a1 	subcs	r0, r0, r1, lsr #3
+c0002704:	218221a3 	orrcs	r2, r2, r3, lsr #3
+c0002708:	e3500000 	cmp	r0, #0	; 0x0
+c000270c:	11b03223 	movnes	r3, r3, lsr #4
+c0002710:	11a01221 	movne	r1, r1, lsr #4
+c0002714:	1affffef 	bne	c00026d8 <__aeabi_uidiv+0x58>
+c0002718:	e1a00002 	mov	r0, r2
+c000271c:	e12fff1e 	bx	r14
+c0002720:	03a00001 	moveq	r0, #1	; 0x1
+c0002724:	13a00000 	movne	r0, #0	; 0x0
+c0002728:	e12fff1e 	bx	r14
+c000272c:	e3510801 	cmp	r1, #65536	; 0x10000
+c0002730:	21a01821 	movcs	r1, r1, lsr #16
+c0002734:	23a02010 	movcs	r2, #16	; 0x10
+c0002738:	33a02000 	movcc	r2, #0	; 0x0
+c000273c:	e3510c01 	cmp	r1, #256	; 0x100
+c0002740:	21a01421 	movcs	r1, r1, lsr #8
+c0002744:	22822008 	addcs	r2, r2, #8	; 0x8
+c0002748:	e3510010 	cmp	r1, #16	; 0x10
+c000274c:	21a01221 	movcs	r1, r1, lsr #4
+c0002750:	22822004 	addcs	r2, r2, #4	; 0x4
+c0002754:	e3510004 	cmp	r1, #4	; 0x4
+c0002758:	82822003 	addhi	r2, r2, #3	; 0x3
+c000275c:	908220a1 	addls	r2, r2, r1, lsr #1
+c0002760:	e1a00230 	mov	r0, r0, lsr r2
+c0002764:	e12fff1e 	bx	r14
+c0002768:	e52de008 	str	r14, [r13, #-8]!
+c000276c:	eb000007 	bl	c0002790 <__aeabi_idiv0>
+c0002770:	e3a00000 	mov	r0, #0	; 0x0
+c0002774:	e49df008 	ldr	r15, [r13], #8
+
+c0002778 <__aeabi_uidivmod>:
+c0002778:	e92d4003 	stmdb	r13!, {r0, r1, r14}
+c000277c:	ebffffbf 	bl	c0002680 <__aeabi_uidiv>
+c0002780:	e8bd4006 	ldmia	r13!, {r1, r2, r14}
+c0002784:	e0030092 	mul	r3, r2, r0
+c0002788:	e0411003 	sub	r1, r1, r3
+c000278c:	e12fff1e 	bx	r14
+
+c0002790 <__aeabi_idiv0>:
+c0002790:	e12fff1e 	bx	r14

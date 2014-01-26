@@ -1,5 +1,9 @@
 ARCH ?= arm
 BOARD ?= demo
+TARGET ?= lynx_kimage
+TARGET_BIN ?= $(TARGET).bin
+TARGET_ELF ?= $(TARGET).elf
+TARGET_SYM ?= $(TARGETE).sym
 
 export TOPDIR=$(shell pwd)
 TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-elf-toolchain/bin/
@@ -26,10 +30,11 @@ ALLOBJS := \
 	kernel/sched_fifo.o \
 	kernel/sched.o \
 	kernel/task.o \
-	kernel/printf.o \
+	kernel/printk.o \
 	kernel/malloc.o \
 	kernel/timer.o \
 	kernel/semaphore.o \
+	init/init_shell.o \
 	lib/string.o
 
 include arch/$(ARCH)/Makefile
@@ -41,7 +46,7 @@ LINKER_SCRIPT := build.ld
 
 ALL_INCLUDE_FILES := $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h)
 
-all: prepare bigeye.bin bigeye.elf bigeye.sym
+all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM)
 
 prepare: prepare_include build.ld
 
@@ -57,15 +62,15 @@ prepare_include:
 build.ld: $(LINKER_SCRIPT_TEMPLETE)
 	@sed "s/%MEMBASE%/$(MEMBASE)/;s/%STACKSIZE%/$(STACKSIZE)/" < $< > $@
 
-bigeye.bin: bigeye.elf
+$(TARGET_BIN): $(TARGET_ELF)
 	@echo generation image: $@
 	$(NOECHO)$(SIZE) $<
 	$(NOCOPY)$(OBJCOPY) -O binary $< $@
 
-bigeye.elf: $(ALLOBJS) $(LINKER_SCRIPT)
+$(TARGET_ELF): $(ALLOBJS) $(LINKER_SCRIPT)
 	@echo linking $@
 	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS) -o $@ $(PLATFORM_LIBGCC)
-bigeye.sym: bigeye.elf
+$(TARGET_SYM): $(TARGET_ELF)
 	@echo generating listing: $@
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
 

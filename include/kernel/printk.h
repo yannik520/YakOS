@@ -20,26 +20,12 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <arch/text.h>
-#include <arch/interrupts.h>
-#include <arch/timer.h>
-#include <arch/platform.h>
-#include <kernel/printk.h>
 
-void console_init(void)
-{
-	__console_init();
-}
+#ifndef __PRINTK_H__
+#define __PRINTK_H__
 
-void platform_init(void)
-{
-	/* init serial port */
-	console_init();
-	
-	/* init interrupt controller */
-	platform_init_interrupts();
+extern void __puts(const char *s);
+extern int printk(const char *fmt, ...);
+extern void kmsg_dump(void);
 
-	/* init timmer for kernel tick */
-	platform_init_timer();
-	//platform_set_periodic_timer(timer_tick, 0, 10); /* 10ms */
-}
+#endif /* __PRINTK_H__ */
