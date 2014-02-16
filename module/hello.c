@@ -20,20 +20,17 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <kernel/type.h>
+#include <kernel/printk.h>
+#include <module/module.h>
 
-#ifndef _STRING_H_
-#define _STRING_H_
-#include <arch/types.h>
+void hello (void)
+{
+  printk("module hello runned\n");
+}
 
-char *strcpy(char *dest, const char *src);
-char *strncpy(char *dest, const char *src, size_t count);
-char *strcat(char *dest, const char *src);
-int strcmp(const char *cs, const char *ct);
-int strncmp(const char *cs, const char *ct, size_t count);
-size_t strlen(const char *s);
-void *memset(void *s, int c, size_t count);
-void *memcpy(void *dest, const void *src, size_t count);
-void *memmove(void *dest, const void *src, size_t count);
-int   memcmp (void const *, const void *, size_t);
-
-#endif
+struct module mod = {
+  .name = {'h','e','l','l','o','\0',},
+  .num_syms = 1,
+  .syms = {{"hello", &hello}}
+};

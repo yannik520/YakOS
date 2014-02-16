@@ -1,11 +1,10 @@
- _                       _  __                    _ 
-| |   _   _ _ __ __  __ | |/ /___ _ __ _ __   ___| |
-| |  | | | | '_ \\ \/ / | ' // _ \ '__| '_ \ / _ \ |
-| |__| |_| | | | |>  <  | . \  __/ |  | | | |  __/ |
-|_____\__, |_| |_/_/\_\ |_|\_\___|_|  |_| |_|\___|_|
-      |___/                                         
-
+YakOS
 ==========
 
-The Lynx is an embedded operating system macro kernel.
-Just now, it just support for the ARM architectur.
+YakOS is an embedded operating system macro kernel.
+
+Features:
+1. support for the ARM CPU.
+2. Support preemptive task scheduling algorithm.
+3. Memory management based on buddy memory allocation algorithm.
+4. Can extend with module.

@@ -12,6 +12,7 @@ CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
+STRIP := $(TOOLCHAIN_PREFIX)strip
 CPPFILT := $(TOOLCHAIN_PREFIX)c++filt
 SIZE := $(TOOLCHAIN_PREFIX)size
 NM := $(TOOLCHAIN_PREFIX)nm
@@ -40,11 +41,16 @@ ALLOBJS := \
 include arch/$(ARCH)/Makefile
 include arch/$(ARCH)/boot/Makefile
 include arch/$(ARCH)/boards/$(BOARD)/Makefile
+include module/Makefile
 
 LINKER_SCRIPT_TEMPLETE := arch/$(ARCH)/boot/build.ld
 LINKER_SCRIPT := build.ld
 
 ALL_INCLUDE_FILES := $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h)
+
+%.ko: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(STRIP) --strip-unneeded -g -x $@
 
 all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM)
 

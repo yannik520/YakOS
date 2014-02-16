@@ -38,6 +38,20 @@ typedef unsigned int u32;
 typedef signed long long s64;
 typedef unsigned long long u64;
 
+typedef   signed char    int8_t;
+typedef unsigned char   uint8_t;
+typedef   signed short  int16_t;
+typedef unsigned short uint16_t;
+typedef   signed int    int32_t;
+typedef unsigned int   uint32_t;
+
+/* These names are deprecated, use C99 names. */
+typedef unsigned char   u8_t;
+typedef unsigned short u16_t;
+typedef unsigned long  u32_t;
+typedef          long  s32_t;
+
+
 #ifndef _SIZE_T_DEFINED_
 typedef unsigned long size_t;
 #endif

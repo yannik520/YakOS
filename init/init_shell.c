@@ -27,6 +27,8 @@
 #include <kernel/task.h>
 #include <arch/text.h>
 #include <init.h>
+#include <module/module_loader.h>
+#include <module/module.h>
 
 char console_buffer[CONSOLE_BUFFER_SIZE];
 static char erase_seq[] = "\b \b";    /* erase sequence	*/
@@ -137,6 +139,10 @@ int readline(const char *const prompt)
 	}
 }
 
+extern struct elfloader_output *codeprop_output;
+void (*pFun)();
+extern unsigned int stack_top;
+
 int run_command(const char *cmd)
 {
 	char cmdbuf[CONSOLE_BUFFER_SIZE];
@@ -151,6 +157,17 @@ int run_command(const char *cmd)
 	if (0 == strcmp("kmsg", str)) {
 		kmsg_dump();
 	}
+	else if (0 == strcmp("exec", str)) {
+		load_module(0xc0100000, codeprop_output);
+		/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
+		/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
+		pFun = ((struct module *)this_module)->syms[0].value;
+		/* printk("code: %x %x %x\n", */
+		/*        *((unsigned int *)elfloader_autostart_processes), */
+		/*        *((unsigned int *)(elfloader_autostart_processes) + 1), */
+		/*        *((unsigned int *)(elfloader_autostart_processes) + 2)); */
+		(*pFun)();
+	}
 	else {
 		printk("unknown command\n");
 	}
@@ -163,7 +180,7 @@ int init_shell(void *arg)
 	static char lastcommand[CONSOLE_BUFFER_SIZE] = { 0, };
 
 	for (;;) {
-		len = readline("#");
+		len = readline("# ");
 		
 		if (len > 0) {
 			strcpy(lastcommand, console_buffer);

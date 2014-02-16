@@ -20,20 +20,15 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __MODULE_LOADER_ARCH_H_
+#define __MODULE_LOADER_ARCH_H_
 
-#ifndef _STRING_H_
-#define _STRING_H_
-#include <arch/types.h>
+#include "module_loader.h"
 
-char *strcpy(char *dest, const char *src);
-char *strncpy(char *dest, const char *src, size_t count);
-char *strcat(char *dest, const char *src);
-int strcmp(const char *cs, const char *ct);
-int strncmp(const char *cs, const char *ct, size_t count);
-size_t strlen(const char *s);
-void *memset(void *s, int c, size_t count);
-void *memcpy(void *dest, const void *src, size_t count);
-void *memmove(void *dest, const void *src, size_t count);
-int   memcmp (void const *, const void *, size_t);
+int module_loader_arch_relocate(unsigned int input_addr,
+			    struct module_output *output,
+			    unsigned int sectionoffset,
+			    char *sectionaddr,
+			    struct elf32_rela *rela, char *addr);
 
-#endif
+#endif /* ELFLOADER_ARCH_H_ */
