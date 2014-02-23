@@ -23,7 +23,8 @@
 #ifndef __MODULE_LOADER_H__
 #define __MODULE_LOADER_H__
 
-#include "elf.h"
+#include <module/elf.h>
+#include <module/module.h>
 
 #define MODULE_OK                  0
 #define MODULE_BAD_ELF_HEADER      1
@@ -76,11 +77,13 @@ struct module_output_ops {
 };
 
 
-void module_init(void);
-int load_module(unsigned int input_addr,
+struct k_module * alloc_kmodule(void);
+int load_kmodule(unsigned int input_addr,
 		struct module_output *output);
 
-extern void *this_module;
+extern struct k_module k_module_root;
+extern struct k_module *this_module;
+
 extern char module_unknown[30];
 
 #endif /* __MODULE_LOADER_H__ */

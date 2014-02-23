@@ -24,13 +24,20 @@
 #include <kernel/printk.h>
 #include <module/module.h>
 
-void hello (void)
+int init_module (void)
 {
-  printk("module hello runned\n");
+	printk("module hello runned!\n");
+  
+	return 0;
 }
 
-struct module mod = {
-  .name = {'h','e','l','l','o','\0',},
-  .num_syms = 1,
-  .syms = {{"hello", &hello}}
+void exit_module(void)
+{
+	printk("module hello exited!\n");
+}
+
+struct module_entry mod_entry = {
+	.name = {'h','e','l','l','o','\0',},
+	.num_syms = 1,
+	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
 };

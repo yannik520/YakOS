@@ -1,6 +1,6 @@
 ARCH ?= arm
 BOARD ?= demo
-TARGET ?= lynx_kimage
+TARGET ?= yakOS
 TARGET_BIN ?= $(TARGET).bin
 TARGET_ELF ?= $(TARGET).elf
 TARGET_SYM ?= $(TARGETE).sym

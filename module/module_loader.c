@@ -20,6 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <kernel/malloc.h>
 #include <module/module_loader.h>
 #include <module/module_loader_arch.h>
 #include <module/symtab.h>
@@ -27,9 +28,13 @@
 #include <string.h>
 
 char module_unknown[30];
-void *this_module;
+//void *this_module;
 
-static struct relevant_section bss, data, rodata, text;
+
+struct k_module k_module_root = {0};
+struct k_module *this_module = &k_module_root;
+
+//static struct relevant_section bss, data, rodata, text;
 
 const static unsigned char elf_magic_header[] =
 {
@@ -88,12 +93,12 @@ static void * find_local_symbol(unsigned int input_addr, const char *symbol,
 			if (ret < 0) return NULL;
       
 			if(strcmp(name, symbol) == 0) {
-				if(s.st_shndx == bss.number) {
-					sect = &bss;
-				} else if(s.st_shndx == data.number) {
-					sect = &data;
-				} else if(s.st_shndx == text.number) {
-					sect = &text;
+				if(s.st_shndx == this_module->seg_info.bss.number) {
+					sect = &this_module->seg_info.bss;
+				} else if(s.st_shndx == this_module->seg_info.data.number) {
+					sect = &this_module->seg_info.data;
+				} else if(s.st_shndx == this_module->seg_info.text.number) {
+					sect = &this_module->seg_info.text;
 				} else {
 					return NULL;
 				}
@@ -151,14 +156,14 @@ static int relocate_section(unsigned int input_addr,
 				//printk("found address %p\n", addr);
 			}
 			if(addr == NULL) {
-				if(s.st_shndx == bss.number) {
-					sect = &bss;
-				} else if(s.st_shndx == data.number) {
-					sect = &data;
-				} else if(s.st_shndx == rodata.number) {
-					sect = &rodata;
-				} else if(s.st_shndx == text.number) {
-					sect = &text;
+				if(s.st_shndx == this_module->seg_info.bss.number) {
+					sect = &this_module->seg_info.bss;
+				} else if(s.st_shndx == this_module->seg_info.data.number) {
+					sect = &this_module->seg_info.data;
+				} else if(s.st_shndx == this_module->seg_info.rodata.number) {
+					sect = &this_module->seg_info.rodata;
+				} else if(s.st_shndx == this_module->seg_info.text.number) {
+					sect = &this_module->seg_info.text;
 				} else {
 					printk("unknown name: '%30s'\n", name);
 					memcpy(module_unknown, name, sizeof(module_unknown));
@@ -168,14 +173,14 @@ static int relocate_section(unsigned int input_addr,
 				addr = sect->address;
 			}
 		} else {
-			if(s.st_shndx == bss.number) {
-				sect = &bss;
-			} else if(s.st_shndx == data.number) {
-				sect = &data;
-			} else if(s.st_shndx == rodata.number) {
-				sect = &rodata;
-			} else if(s.st_shndx == text.number) {
-				sect = &text;
+			if(s.st_shndx == this_module->seg_info.bss.number) {
+				sect = &this_module->seg_info.bss;
+			} else if(s.st_shndx == this_module->seg_info.data.number) {
+				sect = &this_module->seg_info.data;
+			} else if(s.st_shndx == this_module->seg_info.rodata.number) {
+				sect = &this_module->seg_info.rodata;
+			} else if(s.st_shndx == this_module->seg_info.text.number) {
+				sect = &this_module->seg_info.text;
 			} else {
 				return MODULE_SEGMENT_NOT_FOUND;
 			}
@@ -218,18 +223,11 @@ find_module_entry(unsigned int input_addr,
 		if(s.st_name != 0) {
 			seek_read(input_addr, strtab + s.st_name, name, sizeof(name));
 			if(strcmp(name, "mod") == 0) {
-				return &data.address[s.st_value];
+				return &this_module->seg_info.data.address[s.st_value];
 			}
 		}
 	}
 	return NULL;
-/*   return find_local_symbol(fd, "autostart_processes", symtab, size, strtab); */
-}
-/*---------------------------------------------------------------------------*/
-void
-module_init(void)
-{
-	this_module = NULL;
 }
 
 static int
@@ -272,6 +270,18 @@ copy_segment(unsigned int input_addr,
 	return module_output_end_segment(output);
 }
 
+struct k_module * alloc_kmodule(void)
+{
+	struct k_module *mod = NULL;
+	
+	mod = (struct k_module *)kmalloc(sizeof(struct k_module));
+	if (NULL == mod) {
+		printk("Alloc kmodule failed!\n");
+	}
+	
+	return mod;
+}
+
 int load_module(unsigned int input_addr, struct module_output *output)
 {
 	struct elf32_ehdr ehdr;
@@ -293,7 +303,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	unsigned short strtaboff = 0, strtabsize;
 	unsigned short bsssize = 0;
 
-	void *process;
+	void *module;
 	int ret;
 
 	module_unknown[0] = 0;
@@ -303,7 +313,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	if (ret != sizeof(ehdr)) return MODULE_INPUT_ERROR;
 
 	/* Make sure that we have a correct and compatible ELF header. */
-	if(memcmp(ehdr.e_ident, elf_magic_header, sizeof(elf_magic_header)) != 0) {
+	if (memcmp(ehdr.e_ident, elf_magic_header, sizeof(elf_magic_header)) != 0) {
 		printk("ELF header problems\n");
 		return MODULE_BAD_ELF_HEADER;
 	}
@@ -333,10 +343,13 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	textsize = textrelasize = datasize = datarelasize =
 		rodatasize = rodatarelasize = symtabsize = strtabsize = 0;
 
-	bss.number = data.number = rodata.number = text.number = -1;
-		
+	this_module->seg_info.text.number   = -1;
+	this_module->seg_info.rodata.number = -1;
+	this_module->seg_info.data.number   = -1;
+	this_module->seg_info.bss.number    = -1;
+
 	shdrptr = ehdr.e_shoff;
-	for(i = 0; i < shdrnum; ++i) {
+	for (i = 0; i < shdrnum; ++i) {
 
 		ret = seek_read(input_addr, shdrptr, (char *)&shdr, sizeof(shdr));
 		if (ret != sizeof(shdr)) {
@@ -358,8 +371,8 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		if(strncmp(name, ".text", 5) == 0) {
 			textoff = shdr.sh_offset;
 			textsize = shdr.sh_size;
-			text.number = i;
-			text.offset = textoff;
+			this_module->seg_info.text.number = i;
+			this_module->seg_info.text.offset = textoff;
 		} else if(strncmp(name, ".rel.text", 9) == 0) {
 			using_relas = 0;
 			textrelaoff = shdr.sh_offset;
@@ -371,14 +384,14 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		} else if(strncmp(name, ".data", 5) == 0) {
 			dataoff = shdr.sh_offset;
 			datasize = shdr.sh_size;
-			data.number = i;
-			data.offset = dataoff;
+			this_module->seg_info.data.number = i;
+			this_module->seg_info.data.offset = dataoff;
 		} else if(strncmp(name, ".rodata", 7) == 0) {
 			/* read-only data handled the same way as regular text section */
 			rodataoff = shdr.sh_offset;
 			rodatasize = shdr.sh_size;
-			rodata.number = i;
-			rodata.offset = rodataoff;
+			this_module->seg_info.rodata.number = i;
+			this_module->seg_info.rodata.offset = rodataoff;
 		} else if(strncmp(name, ".rel.rodata", 11) == 0) {
 			/* using elf32_rel instead of rela */
 			using_relas = 0;
@@ -405,8 +418,8 @@ int load_module(unsigned int input_addr, struct module_output *output)
 			strtabsize = shdr.sh_size;
 		} else if(strncmp(name, ".bss", 4) == 0) {
 			bsssize = shdr.sh_size;
-			bss.number = i;
-			bss.offset = 0;
+			this_module->seg_info.bss.number = i;
+			this_module->seg_info.bss.offset = 0;
 		}
 
 		/* Move on to the next section header. */
@@ -424,39 +437,39 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	}
 
 	if (bsssize) {
-		bss.address = (char *)
+		this_module->seg_info.bss.address = (char *)
 			module_output_alloc_segment(output, MODULE_SEG_BSS, bsssize);
-		if (!bss.address) {
+		if (!this_module->seg_info.bss.address) {
 			return MODULE_OUTPUT_ERROR;
 		}
 	}
 	if (datasize) {
-		data.address = (char *)
+		this_module->seg_info.data.address = (char *)
 			module_output_alloc_segment(output, MODULE_SEG_DATA, datasize);
-		if (!data.address) {
+		if (!this_module->seg_info.data.address) {
 			return MODULE_OUTPUT_ERROR;
 		}
 	}
 	if (textsize) {
-		text.address = (char *)
+		this_module->seg_info.text.address = (char *)
 			module_output_alloc_segment(output, MODULE_SEG_TEXT, textsize);
-		if (!text.address) {
+		if (!this_module->seg_info.text.address) {
 			return MODULE_OUTPUT_ERROR;
 		}
 	}
 	if (rodatasize) {
-		rodata.address =  (char *)
+		this_module->seg_info.rodata.address =  (char *)
 			module_output_alloc_segment(output, MODULE_SEG_RODATA, rodatasize);
-		if (!rodata.address) {
+		if (!this_module->seg_info.rodata.address) {
 			return MODULE_OUTPUT_ERROR;
 		}
 	}
 
 	/*
-	  printk("bss base address: bss.address = 0x%08x\n", bss.address);
-	  printk("data base address: data.address = 0x%08x\n", data.address);
-	  printk("text base address: text.address = 0x%08x\n", text.address);
-	  printk("rodata base address: rodata.address = 0x%08x\n", rodata.address);
+	  printk("bss base address: bss.address = 0x%08x\n", this_module->seg_info.bss.address);
+	  printk("data base address: data.address = 0x%08x\n", this_module->seg_info.data.address);
+	  printk("text base address: text.address = 0x%08x\n", this_module->seg_info.text.address);
+	  printk("rodata base address: rodata.address = 0x%08x\n", this_module->seg_info.rodata.address);
 	*/
 
 	/* If we have text segment relocations, we process them. */
@@ -465,7 +478,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		ret = copy_segment(input_addr, output,
 				   textrelaoff, textrelasize,
 				   textoff,
-				   text.address,
+				   this_module->seg_info.text.address,
 				   strs,
 				   strtaboff,
 				   symtaboff, symtabsize, using_relas,
@@ -475,7 +488,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		}
 	}
 	else {
-		memcpy(text.address, input_addr+textoff, textsize);
+		memcpy(this_module->seg_info.text.address, input_addr+textoff, textsize);
 	}
 
 	/* If we have any rodata segment relocations, we process them too. */
@@ -484,7 +497,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		ret = copy_segment(input_addr, output,
 				   rodatarelaoff, rodatarelasize,
 				   rodataoff,
-				   rodata.address,
+				   this_module->seg_info.rodata.address,
 				   strs,
 				   strtaboff,
 				   symtaboff, symtabsize, using_relas,
@@ -495,7 +508,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		}
 	}
 	else {
-		memcpy(rodata.address, input_addr+rodataoff, rodatasize);
+		memcpy(this_module->seg_info.rodata.address, input_addr+rodataoff, rodatasize);
 	}
 
 	/* If we have any data segment relocations, we process them too. */
@@ -504,7 +517,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		ret = copy_segment(input_addr, output,
 				   datarelaoff, datarelasize,
 				   dataoff,
-				   data.address,
+				   this_module->seg_info.data.address,
 				   strs,
 				   strtaboff,
 				   symtaboff, symtabsize, using_relas,
@@ -522,7 +535,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		unsigned int len = bsssize;
 		static const char zeros[16] = {0};
 		ret = module_output_start_segment(output, MODULE_SEG_BSS,
-						  bss.address,bsssize);
+						  this_module->seg_info.bss.address,bsssize);
 		if (ret != MODULE_OK) {
 			return ret;
 		}
@@ -540,15 +553,15 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		}
 	}
 
-	process = find_local_symbol(input_addr, "mod", symtaboff, symtabsize, strtaboff);
-	if(process != NULL) {
+	module = find_local_symbol(input_addr, "mod_entry", symtaboff, symtabsize, strtaboff);
+	if(module != NULL) {
 		//printk("module-loader: autostart found\n");
-		this_module = process;
+		this_module->entry = module;
 		return MODULE_OK;
 	} else {
 		printk("module-loader: no autostart\n");
-		process = find_module_entry(input_addr, symtaboff, symtabsize, strtaboff);
-		if(process != NULL) {
+		module = find_module_entry(input_addr, symtaboff, symtabsize, strtaboff);
+		if(module != NULL) {
 			printk("module-loader: FOUND PRG\n");
 		}
 		return MODULE_NO_STARTPOINT;

@@ -23,15 +23,30 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include "symbols.h"
+#include <module/symbols.h>
+#include <module/elf.h>
 
 #define MODULE_NAME_LEN (64 - sizeof(unsigned long))
 
-struct module {
+struct module_entry {
   char name[MODULE_NAME_LEN];
   unsigned int num_syms;
   struct symbols syms[];
 };
 
+struct segment_info {
+	struct relevant_section text;
+	struct relevant_section rodata;
+	struct relevant_section data;
+	struct relevant_section bss;
+};
+
+struct k_module {
+	struct k_module *next;
+	struct segment_info seg_info;
+	struct module_entry *entry;
+	int (*init_module)();
+	void (*exit_module)();
+};
 
 #endif

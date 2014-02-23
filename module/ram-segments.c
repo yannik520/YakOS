@@ -121,6 +121,6 @@ static struct ram_output seg_output = {
 	NULL
 };
 
-struct module_output *codeprop_output = &seg_output.output;
+struct module_output *mod_output = &seg_output.output;
 
 #endif

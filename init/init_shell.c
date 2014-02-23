@@ -139,7 +139,7 @@ int readline(const char *const prompt)
 	}
 }
 
-extern struct elfloader_output *codeprop_output;
+extern struct elfloader_output *mod_output;
 void (*pFun)();
 extern unsigned int stack_top;
 
@@ -158,10 +158,10 @@ int run_command(const char *cmd)
 		kmsg_dump();
 	}
 	else if (0 == strcmp("exec", str)) {
-		load_module(0xc0100000, codeprop_output);
+		load_module(0xc0100000, mod_output);
 		/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
 		/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
-		pFun = ((struct module *)this_module)->syms[0].value;
+		pFun = this_module->entry->syms[0].value;
 		/* printk("code: %x %x %x\n", */
 		/*        *((unsigned int *)elfloader_autostart_processes), */
 		/*        *((unsigned int *)(elfloader_autostart_processes) + 1), */
