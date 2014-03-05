@@ -21,20 +21,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <kernel/malloc.h>
+#include <kernel/list.h>
 #include <module/module_loader.h>
 #include <module/module_loader_arch.h>
 #include <module/symtab.h>
 #include <stddef.h>
 #include <string.h>
 
+extern struct module_output *mod_output;
+
 char module_unknown[30];
-//void *this_module;
+LIST_HEAD(k_module_root);
 
-
-struct k_module k_module_root = {0};
-struct k_module *this_module = &k_module_root;
-
-//static struct relevant_section bss, data, rodata, text;
+struct k_module *this_module = NULL;
 
 const static unsigned char elf_magic_header[] =
 {
@@ -111,12 +110,11 @@ static void * find_local_symbol(unsigned int input_addr, const char *symbol,
 
 static int relocate_section(unsigned int input_addr,
 			    struct module_output *output,
-			    unsigned int section, unsigned short size,
-			    unsigned int sectionaddr,
+			    struct sec_info *sec,
+			    struct sec_info *symtab,
+			    struct sec_info *strtab,
 			    char *sectionbase,
 			    unsigned int strs,
-			    unsigned int strtab,
-			    unsigned int symtab, unsigned short symtabsize,
 			    unsigned char using_relas)
 {
 	struct elf32_rela	 rela;
@@ -135,24 +133,24 @@ static int relocate_section(unsigned int input_addr,
 		rel_size = sizeof(struct elf32_rel);
 	}
 
-	for(a = section; a < section + size; a += rel_size) {
+	for(a = sec->s_reloff; a < sec->s_reloff + sec->s_relsize; a += rel_size) {
 		ret = seek_read(input_addr, a, (char *)&rela, rel_size);
 		if (ret < 0) return MODULE_INPUT_ERROR;
 
 		ret = seek_read(input_addr,
-				(symtab +
+				(symtab->s_offset +
 				 sizeof(struct elf32_sym) * ELF32_R_SYM(rela.r_info)),
 				(char *)&s, sizeof(s));
 		if (ret < 0) return MODULE_INPUT_ERROR;
 
 		if(s.st_name != 0) {
-			ret = seek_read(input_addr, strtab + s.st_name, name, sizeof(name));
+			ret = seek_read(input_addr, strtab->s_offset + s.st_name, name, sizeof(name));
 			if (ret < 0) return MODULE_INPUT_ERROR;
 			//printk("name: %s\n", name);
 			addr = (char *)symtab_lookup(name);
 			if(addr == NULL) {
 				//printk("name not found in global: %s\n", name);
-				addr = find_local_symbol(input_addr, name, symtab, symtabsize, strtab);
+				addr = find_local_symbol(input_addr, name, symtab->s_offset, symtab->s_size, strtab->s_offset);
 				//printk("found address %p\n", addr);
 			}
 			if(addr == NULL) {
@@ -196,18 +194,18 @@ static int relocate_section(unsigned int input_addr,
 	
 			}
 			if (rela.r_offset > offset) {
-				ret = copy_segment_data(input_addr, offset+sectionaddr, output,
+				ret = copy_segment_data(input_addr, offset+sec->s_offset, output,
 							rela.r_offset - offset);
 				if (ret != MODULE_OK) return ret;
 			}
 		}
-		ret = module_loader_arch_relocate(input_addr, output, sectionaddr, sectionbase,
+		ret = module_loader_arch_relocate(input_addr, output, sec->s_offset, sectionbase,
 						  &rela, addr);
 		if (ret != MODULE_OK) return ret;
 	}
 	return MODULE_OK;
 }
-/*---------------------------------------------------------------------------*/
+
 static void *
 find_module_entry(unsigned int input_addr,
 		  unsigned int symtab, unsigned short size,
@@ -233,36 +231,33 @@ find_module_entry(unsigned int input_addr,
 static int
 copy_segment(unsigned int input_addr,
 	     struct module_output *output,
-	     unsigned int section, unsigned short size,
-	     unsigned int sectionaddr,
+	     struct sec_info *sec,
 	     char *sectionbase,
 	     unsigned int strs,
-	     unsigned int strtab,
-	     unsigned int symtab, unsigned short symtabsize,
 	     unsigned char using_relas,
-	     unsigned int seg_size, unsigned int seg_type)
+	     unsigned int seg_type)
 {
 	unsigned int	offset;
 	int		ret;
 
-	ret = module_output_start_segment(output, seg_type,sectionbase, seg_size);
+	ret = module_output_start_segment(output, seg_type, sectionbase, sec[seg_type-1].s_size);
 	if (ret != MODULE_OK) {
 		return ret;
 	}
 
 	ret = relocate_section(input_addr, output,
-			       section, size,
-			       sectionaddr,
+			       &sec[seg_type-1],
+			       &sec[SEC_TYPE_SYMTAB],
+			       &sec[SEC_TYPE_STRTAB],
 			       sectionbase,
 			       strs,
-			       strtab,
-			       symtab, symtabsize, using_relas);
+			       using_relas);
 	if (ret != MODULE_OK) {
 		return ret;
 	}
 
 	offset = module_output_segment_offset(output);
-	ret = copy_segment_data(input_addr, offset+sectionaddr, output,seg_size - offset);
+	ret = copy_segment_data(input_addr, offset+sec[seg_type-1].s_offset, output, sec[seg_type-1].s_size - offset);
 	if (ret != MODULE_OK) {
 		return ret;
 	}
@@ -270,19 +265,34 @@ copy_segment(unsigned int input_addr,
 	return module_output_end_segment(output);
 }
 
-struct k_module * alloc_kmodule(void)
+struct k_module *alloc_kmodule(void)
 {
-	struct k_module *mod = NULL;
+	struct k_module *mod	  = NULL;
 	
 	mod = (struct k_module *)kmalloc(sizeof(struct k_module));
 	if (NULL == mod) {
 		printk("Alloc kmodule failed!\n");
+		return NULL;
 	}
+
+	memset(mod, 0, sizeof(struct k_module));
 	
+	list_add_tail(&mod->list, &k_module_root);
+
 	return mod;
 }
 
-int load_module(unsigned int input_addr, struct module_output *output)
+#define alloc_segment(size, seg_name, seg_type) do {			\
+		if (size) {						\
+			this_module->seg_info.seg_name.address = (char *)module_output_alloc_segment(output, seg_type, size); \
+			if (!this_module->seg_info.seg_name.address) {	\
+				return MODULE_OUTPUT_ERROR;		\
+			}						\
+		}							\
+	} while(0);
+
+
+static inline int _load_module(unsigned int input_addr, struct module_output *output)
 {
 	struct elf32_ehdr ehdr;
 	struct elf32_shdr shdr;
@@ -296,11 +306,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	unsigned short shdrnum, shdrsize;
 
 	unsigned char using_relas = -1;
-	unsigned short textoff = 0, textsize, textrelaoff = 0, textrelasize;
-	unsigned short dataoff = 0, datasize, datarelaoff = 0, datarelasize;
-	unsigned short rodataoff = 0, rodatasize, rodatarelaoff = 0, rodatarelasize;
-	unsigned short symtaboff = 0, symtabsize;
-	unsigned short strtaboff = 0, strtabsize;
+	struct sec_info sec_info[SEC_TYPE_MAX] = {0};
 	unsigned short bsssize = 0;
 
 	void *module;
@@ -320,7 +326,7 @@ int load_module(unsigned int input_addr, struct module_output *output)
 
 	/* Grab the section header. */
 	shdrptr = ehdr.e_shoff;
-	ret = seek_read(input_addr, shdrptr, (char *)&shdr, sizeof(shdr));
+	ret	= seek_read(input_addr, shdrptr, (char *)&shdr, sizeof(shdr));
 	if (ret != sizeof(shdr)) {
 		return MODULE_INPUT_ERROR;
 	}
@@ -338,19 +344,14 @@ int load_module(unsigned int input_addr, struct module_output *output)
 
 	strs = strtable.sh_offset;
 
-	/* Initialize the segment sizes to zero so that we can check if
-	   their sections was found in the file or not. */
-	textsize = textrelasize = datasize = datarelasize =
-		rodatasize = rodatarelasize = symtabsize = strtabsize = 0;
-
 	this_module->seg_info.text.number   = -1;
 	this_module->seg_info.rodata.number = -1;
 	this_module->seg_info.data.number   = -1;
 	this_module->seg_info.bss.number    = -1;
 
 	shdrptr = ehdr.e_shoff;
-	for (i = 0; i < shdrnum; ++i) {
 
+	for (i = 0; i < shdrnum; ++i) {
 		ret = seek_read(input_addr, shdrptr, (char *)&shdr, sizeof(shdr));
 		if (ret != sizeof(shdr)) {
 			return MODULE_INPUT_ERROR;
@@ -369,55 +370,55 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		/* added support for .rodata, .rel.text and .rel.data). */
 
 		if(strncmp(name, ".text", 5) == 0) {
-			textoff = shdr.sh_offset;
-			textsize = shdr.sh_size;
+			sec_info[SEC_TYPE_TEXT].s_offset  = shdr.sh_offset;
+			sec_info[SEC_TYPE_TEXT].s_size	  = shdr.sh_size;
 			this_module->seg_info.text.number = i;
-			this_module->seg_info.text.offset = textoff;
+			this_module->seg_info.text.offset = shdr.sh_offset;
 		} else if(strncmp(name, ".rel.text", 9) == 0) {
-			using_relas = 0;
-			textrelaoff = shdr.sh_offset;
-			textrelasize = shdr.sh_size;
+			using_relas			  = 0;
+			sec_info[SEC_TYPE_TEXT].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_TEXT].s_relsize = shdr.sh_size;
 		} else if(strncmp(name, ".rela.text", 10) == 0) {
-			using_relas = 1;
-			textrelaoff = shdr.sh_offset;
-			textrelasize = shdr.sh_size;
-		} else if(strncmp(name, ".data", 5) == 0) {
-			dataoff = shdr.sh_offset;
-			datasize = shdr.sh_size;
-			this_module->seg_info.data.number = i;
-			this_module->seg_info.data.offset = dataoff;
+			using_relas			  = 1;
+			sec_info[SEC_TYPE_TEXT].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_TEXT].s_relsize = shdr.sh_size;
 		} else if(strncmp(name, ".rodata", 7) == 0) {
 			/* read-only data handled the same way as regular text section */
-			rodataoff = shdr.sh_offset;
-			rodatasize = shdr.sh_size;
+			sec_info[SEC_TYPE_RODATA].s_offset  = shdr.sh_offset;
+			sec_info[SEC_TYPE_RODATA].s_size    = shdr.sh_size;
 			this_module->seg_info.rodata.number = i;
-			this_module->seg_info.rodata.offset = rodataoff;
+			this_module->seg_info.rodata.offset = shdr.sh_offset;
 		} else if(strncmp(name, ".rel.rodata", 11) == 0) {
 			/* using elf32_rel instead of rela */
-			using_relas = 0;
-			rodatarelaoff = shdr.sh_offset;
-			rodatarelasize = shdr.sh_size;
+			using_relas			    = 0;
+			sec_info[SEC_TYPE_RODATA].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_RODATA].s_relsize = shdr.sh_size;
 		} else if(strncmp(name, ".rela.rodata", 12) == 0) {
-			using_relas = 1;
-			rodatarelaoff = shdr.sh_offset;
-			rodatarelasize = shdr.sh_size;
+			using_relas			    = 1;
+			sec_info[SEC_TYPE_RODATA].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_RODATA].s_relsize = shdr.sh_size;
+		} else if(strncmp(name, ".data", 5) == 0) {
+			sec_info[SEC_TYPE_DATA].s_offset  = shdr.sh_offset;
+			sec_info[SEC_TYPE_DATA].s_size	  = shdr.sh_size;
+			this_module->seg_info.data.number = i;
+			this_module->seg_info.data.offset = shdr.sh_offset;
 		} else if(strncmp(name, ".rel.data", 9) == 0) {
 			/* using elf32_rel instead of rela */
-			using_relas = 0;
-			datarelaoff = shdr.sh_offset;
-			datarelasize = shdr.sh_size;
+			using_relas			  = 0;
+			sec_info[SEC_TYPE_DATA].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_DATA].s_relsize = shdr.sh_size;
 		} else if(strncmp(name, ".rela.data", 10) == 0) {
-			using_relas = 1;
-			datarelaoff = shdr.sh_offset;
-			datarelasize = shdr.sh_size;
+			using_relas			  = 1;
+			sec_info[SEC_TYPE_DATA].s_reloff  = shdr.sh_offset;
+			sec_info[SEC_TYPE_DATA].s_relsize = shdr.sh_size;
 		} else if(strncmp(name, ".symtab", 7) == 0) {
-			symtaboff = shdr.sh_offset;
-			symtabsize = shdr.sh_size;
+			sec_info[SEC_TYPE_SYMTAB].s_offset = shdr.sh_offset;
+			sec_info[SEC_TYPE_SYMTAB].s_size   = shdr.sh_size;
 		} else if(strncmp(name, ".strtab", 7) == 0) {
-			strtaboff = shdr.sh_offset;
-			strtabsize = shdr.sh_size;
+			sec_info[SEC_TYPE_STRTAB].s_offset = shdr.sh_offset;
+			sec_info[SEC_TYPE_STRTAB].s_size   = shdr.sh_size;
 		} else if(strncmp(name, ".bss", 4) == 0) {
-			bsssize = shdr.sh_size;
+			bsssize				 = shdr.sh_size;
 			this_module->seg_info.bss.number = i;
 			this_module->seg_info.bss.offset = 0;
 		}
@@ -426,45 +427,20 @@ int load_module(unsigned int input_addr, struct module_output *output)
 		shdrptr += shdrsize;
 	}
 
-	if(symtabsize == 0) {
+	if(sec_info[SEC_TYPE_SYMTAB].s_size == 0) {
 		return MODULE_NO_SYMTAB;
 	}
-	if(strtabsize == 0) {
+	if(sec_info[SEC_TYPE_STRTAB].s_size == 0) {
 		return MODULE_NO_STRTAB;
 	}
-	if(textsize == 0) {
+	if(sec_info[SEC_TYPE_TEXT].s_size == 0) {
 		return MODULE_NO_TEXT;
 	}
 
-	if (bsssize) {
-		this_module->seg_info.bss.address = (char *)
-			module_output_alloc_segment(output, MODULE_SEG_BSS, bsssize);
-		if (!this_module->seg_info.bss.address) {
-			return MODULE_OUTPUT_ERROR;
-		}
-	}
-	if (datasize) {
-		this_module->seg_info.data.address = (char *)
-			module_output_alloc_segment(output, MODULE_SEG_DATA, datasize);
-		if (!this_module->seg_info.data.address) {
-			return MODULE_OUTPUT_ERROR;
-		}
-	}
-	if (textsize) {
-		this_module->seg_info.text.address = (char *)
-			module_output_alloc_segment(output, MODULE_SEG_TEXT, textsize);
-		if (!this_module->seg_info.text.address) {
-			return MODULE_OUTPUT_ERROR;
-		}
-	}
-	if (rodatasize) {
-		this_module->seg_info.rodata.address =  (char *)
-			module_output_alloc_segment(output, MODULE_SEG_RODATA, rodatasize);
-		if (!this_module->seg_info.rodata.address) {
-			return MODULE_OUTPUT_ERROR;
-		}
-	}
-
+	alloc_segment(bsssize, bss, MODULE_SEG_BSS);
+	alloc_segment(sec_info[SEC_TYPE_TEXT].s_size, text, MODULE_SEG_TEXT);
+	alloc_segment(sec_info[SEC_TYPE_RODATA].s_size, rodata, MODULE_SEG_RODATA);
+	alloc_segment(sec_info[SEC_TYPE_DATA].s_size, data, MODULE_SEG_DATA);
 	/*
 	  printk("bss base address: bss.address = 0x%08x\n", this_module->seg_info.bss.address);
 	  printk("data base address: data.address = 0x%08x\n", this_module->seg_info.data.address);
@@ -472,71 +448,37 @@ int load_module(unsigned int input_addr, struct module_output *output)
 	  printk("rodata base address: rodata.address = 0x%08x\n", this_module->seg_info.rodata.address);
 	*/
 
-	/* If we have text segment relocations, we process them. */
+	/* Process text segment relocations */
 	//printk("elfloader: relocate text\n");
-	if(textrelasize > 0) {
-		ret = copy_segment(input_addr, output,
-				   textrelaoff, textrelasize,
-				   textoff,
-				   this_module->seg_info.text.address,
-				   strs,
-				   strtaboff,
-				   symtaboff, symtabsize, using_relas,
-				   textsize, MODULE_SEG_TEXT);
-		if(ret != MODULE_OK) {
-			return ret;
+	for (i = SEC_TYPE_TEXT; i < SEC_TYPE_SYMTAB; i++) {
+		if(sec_info[i].s_relsize > 0) {
+			ret = copy_segment(input_addr, output,
+					   sec_info,
+					   ((struct relevant_section *)&(this_module->seg_info)+i)->address,
+					   strs,
+					   using_relas,
+					   MODULE_SEG_TEXT + i);
+			if(MODULE_OK != ret) {
+				return ret;
+			}
+		}
+		else {
+			memcpy(((struct relevant_section *)&(this_module->seg_info)+i)->address,
+			       input_addr+sec_info[i].s_offset,
+			       sec_info[i].s_size);
 		}
 	}
-	else {
-		memcpy(this_module->seg_info.text.address, input_addr+textoff, textsize);
-	}
 
-	/* If we have any rodata segment relocations, we process them too. */
-	//printk("elfloader: relocate rodata\n");
-	if(rodatarelasize > 0) {
-		ret = copy_segment(input_addr, output,
-				   rodatarelaoff, rodatarelasize,
-				   rodataoff,
-				   this_module->seg_info.rodata.address,
-				   strs,
-				   strtaboff,
-				   symtaboff, symtabsize, using_relas,
-				   rodatasize, MODULE_SEG_RODATA);
-		if(ret != MODULE_OK) {
-			printk("elfloader: data failed\n");
-			return ret;
-		}
-	}
-	else {
-		memcpy(this_module->seg_info.rodata.address, input_addr+rodataoff, rodatasize);
-	}
-
-	/* If we have any data segment relocations, we process them too. */
-	//printk("module-loader: relocate data\n");
-	if(datarelasize > 0) {
-		ret = copy_segment(input_addr, output,
-				   datarelaoff, datarelasize,
-				   dataoff,
-				   this_module->seg_info.data.address,
-				   strs,
-				   strtaboff,
-				   symtaboff, symtabsize, using_relas,
-				   datasize, MODULE_SEG_DATA);
-		if(ret != MODULE_OK) {
-			printk("module-loader: data failed\n");
-			return ret;
-		}
-		ret = module_output_end_segment(output);
-		if (ret != MODULE_OK) return ret;
-	}
-
+	/* process bss segment */
 	{
-		/* Write zeros to bss segment */
-		unsigned int len = bsssize;
+		/* set all data in the bss segment to zero */
+		unsigned int	len	    = bsssize;
 		static const char zeros[16] = {0};
+
 		ret = module_output_start_segment(output, MODULE_SEG_BSS,
-						  this_module->seg_info.bss.address,bsssize);
-		if (ret != MODULE_OK) {
+						  this_module->seg_info.bss.address,
+						  bsssize);
+		if (MODULE_OK != ret) {
 			return ret;
 		}
 
@@ -547,23 +489,45 @@ int load_module(unsigned int input_addr, struct module_output *output)
 			}
 			len -= sizeof(zeros);
 		}
+
 		ret = module_output_write_segment(output, zeros, len);
 		if (ret != len) {
 			return MODULE_OUTPUT_ERROR;
 		}
 	}
 
-	module = find_local_symbol(input_addr, "mod_entry", symtaboff, symtabsize, strtaboff);
-	if(module != NULL) {
+	module = find_local_symbol(input_addr, "mod_entry",
+				   sec_info[SEC_TYPE_SYMTAB].s_offset,
+				   sec_info[SEC_TYPE_SYMTAB].s_size,
+				   sec_info[SEC_TYPE_STRTAB].s_offset);
+	if(NULL != module) {
 		//printk("module-loader: autostart found\n");
 		this_module->entry = module;
 		return MODULE_OK;
 	} else {
 		printk("module-loader: no autostart\n");
-		module = find_module_entry(input_addr, symtaboff, symtabsize, strtaboff);
-		if(module != NULL) {
+		module = find_module_entry(input_addr,
+					   sec_info[SEC_TYPE_SYMTAB].s_offset,
+					   sec_info[SEC_TYPE_SYMTAB].s_size,
+					   sec_info[SEC_TYPE_STRTAB].s_offset);
+		if(NULL != module) {
 			printk("module-loader: FOUND PRG\n");
 		}
 		return MODULE_NO_STARTPOINT;
 	}
+}
+
+int load_kmodule(unsigned int input_addr, struct k_module *mod)
+{
+	int ret;
+
+	if (NULL == mod) {
+		printk("The module pointer is invalid!\n");
+		return -1;
+	}
+	this_module = mod;
+
+	ret = _load_module(input_addr, mod_output);
+
+	return ret;
 }

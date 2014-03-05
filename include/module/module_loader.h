@@ -79,9 +79,9 @@ struct module_output_ops {
 
 struct k_module * alloc_kmodule(void);
 int load_kmodule(unsigned int input_addr,
-		struct module_output *output);
+		struct k_module *mod);
 
-extern struct k_module k_module_root;
+extern struct list_head k_module_root;
 extern struct k_module *this_module;
 
 extern char module_unknown[30];

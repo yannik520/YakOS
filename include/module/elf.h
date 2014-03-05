@@ -25,33 +25,33 @@
 
 #define EI_NIDENT 16
 
-typedef unsigned long  elf32_word;
-typedef   signed long  elf32_sword;
-typedef unsigned short elf32_half;
-typedef unsigned long  elf32_off;
-typedef unsigned long  elf32_addr;
+typedef unsigned long	elf32_word;
+typedef signed long	elf32_sword;
+typedef unsigned short	elf32_half;
+typedef unsigned long	elf32_off;
+typedef unsigned long	elf32_addr;
 
 struct elf32_rela {
-  elf32_addr      r_offset;       /* Location to be relocated. */
-  elf32_word      r_info;         /* Relocation type and symbol index. */
-  elf32_sword     r_addend;       /* Addend. */
+	elf32_addr      r_offset;       /* Location to be relocated. */
+	elf32_word      r_info;         /* Relocation type and symbol index. */
+	elf32_sword     r_addend;       /* Addend. */
 };
 
 struct elf32_ehdr {
-  unsigned char e_ident[EI_NIDENT];    /* ident bytes */
-  elf32_half e_type;                   /* file type */
-  elf32_half e_machine;                /* target machine */
-  elf32_word e_version;                /* file version */
-  elf32_addr e_entry;                  /* start address */
-  elf32_off e_phoff;                   /* phdr file offset */
-  elf32_off e_shoff;                   /* shdr file offset */
-  elf32_word e_flags;                  /* file flags */
-  elf32_half e_ehsize;                 /* sizeof ehdr */
-  elf32_half e_phentsize;              /* sizeof phdr */
-  elf32_half e_phnum;                  /* number phdrs */
-  elf32_half e_shentsize;              /* sizeof shdr */
-  elf32_half e_shnum;                  /* number shdrs */
-  elf32_half e_shstrndx;               /* shdr string index */
+	unsigned char	e_ident[EI_NIDENT];	/* ident bytes */
+	elf32_half	e_type;		/* file type */
+	elf32_half	e_machine;	/* target machine */
+	elf32_word	e_version;	/* file version */
+	elf32_addr	e_entry;	/* start address */
+	elf32_off	e_phoff;	/* phdr file offset */
+	elf32_off	e_shoff;	/* shdr file offset */
+	elf32_word	e_flags;	/* file flags */
+	elf32_half	e_ehsize;	/* sizeof ehdr */
+	elf32_half	e_phentsize;	/* sizeof phdr */
+	elf32_half	e_phnum;	/* number phdrs */
+	elf32_half	e_shentsize;	/* sizeof shdr */
+	elf32_half	e_shnum;	/* number shdrs */
+	elf32_half	e_shstrndx;	/* shdr string index */
 };
 
 /* Values for e_type. */
@@ -62,16 +62,16 @@ struct elf32_ehdr {
 #define ET_CORE         4       /* Core file. */
 
 struct elf32_shdr {
-  elf32_word sh_name; 		/* section name */
-  elf32_word sh_type; 		/* SHT_... */
-  elf32_word sh_flags; 	        /* SHF_... */
-  elf32_addr sh_addr; 		/* virtual address */
-  elf32_off sh_offset; 	        /* file offset */
-  elf32_word sh_size; 		/* section size */
-  elf32_word sh_link; 		/* misc info */
-  elf32_word sh_info; 		/* misc info */
-  elf32_word sh_addralign; 	/* memory alignment */
-  elf32_word sh_entsize; 	/* entry size if table */
+	elf32_word	sh_name;	/* section name */
+	elf32_word	sh_type;	/* SHT_... */
+	elf32_word	sh_flags;	/* SHF_... */
+	elf32_addr	sh_addr;	/* virtual address */
+	elf32_off	sh_offset;	/* file offset */
+	elf32_word	sh_size;	/* section size */
+	elf32_word	sh_link;	/* misc info */
+	elf32_word	sh_info;	/* misc info */
+	elf32_word	sh_addralign;	/* memory alignment */
+	elf32_word	sh_entsize;	/* entry size if table */
 };
 
 /* sh_type */
@@ -93,27 +93,69 @@ struct elf32_shdr {
 #define SHT_HIUSER      0xffffffff      /* specific indexes */
 
 struct elf32_rel {
-  elf32_addr      r_offset;       /* Location to be relocated. */
-  elf32_word      r_info;         /* Relocation type and symbol index. */
+	elf32_addr      r_offset;       /* Location to be relocated. */
+	elf32_word      r_info;         /* Relocation type and symbol index. */
 };
 
 struct elf32_sym {
-  elf32_word      st_name;        /* String table index of name. */
-  elf32_addr      st_value;       /* Symbol value. */
-  elf32_word      st_size;        /* Size of associated object. */
-  unsigned char   st_info;        /* Type and binding information. */
-  unsigned char   st_other;       /* Reserved (not used). */
-  elf32_half      st_shndx;       /* Section index of symbol. */
+	elf32_word      st_name;        /* String table index of name. */
+	elf32_addr      st_value;       /* Symbol value. */
+	elf32_word      st_size;        /* Size of associated object. */
+	unsigned char   st_info;        /* Type and binding information. */
+	unsigned char   st_other;       /* Reserved (not used). */
+	elf32_half      st_shndx;       /* Section index of symbol. */
 };
 
 #define ELF32_R_SYM(info)       ((info) >> 8)
 #define ELF32_R_TYPE(info)      ((unsigned char)(info))
 
 struct relevant_section {
-  unsigned char number;
-  unsigned int offset;
-  char *address;
+	unsigned char	 number;
+	unsigned int	 offset;
+	char		*address;
 };
 
+/*
+struct relocatable_sec {
+	elf32_off	s_offset;
+	elf32_word	s_size;
+	elf32_off	s_reloff;
+	elf32_word	s_relsize;
+};
+
+struct non_relocatable_sec {
+	elf32_off	s_offset;
+	elf32_word	s_size;
+};
+
+
+enum RELOCATABLE_SEC_TYPE {
+	RELOCATABLE_SEC_TEXT,
+	RELOCATABLE_SEC_RODATA,
+	RELOCATABLE_SEC_DATA,
+	RELOCATABLE_SEC_MAX
+};
+
+enum NON_RELOCATABLE_SEC_TYPE {
+	NON_RELOCATABLE_SEC_SYMTAB,
+	NON_RELOCATABLE_SEC_STRTAB,
+	NON_RELOCATABLE_SEC_MAX
+};
+*/
+struct sec_info {
+	elf32_off	s_offset;
+	elf32_word	s_size;
+	elf32_off	s_reloff;
+	elf32_word	s_relsize;
+};
+
+enum SEC_TYPE {
+	SEC_TYPE_TEXT,
+	SEC_TYPE_RODATA,
+	SEC_TYPE_DATA,
+	SEC_TYPE_SYMTAB,
+	SEC_TYPE_STRTAB,
+	SEC_TYPE_MAX
+};
 
 #endif

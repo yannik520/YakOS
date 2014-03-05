@@ -23,6 +23,7 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
+#include <kernel/list.h>
 #include <module/symbols.h>
 #include <module/elf.h>
 
@@ -37,12 +38,12 @@ struct module_entry {
 struct segment_info {
 	struct relevant_section text;
 	struct relevant_section rodata;
-	struct relevant_section data;
+  	struct relevant_section data;
 	struct relevant_section bss;
 };
 
 struct k_module {
-	struct k_module *next;
+	struct list_head list;
 	struct segment_info seg_info;
 	struct module_entry *entry;
 	int (*init_module)();

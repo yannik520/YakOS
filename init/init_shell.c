@@ -139,14 +139,14 @@ int readline(const char *const prompt)
 	}
 }
 
-extern struct elfloader_output *mod_output;
 void (*pFun)();
 extern unsigned int stack_top;
 
 int run_command(const char *cmd)
 {
-	char cmdbuf[CONSOLE_BUFFER_SIZE];
-	char *str = cmdbuf;
+	char		 cmdbuf[CONSOLE_BUFFER_SIZE];
+	char		*str = cmdbuf;
+	struct kmodule	*mod;
 
 	if (!cmd || !*cmd) {
 		return -1;
@@ -158,7 +158,13 @@ int run_command(const char *cmd)
 		kmsg_dump();
 	}
 	else if (0 == strcmp("exec", str)) {
-		load_module(0xc0100000, mod_output);
+		mod = alloc_kmodule();
+		if (NULL == mod)
+		{
+			printk("kmodule alloc failed!\n");
+			return -1;
+		}
+		load_kmodule(0xc0100000, mod);
 		/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
 		/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
 		pFun = this_module->entry->syms[0].value;
