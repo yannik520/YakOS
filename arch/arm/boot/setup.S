@@ -97,7 +97,7 @@ __bss_loop:
 	strlt		r2, [r0], #4
 	blt		__bss_loop
 	/* start c program */
-	bl	c_entry
+	bl	kmain
 	b	.
 
 

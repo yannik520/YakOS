@@ -34,19 +34,7 @@
 extern unsigned int	__heap;
 int			sum = 0;
 struct semaphore	sem;
-/*
-void show_logo(void)
-{
-	printk("\n\n");
-	printk(" _                       _  __                    _ \n");
-	printk("| |   _   _ _ __ __  __ | |/ /___ _ __ _ __   ___| |\n");
-	printk("| |  | | | | '_ \\\\ \\/ / | ' // _ \\ '__| '_ \\ / _ \\ |\n");
-	printk("| |__| |_| | | | |>  <  | . \\  __/ |  | | | |  __/ |\n");
-	printk("|_____\\__, |_| |_/_/\\_\\ |_|\\_\\___|_|  |_| |_|\\___|_|\n");
-	printk("      |___/                                         \n");
-	printk("\n\n");
-}
-*/
+
 void show_logo(void) {
   printk("▄▄▄    ▄▄▄           ▄▄          ▄▄▄▄      ▄▄▄▄   \n");
   printk(" ██▄  ▄██            ██         ██▀▀██   ▄█▀▀▀▀█  \n");
@@ -57,7 +45,7 @@ void show_logo(void) {
   printk("    ▀▀      ▀▀▀▀ ▀▀  ▀▀   ▀▀▀    ▀▀▀▀     ▀▀▀▀▀   \n");
 }
 
-void c_entry(void)
+void kmain(void)
 {
 	task_t	*task_shell;
 	int	 ret;
