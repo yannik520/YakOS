@@ -24,15 +24,38 @@
 #define __MODULE_H__
 
 #include <kernel/list.h>
-#include <module/symbols.h>
 #include <module/elf.h>
+#include <module/symtab.h>
+
+extern struct list_head	 k_module_root;
+extern struct k_module	*this_module;
+extern char		 module_unknown[30];
+
+#define MODULE_OK                  0
+#define MODULE_BAD_ELF_HEADER      1
+#define MODULE_NO_SYMTAB           2
+#define MODULE_NO_STRTAB           3
+#define MODULE_NO_TEXT             4
+#define MODULE_SYMBOL_NOT_FOUND    5
+#define MODULE_SEGMENT_NOT_FOUND   6
+#define MODULE_NO_STARTPOINT       7
+#define MODULE_UNHANDLED_RELOC     8
+#define MODULE_OUTOF_RANGE	   9
+#define MODULE_RELOC_NOT_SORTED    10
+#define MODULE_INPUT_ERROR	   11
+#define MODULE_OUTPUT_ERROR	   12
+
+#define MODULE_SEG_TEXT            1
+#define MODULE_SEG_RODATA          2
+#define MODULE_SEG_DATA            3
+#define MODULE_SEG_BSS             4
 
 #define MODULE_NAME_LEN (64 - sizeof(unsigned long))
 
 struct module_entry {
-  char name[MODULE_NAME_LEN];
-  unsigned int num_syms;
-  struct symbols syms[];
+	char		name[MODULE_NAME_LEN];
+	unsigned int	num_syms;
+	struct symbols	syms[];
 };
 
 struct segment_info {
@@ -43,11 +66,48 @@ struct segment_info {
 };
 
 struct k_module {
-	struct list_head list;
-	struct segment_info seg_info;
-	struct module_entry *entry;
+	struct list_head	 list;
+	struct segment_info	 seg_info;
+	struct module_entry	*entry;
 	int (*init_module)();
 	void (*exit_module)();
 };
 
-#endif
+
+struct module_output {
+	const struct module_output_ops *ops;
+};
+
+#define module_output_alloc_segment(output, type, size)		\
+	((output)->ops->allocate_segment(output, type, size))
+
+#define module_output_start_segment(output, type, addr, size)		\
+	((output)->ops->start_segment(output, type, addr, size))
+
+#define module_output_end_segment(output)	\
+	((output)->ops->end_segment(output))
+
+#define module_output_write_segment(output, buf, len)		\
+	((output)->ops->write_segment(output, buf, len))
+
+#define module_output_segment_offset(output)	\
+	((output)->ops->segment_offset(output))
+
+
+struct module_output_ops {
+	void * (*allocate_segment)(struct module_output *output,
+				   unsigned int type, int size);
+	int (*start_segment)(struct module_output *output,
+			     unsigned int type, void *addr, int size);
+	int (*end_segment)(struct module_output *output);
+	int (*write_segment)(struct module_output *output, const char *buf,
+			     unsigned int len);
+	unsigned int (*segment_offset)(struct module_output *output);
+};
+
+
+struct k_module * alloc_kmodule(void);
+int load_kmodule(unsigned int input_addr,
+		 struct k_module *mod);
+
+#endif /* __MODULE_H__ */

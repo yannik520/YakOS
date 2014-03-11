@@ -23,6 +23,14 @@
 #ifndef __SYMTAB_H__
 #define __SYMTAB_H__
 
+struct symbols {
+  const char	*name;
+  void		*value;
+};
+
+extern const int symbols_nelts;
+extern const struct symbols symbols[/* symbols_nelts */];
+
 void *symtab_lookup(const char *name);
 
 #endif /* __SYMTAB_H__ */

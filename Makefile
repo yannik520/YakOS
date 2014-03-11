@@ -27,21 +27,14 @@ LDFLAGS += -gc-sections
 NOECHO ?= @
 
 ALLOBJS := \
-	kernel/main.o \
-	kernel/sched_fifo.o \
-	kernel/sched.o \
-	kernel/task.o \
-	kernel/printk.o \
-	kernel/malloc.o \
-	kernel/timer.o \
-	kernel/semaphore.o \
 	init/init_shell.o \
 	lib/string.o
 
 include arch/$(ARCH)/Makefile
 include arch/$(ARCH)/boot/Makefile
 include arch/$(ARCH)/boards/$(BOARD)/Makefile
-include module/Makefile
+include kernel/Makefile
+include modules/Makefile
 
 LINKER_SCRIPT_TEMPLETE := arch/$(ARCH)/boot/build.ld
 LINKER_SCRIPT := build.ld

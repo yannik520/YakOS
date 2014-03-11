@@ -21,11 +21,54 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <module/symbols.h>
+#include <string.h>
 
 extern int printk(const char *fmt, ...);
 
 const int symbols_nelts = 1;
-const struct symbols symbols[] = {
+const struct symbols symbols[] = 
+{
 	{ "printk", (void *)&printk },
 	{ (const char *)0, (void *)0}
 };
+
+/* Binary search is twice as large but still small. */
+#ifndef SYMTAB_CONF_BINARY_SEARCH
+#define SYMTAB_CONF_BINARY_SEARCH 1
+#endif
+
+#if SYMTAB_CONF_BINARY_SEARCH
+void * symtab_lookup(const char *name)
+{
+	int start, middle, end;
+	int r;
+  
+	start = 0;
+	end = symbols_nelts - 1;	/* The last entry is { 0, 0 }. */
+
+	while(start <= end) {
+/* Check middle, divide */
+		middle = (start + end) / 2;
+		r = strcmp(name, symbols[middle].name);
+		if(r < 0) {
+			end = middle - 1;
+		} else if(r > 0) {
+			start = middle + 1;
+		} else {
+			return symbols[middle].value;   
+		}
+	}
+	return NULL;
+}
+#else /* SYMTAB_CONF_BINARY_SEARCH */
+void *symtab_lookup(const char *name)
+{
+	const struct symbols *s;
+	for(s = symbols; s->name != NULL; ++s) {
+		if(strcmp(name, s->name) == 0) {
+			return s->value;
+		}
+	}
+	return 0;
+}
+#endif /* SYMTAB_CONF_BINARY_SEARCH */

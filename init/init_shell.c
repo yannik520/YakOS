@@ -27,7 +27,6 @@
 #include <kernel/task.h>
 #include <arch/text.h>
 #include <init.h>
-#include <module/module_loader.h>
 #include <module/module.h>
 
 char console_buffer[CONSOLE_BUFFER_SIZE];

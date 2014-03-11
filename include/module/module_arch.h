@@ -20,49 +20,15 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <module/symtab.h>
-#include <module/symbols.h>
-#include <string.h>
+#ifndef __MODULE_ARCH_H__
+#define __MODULE_ARCH_H__
 
-/* Binary search is twice as large but still small. */
-#ifndef SYMTAB_CONF_BINARY_SEARCH
-#define SYMTAB_CONF_BINARY_SEARCH 1
+#include "module.h"
+
+int apply_relocate(unsigned int input_addr,
+		   struct module_output *output,
+		   unsigned int sectionoffset,
+		   char *sectionaddr,
+		   struct elf32_rela *rela, char *addr);
+
 #endif
-
-#if SYMTAB_CONF_BINARY_SEARCH
-void *
-symtab_lookup(const char *name)
-{
-  int start, middle, end;
-  int r;
-  
-  start = 0;
-  end = symbols_nelts - 1;	/* The last entry is { 0, 0 }. */
-
-  while(start <= end) {
-    /* Check middle, divide */
-    middle = (start + end) / 2;
-    r = strcmp(name, symbols[middle].name);
-    if(r < 0) {
-      end = middle - 1;
-    } else if(r > 0) {
-      start = middle + 1;
-    } else {
-      return symbols[middle].value;   
-    }
-  }
-  return NULL;
-}
-#else /* SYMTAB_CONF_BINARY_SEARCH */
-void *
-symtab_lookup(const char *name)
-{
-  const struct symbols *s;
-  for(s = symbols; s->name != NULL; ++s) {
-    if(strcmp(name, s->name) == 0) {
-      return s->value;
-    }
-  }
-  return 0;
-}
-#endif /* SYMTAB_CONF_BINARY_SEARCH */

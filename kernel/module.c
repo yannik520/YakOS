@@ -22,8 +22,8 @@
  */
 #include <kernel/malloc.h>
 #include <kernel/list.h>
-#include <module/module_loader.h>
-#include <module/module_loader_arch.h>
+#include <module/module.h>
+#include <module/module_arch.h>
 #include <module/symtab.h>
 #include <stddef.h>
 #include <string.h>
@@ -199,7 +199,7 @@ static int relocate_section(unsigned int input_addr,
 				if (ret != MODULE_OK) return ret;
 			}
 		}
-		ret = module_loader_arch_relocate(input_addr, output, sec->s_offset, sectionbase,
+		ret = apply_relocate(input_addr, output, sec->s_offset, sectionbase,
 						  &rela, addr);
 		if (ret != MODULE_OK) return ret;
 	}

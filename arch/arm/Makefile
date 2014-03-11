@@ -4,4 +4,5 @@ ALLOBJS	+= \
 	$(LOCALDIR)/proc-arm926.o \
 	$(LOCALDIR)/arch_task.o \
 	$(LOCALDIR)/arch_irq.o \
-	$(LOCALDIR)/ops.o
+	$(LOCALDIR)/ops.o \
+	$(LOCALDIR)/kernel/module.o

@@ -26,7 +26,7 @@
 #include <kernel/type.h>
 #include <kernel/malloc.h>
 #include <string.h>
-#include <module/module_loader.h>
+#include <module/module.h>
 
 struct ram_output
 {

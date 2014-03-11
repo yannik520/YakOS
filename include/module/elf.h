@@ -115,33 +115,6 @@ struct relevant_section {
 	char		*address;
 };
 
-/*
-struct relocatable_sec {
-	elf32_off	s_offset;
-	elf32_word	s_size;
-	elf32_off	s_reloff;
-	elf32_word	s_relsize;
-};
-
-struct non_relocatable_sec {
-	elf32_off	s_offset;
-	elf32_word	s_size;
-};
-
-
-enum RELOCATABLE_SEC_TYPE {
-	RELOCATABLE_SEC_TEXT,
-	RELOCATABLE_SEC_RODATA,
-	RELOCATABLE_SEC_DATA,
-	RELOCATABLE_SEC_MAX
-};
-
-enum NON_RELOCATABLE_SEC_TYPE {
-	NON_RELOCATABLE_SEC_SYMTAB,
-	NON_RELOCATABLE_SEC_STRTAB,
-	NON_RELOCATABLE_SEC_MAX
-};
-*/
 struct sec_info {
 	elf32_off	s_offset;
 	elf32_word	s_size;
