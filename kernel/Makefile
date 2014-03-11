@@ -10,5 +10,4 @@ ALLOBJS += \
 	$(LOCALDIR)/timer.o \
 	$(LOCALDIR)/semaphore.o \
 	$(LOCALDIR)/symtab.o \
-	$(LOCALDIR)/ram-segments.o \
 	$(LOCALDIR)/module.o

@@ -26,7 +26,7 @@
 #include "module.h"
 
 int apply_relocate(unsigned int input_addr,
-		   struct module_output *output,
+		   struct k_module *output,
 		   unsigned int sectionoffset,
 		   char *sectionaddr,
 		   struct elf32_rela *rela, char *addr);

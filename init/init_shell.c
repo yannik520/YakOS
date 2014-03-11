@@ -145,7 +145,7 @@ int run_command(const char *cmd)
 {
 	char		 cmdbuf[CONSOLE_BUFFER_SIZE];
 	char		*str = cmdbuf;
-	struct kmodule	*mod;
+	struct k_module	*mod;
 
 	if (!cmd || !*cmd) {
 		return -1;
@@ -166,7 +166,7 @@ int run_command(const char *cmd)
 		load_kmodule(0xc0100000, mod);
 		/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
 		/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
-		pFun = this_module->entry->syms[0].value;
+		pFun = mod->entry->syms[0].value;
 		/* printk("code: %x %x %x\n", */
 		/*        *((unsigned int *)elfloader_autostart_processes), */
 		/*        *((unsigned int *)(elfloader_autostart_processes) + 1), */

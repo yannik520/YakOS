@@ -66,17 +66,23 @@ struct segment_info {
 };
 
 struct k_module {
-	struct list_head	 list;
-	struct segment_info	 seg_info;
-	struct module_entry	*entry;
+	struct list_head		 list;
+
+	const struct module_output_ops	*ops;
+	char				*base;
+	unsigned int			 offset;
+
+	struct segment_info		 seg_info;
+	struct module_entry		*entry;
 	int (*init_module)();
 	void (*exit_module)();
 };
 
-
+/*
 struct module_output {
 	const struct module_output_ops *ops;
 };
+*/
 
 #define module_output_alloc_segment(output, type, size)		\
 	((output)->ops->allocate_segment(output, type, size))
@@ -95,14 +101,14 @@ struct module_output {
 
 
 struct module_output_ops {
-	void * (*allocate_segment)(struct module_output *output,
+	void * (*allocate_segment)(struct k_module *output,
 				   unsigned int type, int size);
-	int (*start_segment)(struct module_output *output,
+	int (*start_segment)(struct k_module *output,
 			     unsigned int type, void *addr, int size);
-	int (*end_segment)(struct module_output *output);
-	int (*write_segment)(struct module_output *output, const char *buf,
+	int (*end_segment)(struct k_module *output);
+	int (*write_segment)(struct k_module *output, const char *buf,
 			     unsigned int len);
-	unsigned int (*segment_offset)(struct module_output *output);
+	unsigned int (*segment_offset)(struct k_module *output);
 };
 
 

@@ -20,7 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <module/symbols.h>
+#include <module/symtab.h>
 #include <string.h>
 
 extern int printk(const char *fmt, ...);
