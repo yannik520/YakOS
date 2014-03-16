@@ -156,7 +156,7 @@ int run_command(const char *cmd)
 	if (0 == strcmp("kmsg", str)) {
 		kmsg_dump();
 	}
-	else if (0 == strcmp("exec", str)) {
+	else if (0 == strcmp("insmod", str)) {
 		mod = alloc_kmodule();
 		if (NULL == mod)
 		{

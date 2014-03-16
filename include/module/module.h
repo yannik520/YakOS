@@ -113,6 +113,7 @@ struct module_output_ops {
 
 
 struct k_module * alloc_kmodule(void);
+void free_kmodule(struct k_module *kmod);
 int load_kmodule(unsigned int input_addr,
 		 struct k_module *mod);
 

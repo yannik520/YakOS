@@ -23,6 +23,7 @@
 #include <kernel/type.h>
 #include <kernel/malloc.h>
 #include <kernel/list.h>
+#include <kernel/semaphore.h>
 #include <module/module.h>
 #include <module/module_arch.h>
 #include <module/symtab.h>
@@ -31,6 +32,7 @@
 
 char module_unknown[30];
 LIST_HEAD(k_module_root);
+DEFINE_SEMAPHORE(kmod_sem);
 
 //struct k_module *this_module = NULL;
 
@@ -70,7 +72,7 @@ static int seek_read(unsigned int addr, unsigned int offset, char *buf, int len)
 	return len;
 }
 
-static void * find_local_symbol(unsigned int input_addr, const char *symbol,
+static void *find_local_symbol(unsigned int input_addr, const char *symbol,
 				unsigned int symtab, unsigned short symtabsize,
 				unsigned int strtab, struct k_module *this_module)
 {
@@ -596,8 +598,41 @@ struct k_module *alloc_kmodule(void)
 
 	memset(mod, 0, sizeof(struct k_module));
 	mod->ops = &mod_output_ops;
-	
+
+	down(&kmod_sem);
 	list_add_tail(&mod->list, &k_module_root);
+	up(&kmod_sem);
 
 	return mod;
+}
+
+void free_kmodule(struct k_module *kmod)
+{
+	if (NULL == kmod) {
+		return;
+	}
+	
+	down(&kmod_sem);
+	list_del(&kmod->list);
+	up(&kmod_sem);
+
+	/* Free text segment */
+	if (NULL != kmod->seg_info.text.address) {
+		kfree(kmod->seg_info.text.address);
+	}
+
+	/* Free rodata segment */
+	if (NULL != kmod->seg_info.rodata.address) {
+		kfree(kmod->seg_info.rodata.address);
+	}
+
+	/* Free data segment */
+	if (NULL != kmod->seg_info.data.address) {
+		kfree(kmod->seg_info.data.address);
+	}
+
+	/* Free bss segment */
+	if (NULL != kmod->seg_info.bss.address) {
+		kfree(kmod->seg_info.bss.address);
+	}
 }
