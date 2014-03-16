@@ -10,5 +10,5 @@ YakOS is an embedded operating system macro kernel.
 4. Can extend with module.
 
 ### Architecture:
-![Architecture](https://github.com/yannik520/YakOS/blob/master/documents/arch.png)
+![](https://github.com/yannik520/YakOS/blob/master/documents/arch.png)
 
