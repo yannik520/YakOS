@@ -1,0 +1,44 @@
+#! /bin/sh
+#############################################################################
+#
+#
+#############################################################################
+
+produce_main_menu()
+{
+	echo 'mainmenu "YakOS Configuration"'
+	echo
+	echo 'comment "Project Configuration"'
+	echo 'choice'
+	echo '        prompt "Prjoect Name"'
+
+	echo 'endchoice'
+
+	echo 'config PROJECT_RELEASE_VERSION'
+	echo '        hex "Release Version (hex)"'
+
+	echo 'config PROJECT_DIST_FOLDER_NAME'
+	echo '        string "Distribute Folder Name"'
+	echo 'config PROJECT_FILELIST_NAME'
+	echo '        string "File List Name"'
+
+	echo 'comment "Project Options"'
+
+	echo 'menu "Core Options"'
+	echo 'endmenu'
+
+	echo 'menu "Basic system Options"'
+	echo 'endmenu'
+
+	echo 'comment "Project Components"'
+	
+	echo 'menu "Build YakOS Options"'
+	echo
+	echo 'config BUILD_BOARD_DEMO'
+	echo '        bool "bulid for board demo"'
+	echo 'config BUILD_BOARD_QEMU'
+	echo '        bool "bulid for qemu_mini2440"'
+	echo 'endmenu'
+}
+
+produce_main_menu

@@ -1,5 +1,4 @@
 ARCH ?= arm
-BOARD ?= demo
 TARGET ?= yakOS
 TARGET_BIN ?= $(TARGET).bin
 TARGET_ELF ?= $(TARGET).elf
@@ -17,6 +16,41 @@ CPPFILT := $(TOOLCHAIN_PREFIX)c++filt
 SIZE := $(TOOLCHAIN_PREFIX)size
 NM := $(TOOLCHAIN_PREFIX)nm
 
+SHELL    = /bin/bash
+HOSTCC   = cc
+CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+                else if [ -x /bin/bash ]; then echo /bin/bash; \
+                else echo sh; fi ; fi)
+
+ifeq (.config,$(wildcard .config))
+    include .config
+else
+    $(warning You have not .config file, please run make menuconfig first!)
+    $(shell exit 1)
+endif
+
+define ask_to_save
+	@if [ ! -f .config ]; then \
+		echo; \
+		echo "You have not saved your config, please re-run make config"; \
+		echo; \
+		exit 1; \
+	else \
+		PNAME="yakOS_config" && \
+		echo -n "Save a copy to profiles/$${PNAME}.list [YES/NO] ? " && \
+		read YESNO && \
+		if [ "a$${YESNO}" = "aYES" ]; then \
+			echo "Save to profiles/$${PNAME}.list "; \
+			cp -f .config ./profiles/$${PNAME}.list; \
+		else \
+			echo "NOT save to profiles/$${PNAME}.list, only .config exist "; \
+		fi; \
+		echo ""; \
+		echo "Done, pls do \"make all\" to build all images"; \
+	fi
+endef
+
+
 PLATFORM_LIBGCC := -L $(shell dirname `$(CC) $(CFLAGS) -print-libgcc-file-name`) -lgcc
 CFLAGS := -O2 -g -Iinclude -fno-builtin -finline -W -Wall -Wno-multichar -Wno-unused-parameter -Wno-unused-function
 #CPPFLAGS := -fno-exceptions -fno-rtti -fno-threadsafe-statics
@@ -25,6 +59,13 @@ LDFLAGS :=
 LDFLAGS += -gc-sections
 
 NOECHO ?= @
+
+ifeq ("x$(CONFIG_BUILD_BOARD_DEMO)", "xy")
+	BOARD ?= demo
+else
+	BOARD ?= qemu_mini2440
+endif
+
 
 ALLOBJS := \
 	init/init_shell.o \
@@ -45,6 +86,7 @@ ALL_INCLUDE_FILES := $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h)
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@$(STRIP) --strip-unneeded -g -x $@
 
+.PHONY: all
 all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM)
 
 prepare: prepare_include build.ld
@@ -73,8 +115,18 @@ $(TARGET_SYM): $(TARGET_ELF)
 	@echo generating listing: $@
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
 
+.PHONY: menuconfig
+menuconfig:
+	scripts/mkconfig > Config.in
+	@srctree=`pwd` HOSTCC=gcc make -f scripts/Makefile.build obj=scripts/basic
+	@srctree=`pwd` HOSTCC=gcc make -f scripts/Makefile.build obj=scripts/kconfig/lxdialog
+	@srctree=`pwd` HOSTCC=gcc make -f scripts/Makefile.build obj=scripts/kconfig/ menuconfig
+
+	@$(call ask_to_save)
+
+.PHONY: clean distclean
 clean:
-	@rm -rf *.bin *.elf *.sym $(ALLOBJS)
+	@rm -rf *.bin *.elf .sym $(ALLOBJS)
 
 distclean: clean
-	@rm -rf ./include/arch/*.h
+	@rm -rf .config Config.in .kconfig.d ./include/arch/*.h
