@@ -1,4 +1,4 @@
 LOCALDIR := arch/arm/boot
 
-ALLOBJS	+= \
+ALLOBJS-$(CONFIG_ARCH_ARM) += \
 	$(LOCALDIR)/setup.o

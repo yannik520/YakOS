@@ -615,9 +615,8 @@ static void build_conf(struct menu *menu)
 				break;
 			case S_TRISTATE:
 				switch (val) {
-				case yes: cprint1("<VAE>" ); break;
-				case mod: cprint1("<MEDIA>"); break;
-				case metapack: cprint1("<METAPACK>"); break;
+				case yes: cprint1("<*>" ); break;
+				case mod: cprint1("<M>"); break;
 				default:  cprint1(" ");; break;
 				}
 				break;
@@ -668,13 +667,11 @@ static void build_conf(struct menu *menu)
 				switch (val) {
 				case yes: ch = '*'; break;
 				case mod: ch = 'M'; break;
-				case metapack: ch = 'P'; break;
 				default:  ch = ' '; break;
 				}
 				if (sym_is_changable(sym))
-					if (ch=='*') cprint1( "<VAE>" ); 
-					else if (ch=='M') cprint1( "<MEDIA>" );
-					else if (ch=='P') cprint1( "<METAPACK>" );
+					if (ch=='*') cprint1( "<*>" ); 
+					else if (ch=='M') cprint1( "<M>" );
 					else if (ch==' ') cprint1( "< >" );
 				else
 					cprint1("---");

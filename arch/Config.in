@@ -1,0 +1,7 @@
+menu "Architecture Configuration"
+config ARCH_ARM
+        bool "support ARM architecture"
+
+source "arch/arm/Config.in"
+endmenu
+

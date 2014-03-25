@@ -3,7 +3,7 @@ LOCALDIR := arch/arm/boards/demo
 MEMBASE := 0xc0000000
 STACKSIZE := 0x200000
 
-ALLOBJS	+= \
+ALLOBJS-y += \
 	$(LOCALDIR)/text.o \
 	$(LOCALDIR)/interrupts.o \
 	$(LOCALDIR)/timer.o \

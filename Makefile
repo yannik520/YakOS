@@ -67,7 +67,7 @@ else
 endif
 
 
-ALLOBJS := \
+ALLOBJS-y := \
 	init/init_shell.o \
 	lib/string.o
 
@@ -82,12 +82,10 @@ LINKER_SCRIPT := build.ld
 
 ALL_INCLUDE_FILES := $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h)
 
-%.ko: %.c
-	@$(CC) $(CFLAGS) -c $< -o $@
-	@$(STRIP) --strip-unneeded -g -x $@
+ALLOBJS-m := $(ALLOBJS-m:%.o=%.ko)
 
 .PHONY: all
-all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM)
+all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM) $(ALLOBJS-m)
 
 prepare: prepare_include build.ld
 
@@ -108,12 +106,18 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(NOECHO)$(SIZE) $<
 	$(NOCOPY)$(OBJCOPY) -O binary $< $@
 
-$(TARGET_ELF): $(ALLOBJS) $(LINKER_SCRIPT)
+$(TARGET_ELF): $(ALLOBJS-y) $(LINKER_SCRIPT)
 	@echo linking $@
-	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS) -o $@ $(PLATFORM_LIBGCC)
+	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS-y) -o $@ $(PLATFORM_LIBGCC)
 $(TARGET_SYM): $(TARGET_ELF)
 	@echo generating listing: $@
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@
+
+
+$(ALLOBJS-m): %.ko: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(STRIP) --strip-unneeded -g -x $@
+
 
 .PHONY: menuconfig
 menuconfig:
@@ -126,7 +130,7 @@ menuconfig:
 
 .PHONY: clean distclean
 clean:
-	@rm -rf *.bin *.elf .sym $(ALLOBJS)
+	@rm -rf *.bin *.elf .sym $(ALLOBJS-y) $(ALLOBJS-m)
 
 distclean: clean
 	@rm -rf .config Config.in .kconfig.d ./include/arch/*.h

@@ -1,0 +1,5 @@
+menu "Modules Configuration"
+
+config BUILD_MODULE_HELLO
+        tristate "hello module support"
+endmenu

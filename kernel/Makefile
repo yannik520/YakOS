@@ -1,6 +1,6 @@
 LOCALDIR := kernel
 
-ALLOBJS += \
+ALLOBJS-y += \
 	$(LOCALDIR)/main.o \
 	$(LOCALDIR)/sched_fifo.o \
 	$(LOCALDIR)/sched.o \

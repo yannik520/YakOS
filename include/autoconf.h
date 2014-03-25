@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  */
-#define AUTOCONF_TIMESTAMP "2014-03-19 21:40:58 CST"
+#define AUTOCONF_TIMESTAMP "2014-03-25 22:31:17 CST"
 
 
 /*
@@ -39,6 +39,14 @@
 /*
  * Build YakOS Options
  */
+
+/*
+ * Architecture Configuration
+ */
+#define CONFIG_ARCH_ARM 1
+#define ENABLE_ARCH_ARM 1
+#define USE_ARCH_ARM(...) __VA_ARGS__
+#define SKIP_ARCH_ARM(...)
 #define CONFIG_BUILD_BOARD_DEMO 1
 #define ENABLE_BUILD_BOARD_DEMO 1
 #define USE_BUILD_BOARD_DEMO(...) __VA_ARGS__
@@ -47,3 +55,8 @@
 #define ENABLE_BUILD_BOARD_QEMU 0
 #define USE_BUILD_BOARD_QEMU(...)
 #define SKIP_BUILD_BOARD_QEMU(...) __VA_ARGS__
+
+/*
+ * Modules Configuration
+ */
+#define CONFIG_BUILD_MODULE_HELLO_MODULE 1

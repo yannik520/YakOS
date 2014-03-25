@@ -34,10 +34,8 @@ produce_main_menu()
 	
 	echo 'menu "Build YakOS Options"'
 	echo
-	echo 'config BUILD_BOARD_DEMO'
-	echo '        bool "bulid for board demo"'
-	echo 'config BUILD_BOARD_QEMU'
-	echo '        bool "bulid for qemu_mini2440"'
+	echo 'source "arch/Config.in"'
+	echo 'source "modules/Config.in"'
 	echo 'endmenu'
 }
 

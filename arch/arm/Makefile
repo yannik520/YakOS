@@ -1,6 +1,6 @@
 LOCALDIR := arch/arm
 
-ALLOBJS	+= \
+ALLOBJS-$(CONFIG_ARCH_ARM) += \
 	$(LOCALDIR)/proc-arm926.o \
 	$(LOCALDIR)/arch_task.o \
 	$(LOCALDIR)/arch_irq.o \

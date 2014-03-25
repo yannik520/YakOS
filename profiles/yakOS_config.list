@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Wed Mar 19 21:40:58 2014
+# Tue Mar 25 22:31:17 2014
 #
 
 #
@@ -27,4 +27,14 @@ CONFIG_PROJECT_RELEASE_VERSION=
 #
 # Build YakOS Options
 #
+
+#
+# Architecture Configuration
+#
+CONFIG_ARCH_ARM=y
 CONFIG_BUILD_BOARD_DEMO=y
+
+#
+# Modules Configuration
+#
+CONFIG_BUILD_MODULE_HELLO=m

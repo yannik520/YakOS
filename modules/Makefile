@@ -1,4 +1,3 @@
 LOCALDIR := modules
 
-
-ALLOBJS	+= $(LOCALDIR)/hello.ko
+ALLOBJS-$(CONFIG_BUILD_MODULE_HELLO) += $(LOCALDIR)/hello.o
