@@ -1,3 +1,4 @@
+HOST ?= macosx
 ARCH ?= arm
 TARGET ?= yakOS
 TARGET_BIN ?= $(TARGET).bin
@@ -5,7 +6,7 @@ TARGET_ELF ?= $(TARGET).elf
 TARGET_SYM ?= $(TARGETE).sym
 
 export TOPDIR=$(shell pwd)
-TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-elf-toolchain/bin/
+TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-elf-toolchain-$(HOST)/bin/
 TOOLCHAIN_PREFIX := $(TOOLCHAIN_PATH)arm-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
