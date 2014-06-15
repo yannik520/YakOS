@@ -28,10 +28,17 @@
 #include <arch/text.h>
 #include <init.h>
 #include <module/module.h>
+#include <fs/vfsfs.h>
+#include <fs/vfsfat.h>
+
+#define CMD_FUNC(name)					\
+	static int do_command_##name(char *args)
+#define CMD_FUNC_NAME(name) do_command_##name
 
 char console_buffer[CONSOLE_BUFFER_SIZE];
 static char erase_seq[] = "\b \b";    /* erase sequence	*/
 static char   tab_seq[] = "        "; /* used to expand TABs	*/
+LIST_HEAD(commands);
 
 static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen)
 {
@@ -138,58 +145,220 @@ int readline(const char *const prompt)
 	}
 }
 
+#define TOLOWER(x) ((x) | 0x20)
+#define isxdigit(c)	(('0' <= (c) && (c) <= '9') \
+			 || ('a' <= (c) && (c) <= 'f') \
+			 || ('A' <= (c) && (c) <= 'F'))
+
+#define isdigit(c)	('0' <= (c) && (c) <= '9')
+
+static unsigned int simple_guess_base(const char *cp)
+{
+	if (cp[0] == '0') {
+		if (TOLOWER(cp[1]) == 'x' && isxdigit(cp[2]))
+			return 16;
+		else
+			return 8;
+	} else {
+		return 10;
+	}
+}
+
+unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
+{
+	unsigned long result = 0;
+
+	if (!base)
+		base = simple_guess_base(cp);
+
+	if (base == 16 && cp[0] == '0' && TOLOWER(cp[1]) == 'x')
+		cp += 2;
+
+	while (isxdigit(*cp)) {
+		unsigned int value;
+
+		value = isdigit(*cp) ? *cp - '0' : TOLOWER(*cp) - 'a' + 10;
+		if (value >= base)
+			break;
+		result = result * base + value;
+		cp++;
+	}
+	if (endp)
+		*endp = (char *)cp;
+
+	return result;
+}
+
 void (*pFun)();
 extern unsigned int stack_top;
 
+CMD_FUNC(insmod) {
+	struct k_module	*mod;
+
+	mod = alloc_kmodule();
+	if (NULL == mod)
+	{
+		printk("kmodule alloc failed!\n");
+		return -1;
+	}
+	load_kmodule(0xc0100000, mod);
+	/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
+	/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
+	pFun = mod->entry->syms[0].value;
+	/* printk("code: %x %x %x\n", */
+	/*        *((unsigned int *)elfloader_autostart_processes), */
+	/*        *((unsigned int *)(elfloader_autostart_processes) + 1), */
+	/*        *((unsigned int *)(elfloader_autostart_processes) + 2)); */
+	(*pFun)();
+	
+	return 0;
+}
+
+CMD_FUNC(mount) {
+	unsigned long fimage_addr;
+
+	if (NULL == args) {
+		return -1;
+	}
+
+	fimage_addr = simple_strtoul(args, &args, 16);
+
+	if (fimage_addr == 0) {
+		printk("Please give a correct address!");
+		return -1;
+	}
+
+	if (vfs_mount(fimage_addr, "FAT")) {
+		printk("FAT FS Mount Failed!\n");
+		return -1;
+	}
+	return 0;
+}
+
+CMD_FUNC(ls) {
+	size_t count;
+	char buf[1024];
+	int fd;
+	struct vfs_node file;
+	char *path = args;
+
+	if (NULL == path) {
+		printk("Please give a correct path!\n");
+		return -1;
+	}
+
+	if ((fd = vfs_open(path, &file)) == -1) {
+		printk("vfs_open failed\n");
+		return -1;
+	}
+
+	while (!vfs_read(fd, buf, sizeof(buf), &count) && count > 0) {
+		printk("%s\n", buf);
+	}
+
+	if (vfs_close(fd)) {
+		printk("vfs_close failed\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+CMD_FUNC(kmsg) {
+	kmsg_dump();
+	return 0;
+}
+
+SHELL_COMMAND(kmsg_command, "kmsg", "help: shows all kernel message", CMD_FUNC_NAME(kmsg));
+SHELL_COMMAND(insmod_command, "insmod", "help: insmod the given module", CMD_FUNC_NAME(insmod));
+SHELL_COMMAND(mount_command, "mount", "help: mount the given file system", CMD_FUNC_NAME(mount));
+SHELL_COMMAND(ls_command, "ls", "help: list all file or directory", CMD_FUNC_NAME(ls));
+
+void shell_unregister_command(struct shell_command *cmd)
+{
+	list_del(&cmd->list);
+}
+
+void shell_register_command(struct shell_command *cmd)
+{
+	struct shell_command *pos;
+	
+	if (NULL == cmd) {
+		return;
+	}
+
+	if (list_empty(&commands)) {
+		list_add_tail(&cmd->list, &commands);
+	}
+	else {
+		list_for_each_entry(pos, &commands, list) {
+			if (strcmp(pos->command, cmd->command) > 0) {
+				list_add_tail(&cmd->list, &pos->list);
+				return;
+			}
+		}
+		list_add_tail(&cmd->list, &commands);
+	}
+}
+
 int run_command(const char *cmd)
 {
-	char		 cmdbuf[CONSOLE_BUFFER_SIZE];
-	char		*str = cmdbuf;
-	struct k_module	*mod;
+	char			 cmdbuf[CONSOLE_BUFFER_SIZE];
+	char			*str = cmdbuf;
+	char			*args;
+	struct shell_command	*cur_cmd;
 
 	if (!cmd || !*cmd) {
 		return -1;
 	}
-	
+
+	while(*cmd == ' ') {
+		cmd++;
+	}
+
 	strcpy(cmdbuf, cmd);
 
-	if (0 == strcmp("kmsg", str)) {
-		kmsg_dump();
-	}
-	else if (0 == strcmp("insmod", str)) {
-		mod = alloc_kmodule();
-		if (NULL == mod)
-		{
-			printk("kmodule alloc failed!\n");
-			return -1;
+	list_for_each_entry(cur_cmd, &commands, list) {
+		if (0 == strncmp(cur_cmd->command, str, strlen(cur_cmd->command))) {
+			args = strchr(str, ' ');
+			if (args != NULL) {
+				args++;
+				while(*args == ' ') {
+					args++;
+				}
+			}
+	
+			if (0 == strcmp("--help", args) ||
+			    0 == strcmp("-h", args)) {
+				printk("%s\n", cur_cmd->description);
+			}
+			else {
+				cur_cmd->func(args);
+			}
+			return 0;
 		}
-		load_kmodule(0xc0100000, mod);
-		/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
-		/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
-		pFun = mod->entry->syms[0].value;
-		/* printk("code: %x %x %x\n", */
-		/*        *((unsigned int *)elfloader_autostart_processes), */
-		/*        *((unsigned int *)(elfloader_autostart_processes) + 1), */
-		/*        *((unsigned int *)(elfloader_autostart_processes) + 2)); */
-		(*pFun)();
 	}
-	else {
-		printk("unknown command\n");
-	}
-		
+
+	printk("unknown command\n");
 }
 
 int init_shell(void *arg)
 {
 	int len;
 	static char lastcommand[CONSOLE_BUFFER_SIZE] = { 0, };
+	struct shell_command *cmd;
+
+	shell_register_command(&kmsg_command);
+	shell_register_command(&insmod_command);
+	shell_register_command(&mount_command);
+	shell_register_command(&ls_command);
 
 	for (;;) {
 		len = readline("# ");
 		
 		if (len > 0) {
 			strcpy(lastcommand, console_buffer);
-			printk("%s\n", lastcommand);
+			//printk("%s\n", lastcommand);
 			run_command(lastcommand);
 		}
 	}

@@ -28,6 +28,8 @@
 #include <kernel/timer.h>
 #include <kernel/semaphore.h>
 #include <init.h>
+#include <fs/vfsfs.h>
+#include <fs/vfsfat.h>
 
 #define HEAP_SIZE		0x100000 //1M
 
@@ -60,6 +62,9 @@ void kmain(void)
 	kmalloc_init(&__heap, HEAP_SIZE);
 	task_init();
 	task_create_init();
+
+	/*************** Init File System ****************/
+	register_filesystem(&fat_fs);
 	
 	/*************** Creating Shell TASK ****************/
 	task_shell = task_alloc("shell", 0x2000, 1);

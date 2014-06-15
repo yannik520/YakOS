@@ -24,8 +24,25 @@
 #ifndef _INIT_H_
 #define _INIT_H_
 
+#include <kernel/list.h>
+
 #define CONSOLE_BUFFER_SIZE 256
 
+#define SHELL_COMMAND(name, command, description, cmd_func) \
+	static struct shell_command name = { {NULL, NULL},  \
+					     command,	    \
+					     description,   \
+					     cmd_func }
+
+struct shell_command {
+	struct list_head list;
+	char *command;
+	char *description;
+	int (*func)(char *args);
+};
+
+void shell_unregister_command(struct shell_command *cmd);
+void shell_register_command(struct shell_command *cmd);
 int init_shell(void *arg);
 
 #endif

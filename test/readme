@@ -1,0 +1,5 @@
+How to mount a file system image on mac os x
+1 run the following command first:
+hdiutil attach -imagekey diskimage-class=CRawDiskImage -nomount image_file
+
+2 then mount -t msdos /dev/diskx ./tmp

@@ -20,21 +20,18 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <linkage.h>
 
-#ifndef _STRING_H_
-#define _STRING_H_
-#include <arch/types.h>
+		.text
+		.align	5
+ENTRY(strchr)
+		and	r1, r1, #0xff
+1:		ldrb	r2, [r0], #1
+		teq	r2, r1
+		teqne	r2, #0
+		bne	1b
+		teq	r2, r1
+		movne	r0, #0
+		subeq	r0, r0, #1
+		mov	pc, lr
 
-char *strchr(const char *s, int c);
-char *strcpy(char *dest, const char *src);
-char *strncpy(char *dest, const char *src, size_t count);
-char *strcat(char *dest, const char *src);
-int strcmp(const char *cs, const char *ct);
-int strncmp(const char *cs, const char *ct, size_t count);
-size_t strlen(const char *s);
-void *memset(void *s, int c, size_t count);
-void *memcpy(void *dest, const void *src, size_t count);
-void *memmove(void *dest, const void *src, size_t count);
-int   memcmp (void const *, const void *, size_t);
-
-#endif
