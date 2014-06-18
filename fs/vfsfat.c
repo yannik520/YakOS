@@ -36,6 +36,16 @@
 #include "fs/vfsfs.h"
 #include "fs/vfsfat.h"
 
+#define DENTRY_IS_DIR(_dentry_)     ((_dentry_)->attribute & 0x10)
+#define DENTRY_IS_ARCHIVE(_dentry_) ((_dentry_)->attribute & 0x20)
+#define DENTRY_IS_LONG_NAME(_dentry_) \
+	(0x0F == (_dentry_)->attribute)
+#define DENTRY_IS_DELETED(_dentry_) \
+	(0xE5 == (uint8_t)((_dentry_)->name[0]))
+#define DENTRY_IS_ZERO(_dentry_) \
+	(0x00 == (uint8_t)((_dentry_)->name[0]))
+
+
 struct fat32_struct {
 	uint8_t jmp[3];
 	uint8_t oem[8];
@@ -557,6 +567,17 @@ static int fatfs_root_dir_read(struct fatfs_dirent *dirent, void *buf,
 
 	struct fat_entry *dirents;
 	dirents = (struct fat_entry *)sector_buffer;
+	struct fat_entry *dent = &dirents[dpcnt];
+
+	if (DENTRY_IS_ZERO(dent)) {
+		return -1;
+	}
+	else if(DENTRY_IS_DELETED(dent) ||
+		DENTRY_IS_LONG_NAME(dent)) {
+		dirent->lseek += 32;
+		*pcluster = 0;
+		return 0;
+	}
 
 	cpcnt = dirent_trim(dirents[dpcnt].name, 8);
 	if (cpcnt > 0) {

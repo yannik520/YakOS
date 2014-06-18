@@ -237,7 +237,7 @@ CMD_FUNC(mount) {
 
 CMD_FUNC(ls) {
 	size_t count;
-	char buf[1024];
+	char buf[1024] = {0};
 	int fd;
 	struct vfs_node file;
 	char *path = args;
@@ -252,8 +252,10 @@ CMD_FUNC(ls) {
 		return -1;
 	}
 
-	while (!vfs_read(fd, buf, sizeof(buf), &count) && count > 0) {
-		printk("%s\n", buf);
+	while (!vfs_read(fd, buf, sizeof(buf), &count)) {
+		if (count > 0) {
+			printk("%s\n", buf);
+		}
 	}
 
 	if (vfs_close(fd)) {
