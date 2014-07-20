@@ -24,8 +24,11 @@
 #ifndef __TEXT_H
 #define __TEXT_H
 #include <arch/chip_regs.h>
+#include <arch/memory.h>
+#include <kernel/types.h>
 
-#define BOOTUP_UART_BASE REG_BASE_UART0
+#define BOOTUP_UART_BASE (uint32_t)phys_to_virt(REG_BASE_UART0)
+//#define BOOTUP_UART_BASE REG_BASE_UART0
 #define UART_DR	         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x000))
 #define UART_ECR         (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x004))
 #define UART_LCRH	 (*(volatile unsigned char *)(BOOTUP_UART_BASE + 0x02C))
@@ -41,6 +44,7 @@
 
 void __console_init(void);
 void __puts(const char *str);
+void __puts_early(const char *str);
 void putchar(char c);
 int getchar(void);
 

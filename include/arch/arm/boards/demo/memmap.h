@@ -23,7 +23,7 @@
 #ifndef __MEMMAP_H
 #define __MEMMAP_H
 
-#define MEMBANK_SIZE (4*1024*1024)
+#define MEMBANK_SIZE (128*1024*1024)
 
 /* some helpful macros */
 //#define REG64(x) ((volatile unsigned long long *)(x))
@@ -35,5 +35,13 @@
 // XXX make more dynamic
 #define MAINMEM_BASE 0xc0000000
 #define MAINMEM_SIZE (MEMBANK_SIZE)
+
+/* Exception vectors table */
+#define EXCEPTION_SIZE		0x100000
+//#define EXCEPTION_BASE	0xffff0000
+#define EXCEPTION_BASE		0x0
+
+#define REGISTER_BASE 0x10100000
+#define REGISTER_SIZE 0x100000
 
 #endif

@@ -23,7 +23,10 @@
 
 #ifndef _INTERRUPTS_H_
 #define _INTERRUPTS_H_
+#include <arch/memory.h>
+#include <kernel/types.h>
 
+//#define ioaddr_intc(x) ((uint32_t)phys_to_virt(REG_BASE_INTC) + (x))
 #define ioaddr_intc(x) (REG_BASE_INTC + (x))
 
 typedef enum handler_return {

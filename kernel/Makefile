@@ -1,7 +1,6 @@
 LOCALDIR := kernel
 
 ALLOBJS-y += \
-	$(LOCALDIR)/main.o \
 	$(LOCALDIR)/sched_fifo.o \
 	$(LOCALDIR)/sched.o \
 	$(LOCALDIR)/task.o \

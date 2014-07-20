@@ -20,24 +20,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <kernel/types.h>
-#include <kernel/printk.h>
-#include <module/module.h>
+#ifndef __ARCH_H__
+#define __ARM_H__
 
-int init_module (void)
-{
-	printk("module hello runned!\n");
-  
-	return 0;
-}
+void arch_early_init(void);
 
-void exit_module(void)
-{
-	printk("module hello exited!\n");
-}
-
-struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
-	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
-};
+#endif

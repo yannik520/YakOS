@@ -20,24 +20,38 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __MMU_H__
+#define __MMU_H__
+
 #include <kernel/types.h>
-#include <kernel/printk.h>
-#include <module/module.h>
 
-int init_module (void)
-{
-	printk("module hello runned!\n");
-  
-	return 0;
-}
+typedef uint32_t	pte_t;
+typedef uint32_t	pgd_t;
 
-void exit_module(void)
-{
-	printk("module hello exited!\n");
-}
+#define PAGE_SHIFT	12
+#define PAGE_SIZE	(1UL<<PAGE_SHIFT)
+#define PAGE_MASK	(~(PAGE_SIZE-1))
 
-struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
-	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
-};
+#define page_start(_v)          ((_v) &				PAGE_MASK)
+#define page_offset(_v)         ((_v) & (~PAGE_MASK))
+#define page_align(_v)          (((_v) + (~PAGE_MASK)) &	PAGE_MASK)
+
+#define SECTION_SHIFT	20
+#define SECTION_SIZE	(1UL<<SECTION_SHIFT)
+#define SECTION_MASK	(~(SECTION_SIZE-1))
+
+
+/* Page directory */
+#define PGDIR_SHIFT	20
+#define PGDIR_SIZE	(1UL << PGDIR_SHIFT)
+#define PGDIR_MASK	(~(PGDIR_SIZE-1))
+
+#define pgd_index(addr)	((addr) >> PGDIR_SHIFT)
+#define pgd_offset(pgd, addr)	((pgd_t *)(((pgd_t *)pgd) + pgd_index(addr)))
+#define pte_index(addr)	(((addr) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
+
+#define ALIGN(P, ALIGNBYTES)  ((void*)( ((unsigned long)P + ALIGNBYTES -1) & ~(ALIGNBYTES-1) ) )
+
+void	arm_mmu_init(void);
+
+#endif

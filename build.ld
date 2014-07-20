@@ -4,7 +4,7 @@ OUTPUT_ARCH(arm)
 ENTRY(_start)
 SECTIONS
 {
-	. = 0xc0000000;
+	. = 0xc0008000;
 	.text : {
 	      	arch/arm/boot/setup.o(.text.boot .rodata)
 	      	*(.text)

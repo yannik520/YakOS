@@ -1,4 +1,4 @@
-#include <kernel/type.h>
+#include <kernel/types.h>
 #include <kernel/task.h>
 #include <kernel/semaphore.h>
 #include <compiler.h>

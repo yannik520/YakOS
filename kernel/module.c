@@ -20,7 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <kernel/type.h>
+#include <kernel/types.h>
 #include <kernel/malloc.h>
 #include <kernel/list.h>
 #include <kernel/semaphore.h>

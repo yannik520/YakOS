@@ -20,24 +20,35 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <kernel/types.h>
-#include <kernel/printk.h>
-#include <module/module.h>
 
-int init_module (void)
-{
-	printk("module hello runned!\n");
-  
-	return 0;
-}
+#ifndef _TYPE_H_
+#define _TYPE_H_
 
-void exit_module(void)
-{
-	printk("module hello exited!\n");
-}
+#include <arch/types.h>
 
-struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
-	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
-};
+#undef offsetof
+#ifdef __compiler_offsetof
+#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+#else
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
+
+#define container_of(ptr, type, member) ({			\
+	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+
+#ifdef FALSE
+#undef FALSE
+#endif
+#define FALSE                           (1 == 0)
+
+#ifdef TRUE
+#undef TRUE
+#endif
+#define TRUE                            (1 == 1)
+
+#ifndef NULL
+#define NULL                            (void *) 0
+#endif
+
+#endif

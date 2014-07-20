@@ -39,6 +39,25 @@ void __puts(const char *str)
 	while (UART_FR & UART_FR_BUSY);
 }
 
+#define UART_FR_PHYS	(*(volatile unsigned char *)(REG_BASE_UART0) + 0x018)
+#define UART_DR_PHYS	(*(volatile unsigned char *)(REG_BASE_UART0 + 0x000))
+void __puts_early(const char *str)
+{
+	while (*str) {
+		while (UART_FR_PHYS & UART_FR_TXFF);
+
+		UART_DR_PHYS = *str;
+
+		if (*str == '\n') {
+			while (UART_FR_PHYS & UART_FR_TXFF);
+
+			UART_DR_PHYS = '\r';
+		}
+		str++;
+	}
+	while (UART_FR_PHYS & UART_FR_BUSY);
+}
+
 void putchar(char c)
 {
 	while (UART_FR & UART_FR_TXFF);

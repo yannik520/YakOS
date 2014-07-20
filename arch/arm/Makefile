@@ -6,4 +6,6 @@ ALLOBJS-$(CONFIG_ARCH_ARM) += \
 	$(LOCALDIR)/arch_irq.o \
 	$(LOCALDIR)/ops.o \
 	$(LOCALDIR)/kernel/module.o \
-	$(LOCALDIR)/lib/strchr.o
+	$(LOCALDIR)/lib/strchr.o \
+	$(LOCALDIR)/arch.o \
+	$(LOCALDIR)/mmu.o

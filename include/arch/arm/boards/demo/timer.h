@@ -26,6 +26,7 @@
 
 #include <arch/interrupts.h>
 #include <arch/chip_regs.h>
+#include <arch/memory.h>
 
 #ifndef MHZ
 #define MHZ             (1000*1000)
@@ -35,6 +36,7 @@
 #define HZ		100
 #endif
 
+//#define CFG_TIMER_VABASE	(uint32_t)phys_to_virt(REG_BASE_TIMER_01)
 #define CFG_TIMER_VABASE	REG_BASE_TIMER_01
 #define CFG_TIMER_CONTROL	( (1<<7) | (1<<6) | (1<<5) | (1<<1) )
 #define CFG_TIMER_PRESCALE	1

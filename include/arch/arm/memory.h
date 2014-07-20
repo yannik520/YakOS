@@ -20,24 +20,56 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __MEMORY_H__
+#define __MEMORY_H__
+
+#include <const.h>
+#include <arch/memmap.h>
 #include <kernel/types.h>
-#include <kernel/printk.h>
-#include <module/module.h>
 
-int init_module (void)
-{
-	printk("module hello runned!\n");
-  
-	return 0;
-}
+#define UL(x) _AC(x, UL)
 
-void exit_module(void)
-{
-	printk("module hello exited!\n");
-}
+/* Physical */
+#define PHYS_OFFSET     MAINMEM_BASE
+#define PHYS_SIZE	MEMBANK_SIZE
 
-struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
-	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
+/* Virtual */
+#define PAGE_OFFSET     0xc0000000
+#define TEXT_OFFSET     0x00008000
+
+#define REGISTER_VADDR  (REGISTER_BASE + PAGE_OFFSET)
+
+typedef enum {
+	MAP_DESC_TYPE_SECTION,
+	MAP_DESC_TYPE_PAGE
+} MAP_DESC_TYPE;
+
+struct map_desc {
+	uint32_t paddr;
+	uint32_t vaddr;
+	uint32_t length;
+	uint32_t attr;
+	MAP_DESC_TYPE type;
 };
+
+static inline uint32_t  __virt_to_phys(uint32_t x)
+{
+	return (uint32_t)x - PAGE_OFFSET + PHYS_OFFSET;
+}
+
+static inline unsigned long __phys_to_virt(uint32_t x)
+{
+	return x - PHYS_OFFSET + PAGE_OFFSET;
+}
+
+static inline uint32_t virt_to_phys(const volatile void *x)
+{
+	return __virt_to_phys((uint32_t)(x));
+}
+
+static inline void *phys_to_virt(uint32_t x)
+{
+	return (void *)__phys_to_virt(x);
+}
+
+#endif

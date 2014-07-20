@@ -23,7 +23,7 @@
 
 #include <string.h>
 #include <kernel/printk.h>
-#include <kernel/type.h>
+#include <kernel/types.h>
 #include <kernel/task.h>
 #include <arch/text.h>
 #include <init.h>

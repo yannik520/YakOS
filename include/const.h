@@ -20,24 +20,19 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <kernel/types.h>
-#include <kernel/printk.h>
-#include <module/module.h>
+#ifndef __CONST_H__
+#define __CONST_H__
 
-int init_module (void)
-{
-	printk("module hello runned!\n");
-  
-	return 0;
-}
+#ifdef __ASSEMBLY__
+#define _AC(X,Y)	X
+#define _AT(T,X)	X
+#else
+#define __AC(X,Y)	(X##Y)
+#define _AC(X,Y)	__AC(X,Y)
+#define _AT(T,X)	((T)(X))
+#endif
 
-void exit_module(void)
-{
-	printk("module hello exited!\n");
-}
+#define _BITUL(x)	(_AC(1,UL) << (x))
+#define _BITULL(x)	(_AC(1,ULL) << (x))
 
-struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
-	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
-};
+#endif

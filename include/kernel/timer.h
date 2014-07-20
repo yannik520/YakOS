@@ -25,7 +25,7 @@
 
 #include <compiler.h>
 #include <kernel/list.h>
-#include <kernel/type.h>
+#include <kernel/types.h>
 #include <arch/interrupts.h>
 
 struct timer;

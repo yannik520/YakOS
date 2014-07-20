@@ -26,7 +26,7 @@
 
 #include <stdarg.h>
 #include <compiler.h>
-#include <kernel/type.h>
+#include <kernel/types.h>
 
 #define min(x, y) ({				\
 	typeof(x) _min1 = (x);			\

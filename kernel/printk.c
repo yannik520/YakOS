@@ -40,6 +40,8 @@
 #define LOG_BUF_LEN             1024
 #define LOG_ALIGN               __alignof__(struct printk_log)
 
+extern bool mmu_opened;
+
 struct printk_log {
 	u32 len;                /* length of entire record */
 	u16 text_len;		/* length of text buffer */
@@ -144,6 +146,12 @@ static void log_store(int level, const char *text, u16 text_len)
 
 void puts(const char *s)
 {
+	/*if (mmu_opened) {
+		__puts(s);
+	}
+	else {
+		__puts_early(s);
+		}*/
 	__puts(s);
 }
 

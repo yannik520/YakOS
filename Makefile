@@ -69,7 +69,6 @@ endif
 
 
 ALLOBJS-y := \
-	init/init_shell.o \
 	lib/string.o
 
 include arch/$(ARCH)/Makefile
@@ -78,6 +77,7 @@ include arch/$(ARCH)/boards/$(BOARD)/Makefile
 include kernel/Makefile
 include modules/Makefile
 include fs/Makefile
+include init/Makefile
 
 LINKER_SCRIPT_TEMPLETE := arch/$(ARCH)/boot/build.ld
 LINKER_SCRIPT := build.ld
