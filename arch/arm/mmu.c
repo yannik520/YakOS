@@ -30,9 +30,10 @@
 
 #define MB	(1024 * 1024)
 
-
 uint32_t *	pgd_base = (uint32_t *)PAGE_OFFSET;
 
+#define dsb() __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+				    : : "r" (0) : "memory") /* drain write buffer on v4 */
 
 static inline uint32_t arm_read_cr1(void)
 {
@@ -105,7 +106,8 @@ static inline void flush_pgd_entry(pgd_t *gpd)
 	    :
 	    :"r" (gpd)
 	    :"cc");
-	DSB;
+
+	dsb();
 }
 
 void arm_mmu_map_section (addr_t vaddr, addr_t paddr, uint32_t flags)
@@ -131,52 +133,52 @@ void arm_mmu_unmap_section(addr_t vaddr)
 	flush_pgd_entry(pgd);
 }
 
-static pte_t *pte_offset(pte_t *pt, unsigned long virtual) {
+static inline pte_t *pte_offset(pte_t *pt, unsigned long virtual) {
 	int index = (virtual & ~SECTION_MASK) >> PAGE_SHIFT;
+	printk("pt=0x%x,index=0x%d\n",pt, index);
 	return (pt + index);
 }
 
 void arm_mmu_map_page(addr_t vaddr, addr_t paddr, uint32_t flags)
 {
-	pgd_t		*pgd		      = pgd_offset(pgd_base, vaddr);
+	pgd_t		*pgd = pgd_offset(pgd_base, vaddr);
 	pgd_t		 pgd_value;
-	pte_t		 pte_value, *pte, *pt = NULL;
+	pte_t		 *pte, *pt = NULL;
 	uint32_t	 AP;
 	uint32_t	 CB;
 
-	AP = flags & TTB_SPGTD_AP0_MASK; /* AP0 */
-	AP |= flags & TTB_SPGTD_AP1_MASK; /* AP1 */
-	AP |= flags & TTB_SPGTD_AP2_MASK; /* AP2 */
-	AP |= flags & TTB_SPGTD_AP3_MASK; /* AP3 */
+	AP = flags & TTB_SPGTD_AP0_MASK;        /* AP0 */
+	AP |= flags & TTB_SPGTD_AP1_MASK;       /* AP1 */
+	AP |= flags & TTB_SPGTD_AP2_MASK;       /* AP2 */
+	AP |= flags & TTB_SPGTD_AP3_MASK;       /* AP3 */
 	
-	CB = flags & TTB_SPGTD_CACHEABLE; /* C bit */
-	CB |= flags & TTB_SPGTD_BUFFERABLE; /* B bit */
+	CB = flags & TTB_SPGTD_CACHEABLE;       /* C bit */
+	CB |= flags & TTB_SPGTD_BUFFERABLE;     /* B bit */
 	
 	pgd = (pgd_t *)ALIGN(pgd, 4);
-	//printk("pgd=0x%x, paddr=0x%x, vaddr=0x%x\n", pgd, paddr, vaddr);
-	//printk("AP|CB=0x%x\n", AP|CB);
+
 	/* One coarse page table contain 256 page table entries,
 	one entry consumed 4 bytes memory, so one coarse totally
 	consumed 4*256=1k bytes memory. */
-	if (NULL == pgd) {
+	if (NULL != pgd) {
 		int i;
 
 		/* allock memmory to store page table */
-		pt = kmalloc(PAGE_SIZE); //4k bytes
-		//printk("pt=0x%x\n", pt);
+		pt = ALIGN(kmalloc(PAGE_SIZE), 1024); //4k bytes
 		for (i=0; i < 4; i++) {
 			pgd_value = (virt_to_phys(pt) + i * 256 * sizeof(pte_t)) | TTB_CPTD;
 			pgd[i] = pgd_value;
-			//printk("i=%d, pgd_value=0x%x\n", i, pgd_value);
-			//flush_pgd_entry(&pgd[i]);
+
+			flush_pgd_entry(&pgd[i]);
 		}
 	}
 
 	pt	  = (pte_t *)ALIGN(phys_to_virt((uint32_t)*pgd), 1024);
 	pte	  = pte_offset(pt, vaddr);
-	pte_value = (paddr & PAGE_MASK) | AP | CB;
-	*pte	  = pte_value;
-	//printk("pte=0x%x, pte_value=0x%x\n", pte, pte_value);
+	*pte	  = (paddr & PAGE_MASK) | AP | CB | TTB_SPGDT_SMALL_PAGE;
+	//printk("*pgd=0x%x, pt=0x%x, pte=0x%x *pte=0x%x\n", *pgd, pt, pte, *pte);
+	//printk("paddr=0x%x, vaddr=0x%x\n", paddr, vaddr);
+
 }
 
 void arm_mmu_create_mapping(struct map_desc *md)
@@ -238,9 +240,8 @@ static void arm_mmu_map_low_memory() {
 
 static void arm_mmu_map_vector_memory() {
 	struct map_desc map;
-	//map.paddr  = __virt_to_phys((unsigned long)kmalloc(PAGE_SIZE));
 	map.paddr  = 0;
-	map.vaddr  = EXCEPTION_BASE;
+	map.vaddr  = 0;
 	map.length = SECTION_SIZE;
 	map.attr   = TTB_AP_WR;
 	map.type   = MAP_DESC_TYPE_SECTION;
@@ -250,15 +251,38 @@ static void arm_mmu_map_vector_memory() {
 static void arm_mmu_map_register() {
 	struct map_desc map;
 	map.paddr  = REGISTER_BASE;
-	map.vaddr  = REGISTER_VADDR;
+	//map.vaddr  = REGISTER_VADDR;
+	map.vaddr  = REGISTER_BASE;
 	map.length = REGISTER_SIZE;
 	map.attr   = TTB_AP_WR;
 	map.type   = MAP_DESC_TYPE_SECTION;
 	arm_mmu_create_mapping(&map);
 }
 
+void arm_mmu_remap_evt(void) {
+	struct map_desc map;
+	map.paddr  = ALIGN( __virt_to_phys((unsigned long)kmalloc(PAGE_SIZE*2)+(PAGE_SIZE -1)), PAGE_SIZE);
+	map.vaddr  = EXCEPTION_BASE;
+	map.length = PAGE_SIZE;
+	map.attr   = TTB_SPGTD_AP0_WR;
+	map.type   = MAP_DESC_TYPE_PAGE;
+	printk("map.paddr=0x%x\n", map.paddr);
+	arm_mmu_create_mapping(&map);
+}
+
+void clean_user_space(void) {
+	unsigned long virtual = 0;
+	for (virtual = 0; virtual < PAGE_OFFSET; virtual += SECTION_SIZE) {
+		pgd_t *pgd = pgd_offset(((pgd_t *)pgd_base), virtual);
+		*pgd = (unsigned long)0;
+
+		//arm_mmu_unmap_section(virtual);
+	}
+}
+
 void arm_mmu_init(void)
 {
+	uint32_t i;
 	armv4_mmu_cache_off();
 	arm_mmu_map_low_memory();
 	arm_mmu_map_vector_memory();
@@ -266,5 +290,5 @@ void arm_mmu_init(void)
 	arm_write_ttbr(PAGE_OFFSET);
 	arm_write_dacr(DOMAIN_CLIENT);
 	/* turn on the mmu */
-	arm_write_cr1(arm_read_cr1() | 0x1);
+	arm_write_cr1(arm_read_cr1() | 0x1 | (1<<13));
 }

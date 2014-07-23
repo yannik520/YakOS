@@ -133,6 +133,9 @@
 #define TTB_SPGTD_AP3_WR	    (3 << 10)
 #define TTB_SPGTD_CACHEABLE	    (1 << 3)
 #define TTB_SPGTD_BUFFERABLE	    (1 << 2)
-
+#define TTB_SPGTD_INVALID	    (0x00)
+#define TTB_SPGDT_LARGE_PAGE        (0x01)    /* 64K page */
+#define TTB_SPGDT_SMALL_PAGE        (0x02)    /* 4K page */
+#define TTB_SPGDT_TINY_PAGE         (0x03)    /* 1K page */
 
 #endif

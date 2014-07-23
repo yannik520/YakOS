@@ -22,7 +22,22 @@
  */
 
 #include <arch/mmu.h>
+#include <arch/memory.h>
+#include <kernel/malloc.h>
+#include <string.h>
+
+#define HEAP_SIZE		0x100000 //1M
+extern unsigned int	__heap;
+
+void exception_init(void) {
+	unsigned long vectors_vaddr = EXCEPTION_BASE;
+	memcpy((void *)vectors_vaddr, (PAGE_OFFSET+TEXT_OFFSET), 64);
+}
 
 void arch_early_init(void) {
 	arm_mmu_init();
+	kmalloc_init(&__heap, HEAP_SIZE);
+       	arm_mmu_remap_evt();
+	exception_init();
+	//clean_user_space();
 }

@@ -32,9 +32,6 @@
 #include <fs/vfsfs.h>
 #include <fs/vfsfat.h>
 
-#define HEAP_SIZE		0x100000 //1M
-
-extern unsigned int	__heap;
 int			sum = 0;
 struct semaphore	sem;
 
@@ -63,7 +60,6 @@ void kmain(void)
 	timer_init();
 
 	/*************** Init Task ****************/
-	kmalloc_init(&__heap, HEAP_SIZE);
 	task_init();
 	task_create_init();
 

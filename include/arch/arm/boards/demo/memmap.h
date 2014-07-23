@@ -38,8 +38,8 @@
 
 /* Exception vectors table */
 #define EXCEPTION_SIZE		0x100000
-//#define EXCEPTION_BASE	0xffff0000
-#define EXCEPTION_BASE		0x0
+#define EXCEPTION_BASE	0xffff0000
+//#define EXCEPTION_BASE		0x0
 
 #define REGISTER_BASE 0x10100000
 #define REGISTER_SIZE 0x100000

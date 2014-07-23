@@ -50,8 +50,9 @@ typedef uint32_t	pgd_t;
 #define pgd_offset(pgd, addr)	((pgd_t *)(((pgd_t *)pgd) + pgd_index(addr)))
 #define pte_index(addr)	(((addr) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 
-#define ALIGN(P, ALIGNBYTES)  ((void*)( ((unsigned long)P + ALIGNBYTES -1) & ~(ALIGNBYTES-1) ) )
+#define ALIGN(P, ALIGNBYTES)  ((void*)( (uint32_t)(P) & (~((ALIGNBYTES)-1)) ) )
 
 void	arm_mmu_init(void);
-
+void	arm_mmu_remap_evt(void);
+void	clean_user_space(void);
 #endif
