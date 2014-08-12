@@ -34,9 +34,27 @@
 	       	 +++------+++------+++---------------+++---------------------------------+++-----
 */
 
+#include <arch/mmu.h>
 #include <kernel/malloc.h>
 #include <kernel/list.h>
 #include <kernel/types.h>
+#include <kernel/printk.h>
+
+#define MIN_POWER_SLAB	(5u)
+#define MAX_POWER_SLAB	(16u)
+#define MIN_POWER_PAGE  (12u)
+#define MAX_POWER_PAGE	(20u)
+#define GROUP_NUM_SLAB	((MAX_POWER_SLAB) - (MIN_POWER_SLAB) + 1)
+#define GROUP_NUM_PAGE	((MAX_POWER_PAGE) - (MIN_POWER_PAGE) + 1)
+#define HEADER_SIZE	(sizeof(mem_head))
+#define MIN(x, y)	((x) <= (y) ? (x) : (y))
+#define MAX(x, y)	((x) <= (y) ? (y) : (x))
+
+typedef enum {
+	ALLOC_TYPE_SLAB,
+	ALLOC_TYPE_PAGE,
+	ALLOC_TYPE_MAX
+}ALLOC_TYPE;
 
 typedef struct mem_head
 {
@@ -46,28 +64,49 @@ typedef struct mem_head
 
 }mem_head;
 
-#define MIN_POWER	(5)
-#define MAX_POWER	(20)
-#define GROUP_NUM	((MAX_POWER) - (MIN_POWER) + 1)
-#define HEADER_SIZE	(sizeof(mem_head))
-#define MIN(x, y)	((x) <= (y) ? (x) : (y))
-#define MAX(x, y)	((x) <= (y) ? (y) : (x))
+struct alloctor_info
+{
+	uint32_t min_power;
+	uint32_t max_power;
+	uint32_t group_num;
+	mem_head *area;
+};
 
-static mem_head free_area[GROUP_NUM];
+static mem_head free_slab_area[GROUP_NUM_SLAB];
+static mem_head free_page_area[GROUP_NUM_PAGE];
+
+static struct alloctor_info alloctor[] = {
+	{MIN_POWER_SLAB, MAX_POWER_SLAB, GROUP_NUM_SLAB, free_slab_area},
+	{MIN_POWER_PAGE, MAX_POWER_PAGE, GROUP_NUM_PAGE, free_page_area}
+};
 
 void kmalloc_init(unsigned int *addr, unsigned int size)
 {
 	int i;
 
-	for (i = 0; i < GROUP_NUM; i++)
-	{
-		INIT_LIST_HEAD(&free_area[i].list);
+	if (NULL == addr) {
+		printk("%s %d: addr is null!\n", __FUNCTION__, __LINE__);
+		return;
 	}
 
-	list_add_tail((struct list_head *)addr, &free_area[i-1].list);
+	/* Align to page size */
+	addr = (unsigned int *)(((unsigned int)addr + PAGE_SIZE - 1) & PAGE_MASK);
+
+	for (i = 0; i < (int32_t)GROUP_NUM_SLAB; i++)
+	{
+		INIT_LIST_HEAD(&free_slab_area[i].list);
+	}
+
+	for (i = 0; i < (int32_t)GROUP_NUM_PAGE; i++)
+	{
+		INIT_LIST_HEAD(&free_page_area[i].list);
+	}
+
+	list_add_tail((struct list_head *)addr, &free_slab_area[GROUP_NUM_SLAB - 1].list);
+	list_add_tail((struct list_head *)((uint32_t)addr + (1<<MAX_POWER_SLAB)), &free_page_area[GROUP_NUM_PAGE - 1].list);
 }
 
-unsigned int round2power(unsigned int num)
+static unsigned int round2power(unsigned int num)
 {
 	unsigned int count = 0;
 
@@ -84,22 +123,32 @@ void *kmalloc(unsigned int size)
 	int		 i;
 	unsigned int	 idx;
 	unsigned int	*mem = NULL;
+	struct alloctor_info *cur_alloctor;
 
 	if (size == 0)
-		return 0;
+		return NULL;
 
 	idx = round2power(size + sizeof(mem_head));
 
-	idx = MAX(idx, MIN_POWER);
+	idx = MAX(idx, MIN_POWER_SLAB);
 
-	if (idx > MAX_POWER)
+	if (idx > MAX_POWER_PAGE)
 		return NULL;
+
+	/* Select alloctor by size */
+	for (i=0; i<(int32_t)(sizeof(alloctor)/sizeof(struct alloctor_info) - 1); i++) {
+		if (idx < alloctor[i+1].min_power) {
+			break;
+		}
+	}
+
+	cur_alloctor = &alloctor[i];
 
 	/* frome power idx group to find free block, if no,
 	   find from  bigger group */
-	for (i = idx - MIN_POWER; i < GROUP_NUM; i++)
+	for (i = idx - cur_alloctor->min_power; i < (int32_t)cur_alloctor->group_num; i++)
 	{
-		mem_head *cur_area = &free_area[i];
+		mem_head *cur_area = &cur_alloctor->area[i];
 
 		if (!list_empty(&cur_area->list)) //have free block
 		{
@@ -110,11 +159,11 @@ void *kmalloc(unsigned int size)
 			/* if the block size bigger than needed, looped devide the block into
 			   two half, and add second half to lower index group, looped till
 			   suitable block gotted*/
-			for (j = i; j > (int)(idx - MIN_POWER); j--)
+			for (j = i; j > (int)(idx - cur_alloctor->min_power); j--)
 			{
-				half_size = 1 << (j  - 1 + MIN_POWER);
+				half_size = 1 << (j  - 1 + cur_alloctor->min_power);
 				tmp = (mem_head *)((unsigned int)cur_area->list.next + half_size);
-				list_add_tail(&tmp->list, &free_area[j-1].list);
+				list_add_tail(&tmp->list, &cur_alloctor->area[j-1].list);
 			}
 
 			tmp = (mem_head *)cur_area->list.next;
@@ -133,15 +182,33 @@ void kfree(void *addr)
 {
 	int			 i;
 	int			 combine = 0;
-	unsigned int		 mem_size; //power index, the real size eque 1<<mem_size
+	unsigned int		 mem_size;	//power index, the real size eque 1<<mem_size
 	mem_head		*cur_mem = (mem_head *)addr - 1;
 	struct list_head	*pos;
+	struct alloctor_info	*cur_alloctor;
+	uint32_t		idx;
 
 	mem_size = cur_mem->size;
 
-	for ( i = mem_size - MIN_POWER; i< GROUP_NUM; i++)
+	idx = round2power(mem_size + sizeof(mem_head));
+
+	idx = MAX(idx, MIN_POWER_SLAB);
+
+	if (idx > MAX_POWER_PAGE)
+		return;
+
+	/* Select alloctor by size */
+	for (i=0; i<(int32_t)(sizeof(alloctor)/sizeof(struct alloctor_info) - 1); i++) {
+		if (idx < alloctor[i+1].min_power) {
+			break;
+		}
+	}
+
+	cur_alloctor = &alloctor[i];
+
+	for ( i = mem_size - cur_alloctor->min_power; i< (int32_t)cur_alloctor->group_num; i++)
 	{
-		list_for_each(pos, &free_area[i].list)
+		list_for_each(pos, &cur_alloctor->area[i].list)
 		{
 
 			if ((unsigned int)cur_mem + (1 << mem_size) == (unsigned int)pos) //forward combine
@@ -171,5 +238,5 @@ void kfree(void *addr)
 			break;
 	}
 
-	list_add_tail(&cur_mem->list, &free_area[mem_size - MIN_POWER].list);
+	list_add_tail(&cur_mem->list, &cur_alloctor->area[mem_size - cur_alloctor->min_power].list);
 }

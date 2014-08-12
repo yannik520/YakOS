@@ -135,7 +135,6 @@ void arm_mmu_unmap_section(addr_t vaddr)
 
 static inline pte_t *pte_offset(pte_t *pt, unsigned long virtual) {
 	int index = (virtual & ~SECTION_MASK) >> PAGE_SHIFT;
-	printk("pt=0x%x,index=0x%d\n",pt, index);
 	return (pt + index);
 }
 
@@ -266,7 +265,6 @@ void arm_mmu_remap_evt(void) {
 	map.length = PAGE_SIZE;
 	map.attr   = TTB_SPGTD_AP0_WR;
 	map.type   = MAP_DESC_TYPE_PAGE;
-	printk("map.paddr=0x%x\n", map.paddr);
 	arm_mmu_create_mapping(&map);
 }
 

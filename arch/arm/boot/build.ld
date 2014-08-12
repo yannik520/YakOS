@@ -18,8 +18,9 @@ SECTIONS
 	
 	. = ALIGN(4);
 	_end = .;
-	
-	__heap = . + 0x40;
+
+	. = ALIGN(4096);
+	__heap = .;
 
 	. = . + %STACKSIZE%; /* 8kB of stack memory */
 	stack_top = .;
