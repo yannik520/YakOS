@@ -58,18 +58,18 @@ typedef enum {
 
 typedef struct mem_head
 {
-	struct list_head list;
+	struct list_head	list;
 	/*just save the power index,the real_size = 1 << size */
-	unsigned int size;
+	unsigned int		size;
 
 }mem_head;
 
 struct alloctor_info
 {
-	uint32_t min_power;
-	uint32_t max_power;
-	uint32_t group_num;
-	mem_head *area;
+	uint32_t	 min_power;
+	uint32_t	 max_power;
+	uint32_t	 group_num;
+	mem_head	*area;
 };
 
 static mem_head free_slab_area[GROUP_NUM_SLAB];
@@ -120,10 +120,10 @@ static unsigned int round2power(unsigned int num)
 
 void *kmalloc(unsigned int size)
 {
-	int		 i;
-	unsigned int	 idx;
-	unsigned int	*mem = NULL;
-	struct alloctor_info *cur_alloctor;
+	int			 i;
+	unsigned int		 idx;
+	unsigned int		*mem = NULL;
+	struct alloctor_info	*cur_alloctor;
 
 	if (size == 0)
 		return NULL;
@@ -186,7 +186,7 @@ void kfree(void *addr)
 	mem_head		*cur_mem = (mem_head *)addr - 1;
 	struct list_head	*pos;
 	struct alloctor_info	*cur_alloctor;
-	uint32_t		idx;
+	uint32_t		 idx;
 
 	mem_size = cur_mem->size;
 
