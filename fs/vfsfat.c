@@ -207,7 +207,7 @@ int fat_read_cluster(struct fatfs_priv *fsop, size_t cluster, void *buf)
 	sector += (cluster - 2) * fsop->sectors_per_cluster;
 	VFS_ASSERT(fsop->sectors_per_cluster > 0);
 
-	for (i = 0; i < fsop->sectors_per_cluster; i++) {
+	for (i = 0; i < (int)fsop->sectors_per_cluster; i++) {
 		if (fat_read_sector(fsop, sector, p + cpcnt) == -1) {
 			printk("fat_read_sector: %d\n", sector);
 			return -1;
@@ -221,7 +221,6 @@ int fat_read_cluster(struct fatfs_priv *fsop, size_t cluster, void *buf)
 
 int fat_next_cluster32(struct fatfs_priv *fsop, size_t cluster, size_t *pcluster)
 {
-	int count;
 	size_t bytecnt_in_sector;
 	size_t fat_start = fsop->reserved_sector;
 	size_t sectorcnt = (cluster * 4) / fsop->bytes_per_sector;
@@ -240,7 +239,6 @@ int fat_next_cluster32(struct fatfs_priv *fsop, size_t cluster, size_t *pcluster
 
 int fat_next_cluster16(struct fatfs_priv *fsop, size_t cluster, size_t *pcluster)
 {
-	int count;
 	size_t bytecnt_in_sector;
 	size_t fat_start = fsop->reserved_sector;
 	size_t sectorcnt = (cluster*2)/(fsop->bytes_per_sector);
@@ -260,7 +258,6 @@ int fat_next_cluster16(struct fatfs_priv *fsop, size_t cluster, size_t *pcluster
 
 int fat_next_cluster12(struct fatfs_priv *fsop, size_t cluster, size_t *pcluster)
 {
-	int count;
 	size_t fat_start = fsop->reserved_sector;
 
 	size_t bitcnt = cluster * 12;
@@ -311,7 +308,6 @@ int fatfs_pread(struct fatfs_dirent *file, void *buf, size_t count, size_t off)
 		file->offset = 0;
 	}
 
-	size_t i;
 	struct fatfs_priv *fs = (struct fatfs_priv *)file->fs;
 	size_t bytes_per_cluster = (fs->bytes_per_sector * fs->sectors_per_cluster);
 	size_t cluster_count = (off - file->offset) / bytes_per_cluster;
@@ -378,12 +374,12 @@ int fat_dirent_lookup(struct fat_entry *dirents, size_t dpcnt,
 	size_t j, cpcnt, cpcntext;
 
 	for (j = 0; j < dpcnt; j++) {
-		cpcnt = dirent_trim(dirents[j].name, 8);
+		cpcnt = dirent_trim((char *)dirents[j].name, 8);
 		if (cpcnt > 0) {
-			strncpy(name, dirents[j].name, cpcnt);
-			cpcntext = dirent_trim(dirents[j].fext, 3);
+			strncpy(name, (char *)dirents[j].name, cpcnt);
+			cpcntext = dirent_trim((char *)dirents[j].fext, 3);
 			cpcntext && (name[cpcnt++] = '.');
-			strncpy(name + cpcnt, dirents[j].fext, cpcntext);
+			strncpy(name + cpcnt, (char *)dirents[j].fext, cpcntext);
 			name[cpcnt + cpcntext] = 0;
 			if (!strcmp(path, name)) {
 				*dirent= dirents[j];
@@ -408,7 +404,7 @@ static int fatfs_root(struct fatfs_priv *fsop,
 	VFS_MALLOC(struct fatfs_dirent, dirent);
 	char *sector_buffer = (char *)kmalloc(fsop->bytes_per_sector);
 
-	for (count = 0; count < fsop->root_entries; idx++) {
+	for (count = 0; count < (int)fsop->root_entries; idx++) {
 		if (0 >= fat_read_sector(fsop, idx, sector_buffer)) {
 			kfree(sector_buffer);
 			kfree(dirent);
@@ -517,7 +513,7 @@ static int fatfs_read(void *priv, void *buf,
 	struct fatfs_dirent *dirent = (struct fatfs_dirent*)priv;
 
 	*pcluster = fatfs_pread(priv, buf, count, dirent->lseek);
-	if (*pcluster == -1) {
+	if ((int32_t)*pcluster == -1) {
 		*pcluster = 0;
 		return -1;
 	}
@@ -541,7 +537,7 @@ static int fatfs_root_dir_read(struct fatfs_dirent *dirent, void *buf,
 	VFS_ASSERT(dirent && buf);
 
 	entry_cnt = dirent->lseek/32;
-	if (entry_cnt >= fsop->root_entries) {
+	if ((uint32_t)entry_cnt >= fsop->root_entries) {
 		return -1;
 	}
 
@@ -554,7 +550,6 @@ static int fatfs_root_dir_read(struct fatfs_dirent *dirent, void *buf,
 	idx += fsop->sectors_per_fat * fsop->number_of_FAT;
 	idx += dirent->offset;
 
-	struct fat_entry entry;
 	char *sector_buffer = (char *)kmalloc(fsop->bytes_per_sector);
 
 	if (0 >= fat_read_sector(fsop, idx, sector_buffer)) {
@@ -579,12 +574,12 @@ static int fatfs_root_dir_read(struct fatfs_dirent *dirent, void *buf,
 		return 0;
 	}
 
-	cpcnt = dirent_trim(dirents[dpcnt].name, 8);
+	cpcnt = dirent_trim((char *)dirents[dpcnt].name, 8);
 	if (cpcnt > 0) {
-		strncpy(name, dirents[dpcnt].name, cpcnt);
-		cpcntext = dirent_trim(dirents[dpcnt].fext, 3);
+		strncpy(name, (char *)dirents[dpcnt].name, cpcnt);
+		cpcntext = dirent_trim((char *)dirents[dpcnt].fext, 3);
 		cpcntext && (name[cpcnt++] = '.');
-		strncpy(name + cpcnt, dirents[dpcnt].fext, cpcntext);
+		strncpy(name + cpcnt, (char *)dirents[dpcnt].fext, cpcntext);
 		cpcnt += cpcntext;
 		name[cpcnt] = 0;
 		*pcluster = cpcnt + 1;
@@ -613,19 +608,19 @@ static int fatfs_dir_read(void *priv, void *buf,
 	}
 
 	*pcluster = fatfs_pread(priv, buf, 32, dirent->lseek);
-	if (*pcluster == -1) {
+	if ((int32_t)*pcluster == -1) {
 		*pcluster = 0;
 		return -1;
 	}
 
 	dirent->lseek += *pcluster;
 	entry = (struct fat_entry *)buf;
-	cpcnt = dirent_trim(entry->name, 8);
+	cpcnt = dirent_trim((char *)entry->name, 8);
 	if (cpcnt > 0) {
-		strncpy(name, entry->name, cpcnt);
-		cpcntext = dirent_trim(entry->fext, 3);
+		strncpy(name, (char *)entry->name, cpcnt);
+		cpcntext = dirent_trim((char *)entry->fext, 3);
 		cpcntext && (name[cpcnt++] = '.');
-		strncpy(name + cpcnt, entry->fext, cpcntext);
+		strncpy(name + cpcnt, (char *)entry->fext, cpcntext);
 		cpcnt += cpcntext;
 		name[cpcnt] = 0;
 		*pcluster = cpcnt + 1;
@@ -667,7 +662,7 @@ static int fatfs_mount(const uint8_t *image, struct vfs_node *vfsroot)
 		goto mount_fail;
 	}
 #else
-	fp = image;
+	fp = (uint8_t *)image;
 	memcpy(volume, image, 512);
 #endif
 

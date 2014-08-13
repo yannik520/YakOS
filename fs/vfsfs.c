@@ -141,7 +141,6 @@ int fd_alloc(int low)
 
 int fd_free(int fd)
 {
-	struct vfs_node *fp;
 	int error = 0;
 
 	if ((fd < 0) || (fd > FD_MAX_NUM))
@@ -209,7 +208,6 @@ inline struct vfs_node *file_alloc()
 
 int vfs_open(const char *path, struct vfs_node *file)
 {
-	int error = -1;
 	struct vfs_opvector *vops;
 	const char *p, *stp = path;
 	struct vfs_node dir = __vfsroot;
@@ -249,7 +247,6 @@ int vfs_open(const char *path, struct vfs_node *file)
 
 int vfs_read(int fd, void *buf, size_t count, size_t *ready)
 {
-	size_t nbyte;
 	struct vfs_node *file = fp_get(fd);
 	struct vfs_opvector *vops = file->vops;
 	VFS_ASSERT(vops && vops->read);

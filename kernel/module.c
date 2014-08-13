@@ -24,6 +24,7 @@
 #include <kernel/malloc.h>
 #include <kernel/list.h>
 #include <kernel/semaphore.h>
+#include <kernel/printk.h>
 #include <module/module.h>
 #include <module/module_arch.h>
 #include <module/symtab.h>
@@ -36,7 +37,7 @@ DEFINE_SEMAPHORE(kmod_sem);
 
 //struct k_module *this_module = NULL;
 
-const static unsigned char elf_magic_header[] =
+static const unsigned char elf_magic_header[] =
 {
 	0x7f, 0x45, 0x4c, 0x46,  /* 0x7f, 'E', 'L', 'F' */
 	0x01,                    /* Only 32-bit objects. */
@@ -53,7 +54,7 @@ static int copy_segment_data(unsigned int input_addr, unsigned int offset,
 	unsigned int	addr = input_addr + offset;
 
 	while(len > sizeof(buffer)) {
-		memcpy(buffer, addr, sizeof(buffer));
+		memcpy(buffer, (uint32_t *)addr, sizeof(buffer));
 		res = module_output_write_segment(output, buffer, sizeof(buffer));
 		if (res != sizeof(buffer)) 
 			return MODULE_OUTPUT_ERROR;
@@ -62,13 +63,13 @@ static int copy_segment_data(unsigned int input_addr, unsigned int offset,
 	}
 	memcpy(buffer, addr, len);
 	res = module_output_write_segment(output, buffer, len);
-	if (res != len) return MODULE_OUTPUT_ERROR;
+	if ((uint32_t)res != len) return MODULE_OUTPUT_ERROR;
 	return MODULE_OK;
 }
 
 static int seek_read(unsigned int addr, unsigned int offset, char *buf, int len)
 {
-	memcpy(buf, addr+offset, len);
+	memcpy(buf, (uint32_t *)(addr+offset), len);
 	return len;
 }
 
@@ -289,7 +290,7 @@ static inline int _load_module(unsigned int input_addr, struct k_module *output)
 	unsigned short shdrnum, shdrsize;
 
 	unsigned char using_relas = -1;
-	struct sec_info sec_info[SEC_TYPE_MAX] = {0};
+	struct sec_info sec_info[SEC_TYPE_MAX] = {{0,0,0,0}};
 	unsigned short bsssize = 0;
 
 	void *module;
@@ -448,7 +449,7 @@ static inline int _load_module(unsigned int input_addr, struct k_module *output)
 		}
 		else {
 			memcpy(((struct relevant_section *)&(output->seg_info)+i)->address,
-			       input_addr+sec_info[i].s_offset,
+			       (uint32_t *)(input_addr+sec_info[i].s_offset),
 			       sec_info[i].s_size);
 		}
 	}

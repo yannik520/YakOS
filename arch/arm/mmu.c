@@ -260,7 +260,7 @@ static void arm_mmu_map_register() {
 
 void arm_mmu_remap_evt(void) {
 	struct map_desc map;
-	map.paddr  = ALIGN( __virt_to_phys((unsigned long)kmalloc(PAGE_SIZE*2)+(PAGE_SIZE -1)), PAGE_SIZE);
+	map.paddr  = (uint32_t)ALIGN(__virt_to_phys((unsigned long)kmalloc(PAGE_SIZE*2)+(PAGE_SIZE -1)), PAGE_SIZE);
 	map.vaddr  = EXCEPTION_BASE;
 	map.length = PAGE_SIZE;
 	map.attr   = TTB_SPGTD_AP0_WR;
@@ -280,7 +280,6 @@ void clean_user_space(void) {
 
 void arm_mmu_init(void)
 {
-	uint32_t i;
 	armv4_mmu_cache_off();
 	arm_mmu_map_low_memory();
 	arm_mmu_map_vector_memory();

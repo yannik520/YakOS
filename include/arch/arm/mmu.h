@@ -32,9 +32,9 @@ typedef uint32_t	pgd_t;
 #define PAGE_SIZE	(1UL<<PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
 
-#define page_start(_v)          ((_v) &				PAGE_MASK)
+#define page_start(_v)          ((_v) &	PAGE_MASK)
 #define page_offset(_v)         ((_v) & (~PAGE_MASK))
-#define page_align(_v)          (((_v) + (~PAGE_MASK)) &	PAGE_MASK)
+#define page_align(_v)          (((_v) + (~PAGE_MASK)) & PAGE_MASK)
 
 #define SECTION_SHIFT	20
 #define SECTION_SIZE	(1UL<<SECTION_SHIFT)
@@ -46,11 +46,11 @@ typedef uint32_t	pgd_t;
 #define PGDIR_SIZE	(1UL << PGDIR_SHIFT)
 #define PGDIR_MASK	(~(PGDIR_SIZE-1))
 
-#define pgd_index(addr)	((addr) >> PGDIR_SHIFT)
-#define pgd_offset(pgd, addr)	((pgd_t *)(((pgd_t *)pgd) + pgd_index(addr)))
-#define pte_index(addr)	(((addr) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
+#define pgd_index(addr)         ((addr) >> PGDIR_SHIFT)
+#define pgd_offset(pgd, addr)   ((pgd_t *)(((pgd_t *)(pgd) ) + pgd_index(addr)))
+#define pte_index(addr)         (((addr) >> PAGE_SHIFT) & (PTRS_PER_PTE - 1))
 
-#define ALIGN(P, ALIGNBYTES)  ((void*)( (uint32_t)(P) & (~((ALIGNBYTES)-1)) ) )
+#define ALIGN(P, ALIGNBYTES)    ((void*)((uint32_t)(P) & (~((ALIGNBYTES)-1))))
 
 void	arm_mmu_init(void);
 void	arm_mmu_remap_evt(void);

@@ -138,7 +138,7 @@ static enum handler_return task_sleep_function(timer_t *timer, unsigned long now
 	enter_critical_section();
 
 	scheduler->enqueue_task(t, 0);
-	kfree(timer);
+	kfree((void *)timer);
 
 	exit_critical_section();
 
@@ -165,7 +165,7 @@ void task_sleep(unsigned long delay)
 
 	enter_critical_section();
 
-	oneshot_timer_add(timer, delay, task_sleep_function, (void *)current_task);
+	oneshot_timer_add(timer, delay, (timer_function)task_sleep_function, (void *)current_task);
 	current_task->state = SLEEPING;
 
 	scheduler->dequeue_task(current_task, 0);
@@ -214,8 +214,6 @@ void task_init(void)
 
 void task_exit(int retcode)
 {
-	struct list_head    *iterator;
-
 	enter_critical_section();
 
 	current_task->state = EXITED;

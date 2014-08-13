@@ -342,13 +342,13 @@ int run_command(const char *cmd)
 	}
 
 	printk("unknown command\n");
+	return 0;
 }
 
 int init_shell(void *arg)
 {
 	int len;
 	static char lastcommand[CONSOLE_BUFFER_SIZE] = { 0, };
-	struct shell_command *cmd;
 
 	shell_register_command(&kmsg_command);
 	shell_register_command(&insmod_command);
