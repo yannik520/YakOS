@@ -50,7 +50,7 @@ static void timer_list_add(timer_t *timer)
 {
 	timer_t *iterator;
 
-	DBG("Etime:%d\n", timer->expired_time);
+	dbg("Etime:%d\n", timer->expired_time);
 	#ifdef DEBUG
 	dump_timers();
 	#endif
@@ -63,7 +63,7 @@ static void timer_list_add(timer_t *timer)
 
 	list_for_each_entry(iterator, &timer_list, entry)
 	{
-		DBG("%d\n", iterator->expired_time);
+		dbg("%d\n", iterator->expired_time);
 		if (iterator->expired_time < timer->expired_time)
 		{
 			list_add(&timer->entry, &iterator->entry);
@@ -83,7 +83,7 @@ static void timer_add(timer_t *timer, unsigned int delay_time, unsigned int peri
 
 	if (!list_empty(&timer->entry))
 	{
-		ERROR("timer has been added\n");
+		error("timer has been added\n");
 	}
 	
 	now = current_time();
@@ -146,7 +146,7 @@ enum handler_return timer_tick(void *arg, bigtime_t now)
 	    return INT_RESCHEDULE;
 	}
 
-	DBG("now=%d\n", now);
+	dbg("now=%d\n", now);
 
 	#ifdef DEBUG
 	dump_timers();

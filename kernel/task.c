@@ -131,7 +131,7 @@ static enum handler_return task_sleep_function(timer_t *timer, unsigned long now
 {
 	task_t *t = (task_t *)arg;
 
-	DBG("%s wakeup\n", t->name);
+	dbg("%s wakeup\n", t->name);
 
 	t->state = READY;
 
@@ -149,7 +149,7 @@ void task_sleep(unsigned long delay)
 {
 	timer_t         *timer;
 	
-	DBG("start sleep\n");
+	dbg("start sleep\n");
 
 	#ifdef DEBUG
 	scheduler->dump();
@@ -158,7 +158,7 @@ void task_sleep(unsigned long delay)
 	timer = (timer_t *)kmalloc(sizeof(*timer));
 	if (NULL == timer)
 	{
-		ERROR("%s: alloc timer failled\n");
+		error("%s: alloc timer failled\n");
 	}
 	
 	init_timer_value(timer);
@@ -183,7 +183,7 @@ void task_create_init(void)
 	init = (task_t *)kmalloc(sizeof(task_t));
 	if (init == (task_t *)0)
 	{
-		ERROR("Alloc task_t error!\n");
+		error("Alloc task_t error!\n");
 		return;
 	}
 

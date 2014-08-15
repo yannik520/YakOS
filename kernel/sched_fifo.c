@@ -37,8 +37,7 @@ void sched_fifo_init (void)
 {
 	int i;
 	
-	for (i=0; i< MAX_PRIORITY; i++)
-	{
+	for (i=0; i< MAX_PRIORITY; i++) {
 		INIT_LIST_HEAD(&all_task[i]);
 	}
 }
@@ -49,13 +48,11 @@ static void sched_fifo_dump ()
 	struct list_head        *list;
 
 	printk("\ntasks:");
-	list_for_each(list, &all_task[current_task->priority])
-	{
+	list_for_each(list, &all_task[current_task->priority]) {
 		task = (task_t *)list;
 		printk(" %s ", task->name);
 	}
 	printk("\n");
-
 }
 
 static task_t *_find_next_task(unsigned int priority, struct list_head *start)
@@ -63,21 +60,17 @@ static task_t *_find_next_task(unsigned int priority, struct list_head *start)
 	task_t           *task;
 	struct list_head *iterator;
 
-	list_for_each(iterator, start)
-	{
+	list_for_each(iterator, start) {
 		task = (task_t *)iterator;
-		DBG("new_task=%s\n", task->name);
-		if ((iterator == &all_task[priority]) || (task->state == BLOCKED))
-		{
+		dbg("new_task=%s\n", task->name);
+		if ((iterator == &all_task[priority]) || (task->state == BLOCKED)) {
 			continue;
 		}
-		else
-		{
+		else {
 			break;
 		}
 	}
-	if (iterator == start)
-	{
+	if (iterator == start) {
 		task = NULL;
 	}
 	
@@ -95,8 +88,7 @@ static void sched_fifo_dequeue_task (task_t *p, int flags)
 	next_task = _find_next_task(p->priority, &p->list);
 
 	list_del(&p->list);
-	if (list_empty(&all_task[p->priority]))
-	{
+	if (list_empty(&all_task[p->priority])) {
 		task_bitmap &= ~(1 << p->priority);
 	}
 }
@@ -113,53 +105,46 @@ static task_t * sched_fifo_pick_next_task (void)
 	sched_fifo_dump();
 	#endif
 
-	for (i=0; i<MAX_PRIORITY; i++)
-	{
-		if ((task_bitmap >> i) & 1)
-		{
-			if (i != current_task->priority)
-			{
-				current_list = &all_task[i];
-			}
-			else
-			{
-				if ( (current_task->state == EXITED) ||
-				     (current_task->state == SLEEPING) )
-				{
-					if (NULL != next_task)
-					{
-						DBG("next_task=%s\n", next_task->name);
-						new_task = next_task;
-						next_task = NULL;
-						break;
-					}
-					else
-					{
-						continue;
-					}
-				}
-
-				current_list = list;
-			}
-			
-			new_task = _find_next_task(i, current_list);
-			if (NULL == new_task)
-			{
-				continue;
-			}
-			break;
+	for (i=0; i<MAX_PRIORITY; i++) {
+		if (0 == ((task_bitmap >> i) & 0x1)) {
+			continue;
 		}
+
+		if (i != current_task->priority) {
+			current_list = &all_task[i];
+		}
+		else {
+			if ( (current_task->state == EXITED)	||
+			     (current_task->state == SLEEPING) ) {
+				if (NULL != next_task) {
+					dbg("next_task=%s\n", next_task->name);
+					new_task  = next_task;
+					next_task = NULL;
+					break;
+				}
+				else {
+					continue;
+				}
+			}
+
+			current_list = list;
+		}
+			
+		new_task = _find_next_task(i, current_list);
+		if (NULL == new_task) {
+			continue;
+		}
+		break;
 	}
 
-	if (MAX_PRIORITY == i)
-	{
+	if (MAX_PRIORITY == i) {
 		return NULL;
 	}
 
 	new_task->state = RUNNING;
 	current_task    = new_task;
 
-	DBG("old_task=%s, new_task=%s\n", old_task->name, new_task->name);
+	dbg("old_task=%s, new_task=%s\n", old_task->name, new_task->name);
 
 	return current_task;
 }

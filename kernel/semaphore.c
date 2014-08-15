@@ -4,9 +4,9 @@
 #include <compiler.h>
 
 struct semaphore_waiter {
-	struct list_head list;
-	task_t *task;
-	int up;
+	struct list_head	 list;
+	task_t			*task;
+	int			 up;
 };
 
 extern task_t	*current_task;
@@ -18,7 +18,7 @@ static inline int __down(struct semaphore *sem)
 
 	list_add_tail(&waiter.list, &sem->wait_list);
 	waiter.task = task;
-	waiter.up = 0;
+	waiter.up   = 0;
 
 	for (;;) {
 		set_task_state(task, BLOCKED);

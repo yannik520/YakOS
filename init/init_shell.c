@@ -196,7 +196,7 @@ CMD_FUNC(insmod) {
 	struct k_module	*mod;
 
 	mod = alloc_kmodule();
-	if (NULL == mod)
+	if (unlikely(NULL == mod))
 	{
 		printk("kmodule alloc failed!\n");
 		return -1;

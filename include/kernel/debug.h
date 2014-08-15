@@ -23,18 +23,32 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#include <arch/halt.h>
 #include <kernel/printk.h>
 
 #ifdef DEBUG
-#define DBG(fmt,args...) \
+#define dbg(fmt,args...) \
 	printk("%s %s: " fmt , "DEBUG", \
 	       __FUNCTION__, ## args)
+
+void _assert(
+	const char*  assertion,
+	const char*  file,
+	unsigned int line,
+	const char*  function
+);
+
+#define assert(expr) \
+	if(!(expr)) _assert(#expr, __FILE__, __LINE__, __FUNCTION__)
+
 #else
-#define DBG(fmt,args...) \
+#define dbg(fmt,args...) \
 	do { } while (0)
+
+#define assert(expr)
 #endif
 
-#define ERROR(fmt, args...) \
+#define error(fmt, args...) \
 	printk("%s %s: " fmt , "ERROR", \
 	       __FUNCTION__, ## args)
 

@@ -21,14 +21,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _MALLOC_H_
-#define _MALLOC_H_
+#ifndef __HALT_H__
+#define __HALT_H__
 
-#include <kernel/types.h>
-#include <kernel/list.h>
-
-void kmalloc_init(uint32_t *addr, uint32_t size);
-void *kmalloc(uint32_t size);
-void kfree(void *addr);
+void halt(void);
 
 #endif

@@ -30,6 +30,7 @@
 #include <module/symtab.h>
 #include <stddef.h>
 #include <string.h>
+#include <compiler.h>
 
 char module_unknown[30];
 LIST_HEAD(k_module_root);
@@ -506,7 +507,7 @@ int load_kmodule(unsigned int input_addr, struct k_module *mod)
 {
 	int ret;
 
-	if (NULL == mod) {
+	if (unlikely(NULL == mod)) {
 		printk("The module pointer is invalid!\n");
 		return -1;
 	}
@@ -592,7 +593,7 @@ struct k_module *alloc_kmodule(void)
 	struct k_module *mod	  = NULL;
 	
 	mod = (struct k_module *)kmalloc(sizeof(struct k_module));
-	if (NULL == mod) {
+	if (unlikely(NULL == mod)) {
 		printk("Alloc kmodule failed!\n");
 		return NULL;
 	}
@@ -609,7 +610,7 @@ struct k_module *alloc_kmodule(void)
 
 void free_kmodule(struct k_module *kmod)
 {
-	if (NULL == kmod) {
+	if (unlikely(NULL == kmod)) {
 		return;
 	}
 	

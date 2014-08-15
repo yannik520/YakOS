@@ -21,14 +21,25 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _MALLOC_H_
-#define _MALLOC_H_
+#include <linkage.h>
+	
+ENTRY(halt)
+    /* Disable interrupts */
+    cpsid iaf
 
-#include <kernel/types.h>
-#include <kernel/list.h>
+#ifdef DEBUG
+    /* print a message */
+    ldr r0, =halt_message
+    blx __puts
+#endif
 
-void kmalloc_init(uint32_t *addr, uint32_t size);
-void *kmalloc(uint32_t size);
-void kfree(void *addr);
+    /* Halt(wait for interrupt) */
+1:  mcr p15, 0, r0, c7, c0, 4
+    b 1b
 
+
+#ifdef DEBUG
+.section .rodata
+halt_message:
+.asciz "halting..."
 #endif

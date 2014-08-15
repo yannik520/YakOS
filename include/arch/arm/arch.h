@@ -21,7 +21,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #ifndef __ARCH_H__
-#define __ARM_H__
+#define __ARCH_H__
 
 void exception_init(void);
 void arch_early_init(void);

@@ -31,18 +31,19 @@
 #include <init.h>
 #include <fs/vfsfs.h>
 #include <fs/vfsfat.h>
+#include <compiler.h>
 
 int			sum = 0;
 struct semaphore	sem;
 
 void show_logo(void) {
-  printk("▄▄▄    ▄▄▄           ▄▄          ▄▄▄▄      ▄▄▄▄   \n");
-  printk(" ██▄  ▄██            ██         ██▀▀██   ▄█▀▀▀▀█  \n");
-  printk("  ██▄▄██    ▄█████▄  ██ ▄██▀   ██    ██  ██▄      \n");
-  printk("   ▀██▀     ▀ ▄▄▄██  ██▄██     ██    ██   ▀████▄  \n");
-  printk("    ██     ▄██▀▀▀██  ██▀██▄    ██    ██       ▀██ \n");
-  printk("    ██     ██▄▄▄███  ██  ▀█▄    ██▄▄██   █▄▄▄▄▄█▀ \n");
-  printk("    ▀▀      ▀▀▀▀ ▀▀  ▀▀   ▀▀▀    ▀▀▀▀     ▀▀▀▀▀   \n");
+	printk("▄▄▄    ▄▄▄           ▄▄          ▄▄▄▄      ▄▄▄▄   \n");
+	printk(" ██▄  ▄██            ██         ██▀▀██   ▄█▀▀▀▀█  \n");
+	printk("  ██▄▄██    ▄█████▄  ██ ▄██▀   ██    ██  ██▄      \n");
+	printk("   ▀██▀     ▀ ▄▄▄██  ██▄██     ██    ██   ▀████▄  \n");
+	printk("    ██     ▄██▀▀▀██  ██▀██▄    ██    ██       ▀██ \n");
+	printk("    ██     ██▄▄▄███  ██  ▀█▄    ██▄▄██   █▄▄▄▄▄█▀ \n");
+	printk("    ▀▀      ▀▀▀▀ ▀▀  ▀▀   ▀▀▀    ▀▀▀▀     ▀▀▀▀▀   \n");
 }
 
 void kmain(void)
@@ -91,5 +92,4 @@ void kmain(void)
 	}
 
 	task_free(task_shell);
-
 }
