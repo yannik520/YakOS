@@ -9,4 +9,5 @@ ALLOBJS-y += \
 	$(LOCALDIR)/timer.o \
 	$(LOCALDIR)/semaphore.o \
 	$(LOCALDIR)/symtab.o \
-	$(LOCALDIR)/module.o
+	$(LOCALDIR)/module.o \
+	$(LOCALDIR)/debug.o
