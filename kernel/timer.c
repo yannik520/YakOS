@@ -126,9 +126,9 @@ void timer_delete(timer_t *timer)
 		list_del_init(&timer->entry);
 	}
 	timer->periodic_time = 0;
-	timer->expired_time = 0;
-	timer->function = NULL;
-	timer->arg = NULL;
+	timer->expired_time  = 0;
+	timer->function	     = NULL;
+	timer->arg	     = NULL;
 	
 	exit_critical_section();
 }
@@ -138,12 +138,12 @@ enum handler_return timer_tick(void *arg, bigtime_t now)
 	timer_t *timer;
 	timer_t *timer_tmp;
 	enum handler_return ret = INT_NO_RESCHEDULE;
-	static first_time       = 1;
+	static	 first_time     = 1;
 
 	if (first_time)
 	{
-	    first_time = 0;
-	    return INT_RESCHEDULE;
+		first_time = 0;
+		return INT_RESCHEDULE;
 	}
 
 	dbg("now=%d\n", now);
@@ -157,17 +157,11 @@ enum handler_return timer_tick(void *arg, bigtime_t now)
 		unsigned long expired_time  = timer->expired_time;
 		unsigned long periodic_time = timer->periodic_time;
 
-		/* if (&timer_tmp->entry == &timer_list) */
-		/* { */
-		/* 	break; */
-		/* } */
-
 		if ((signed long)(expired_time - now) > 0)
 		{
 			break;
 		}
 
-		//list_del_init(&timer->entry);
 		list_del(&timer->entry);
 
 		
@@ -181,9 +175,7 @@ enum handler_return timer_tick(void *arg, bigtime_t now)
 		{
 			timer->expired_time = now + periodic_time;
 			timer_list_add(timer);
-			
 		}
-
 	}
 
 	return ret;

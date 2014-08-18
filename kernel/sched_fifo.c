@@ -24,12 +24,13 @@
 #include <kernel/printk.h>
 #include <kernel/types.h>
 #include <kernel/sched.h>
+#include <kernel/bitops.h>
 
 //#define DEBUG           1
 #include <kernel/debug.h>
 
 struct list_head	 all_task[MAX_PRIORITY];
-unsigned int		 task_bitmap;
+unsigned long		 task_bitmap;
 extern task_t		*current_task;
 extern task_t		*next_task;
 
@@ -80,7 +81,7 @@ static task_t *_find_next_task(unsigned int priority, struct list_head *start)
 static void sched_fifo_enqueue_task (task_t *p, int flags)
 {
 	list_add_tail(&p->list, &all_task[p->priority]);
-	task_bitmap |= 1 << p->priority;
+	set_bit(p->priority, &task_bitmap);
 }
 
 static void sched_fifo_dequeue_task (task_t *p, int flags)
@@ -89,14 +90,16 @@ static void sched_fifo_dequeue_task (task_t *p, int flags)
 
 	list_del(&p->list);
 	if (list_empty(&all_task[p->priority])) {
-		task_bitmap &= ~(1 << p->priority);
+		clear_bit(p->priority, &task_bitmap);
 	}
 }
 
 static task_t * sched_fifo_pick_next_task (void)
 {
 	struct list_head    *list     = &current_task->list;
+	#ifdef DEBUG
 	task_t              *old_task = current_task;
+	#endif
 	task_t              *new_task;
 	int                  i;
 	struct list_head    *current_list;
@@ -106,11 +109,11 @@ static task_t * sched_fifo_pick_next_task (void)
 	#endif
 
 	for (i=0; i<MAX_PRIORITY; i++) {
-		if (0 == ((task_bitmap >> i) & 0x1)) {
+		if (0 == test_bit(i, &task_bitmap)) {
 			continue;
 		}
 
-		if (i != current_task->priority) {
+		if (i != (int)current_task->priority) {
 			current_list = &all_task[i];
 		}
 		else {

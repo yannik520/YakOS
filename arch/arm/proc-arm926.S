@@ -58,3 +58,20 @@ ENTRY(cpu_arm926_do_idle)
 	mcr	p15, 0, r0, c7, c0, 4		@ Wait for interrupt
 	mcr	p15, 0, r1, c1, c0, 0		@ Restore ICache enable
 	mov	pc, lr
+
+/*
+ * cpu_arm926_switch_mm(pgd)
+ *
+ * Set the translation base pointer to be as described by pgd.
+ *
+ * pgd: new page tables
+ */
+	.align	5
+ENTRY(cpu_arm926_switch_mm)
+	mov	ip, #0
+	mcr	p15, 0, ip, c7, c6, 0		@ invalidate D cache
+	mcr	p15, 0, ip, c7, c5, 0		@ invalidate I cache
+	mcr	p15, 0, ip, c7, c10, 4		@ drain WB
+	mcr	p15, 0, r0, c2, c0, 0		@ load page table pointer
+	mcr	p15, 0, ip, c8, c7, 0		@ invalidate I & D TLBs
+	mov	pc, lr

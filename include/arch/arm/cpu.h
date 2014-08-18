@@ -39,9 +39,9 @@
 #define CPU_NAME                        cpu_arm926 /* tmp define it here */
 #define cpu_reset			__cpu_fn(CPU_NAME,_reset)
 #define cpu_do_idle			__cpu_fn(CPU_NAME,_do_idle)
-
+#define cpu_switch_mm			__cpu_fn(CPU_NAME,_switch_mm)
 /* declare all the functions as extern */
 extern int cpu_do_idle(void);
 extern void cpu_reset(unsigned long addr) __attribute__((noreturn));
-
+extern void cpu_switch_mm(unsigned long pgd_phys);
 #endif /* __CPU_H__ */

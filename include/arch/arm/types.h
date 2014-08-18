@@ -62,4 +62,6 @@ typedef unsigned int addr_t;
 
 typedef signed int	bool;
 
+#define BITS_PER_LONG 32
+
 #endif

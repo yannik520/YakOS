@@ -30,7 +30,7 @@
 
 #define MB	(1024 * 1024)
 
-uint32_t *	pgd_base = (uint32_t *)PAGE_OFFSET;
+uint32_t *	kernel_pgd = (uint32_t *)PAGE_OFFSET;
 
 #define dsb() __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
 				    : : "r" (0) : "memory") /* drain write buffer on v4 */
@@ -114,7 +114,7 @@ void arm_mmu_map_section (addr_t vaddr, addr_t paddr, uint32_t flags)
 {
 	uint32_t	 AP  = 0;
 	uint32_t	 CB  = 0;
-	pgd_t		*pgd = pgd_offset(pgd_base, vaddr);
+	pgd_t		*pgd = pgd_offset(kernel_pgd, vaddr);
 
 	AP   = flags &	TTB_AP;
 	CB   = (flags & TTB_CACHEABLE) |
@@ -128,7 +128,7 @@ void arm_mmu_map_section (addr_t vaddr, addr_t paddr, uint32_t flags)
 
 void arm_mmu_unmap_section(addr_t vaddr)
 {
-	pgd_t	*pgd = pgd_offset(pgd_base, vaddr);
+	pgd_t	*pgd = pgd_offset(kernel_pgd, vaddr);
 	*pgd	     = 0;
 	flush_pgd_entry(pgd);
 }
@@ -140,7 +140,7 @@ static inline pte_t *pte_offset(pte_t *pt, unsigned long virtual) {
 
 void arm_mmu_map_page(addr_t vaddr, addr_t paddr, uint32_t flags)
 {
-	pgd_t		*pgd = pgd_offset(pgd_base, vaddr);
+	pgd_t		*pgd = pgd_offset(kernel_pgd, vaddr);
 	pgd_t		 pgd_value;
 	pte_t		 *pte, *pt = NULL;
 	uint32_t	 AP;
@@ -271,7 +271,7 @@ void arm_mmu_remap_evt(void) {
 void clean_user_space(void) {
 	unsigned long virtual = 0;
 	for (virtual = 0; virtual < PAGE_OFFSET; virtual += SECTION_SIZE) {
-		pgd_t *pgd = pgd_offset(((pgd_t *)pgd_base), virtual);
+		pgd_t *pgd = pgd_offset(((pgd_t *)kernel_pgd), virtual);
 		*pgd = (unsigned long)0;
 
 		//arm_mmu_unmap_section(virtual);

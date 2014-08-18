@@ -25,6 +25,7 @@
 #define _TASK_H_
 
 #include <kernel/list.h>
+#include <kernel/mm.h>
 #include <compiler.h>
 
 #define MAX_PRIORITY	 8
@@ -58,6 +59,10 @@ typedef struct task {
 
 	void *stack;
 	int stack_size;
+
+	struct mm_struct mm;
+	
+	int pid;
 
 	task_routine entry;
 	void *args;

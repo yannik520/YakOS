@@ -40,6 +40,8 @@ task_t				*current_task;
 task_t				*next_task;
 int				 critical_section_count = 0;
 extern struct sched_class	*scheduler;
+extern uint32_t			*kernel_pgd;
+static int pid = 0;
 
 void initial_task_func(void)
 {
@@ -67,8 +69,12 @@ task_t *task_alloc(char *name, int stack_size, unsigned int priority)
 	}
 	memset(task, 0, sizeof(task_t));
 	memcpy(task->name, name, strlen(name) + 1);
+	task->pid	 = pid++;
 	task->stack_size = stack_size;
 	task->priority   = priority;
+	task->mm.pgd	 = kernel_pgd;
+	//task->mm.pgd	 = kmalloc(PAGE_SIZE * 4);
+	//memcpy((void *)task->mm.pgd, (void *)kernel_pgd, PAGE_SIZE * 4);
 
 	return task;
 }
@@ -77,6 +83,7 @@ void task_free(task_t *task)
 {
 	if (NULL == task)
 	{
+		assert(NULL == task);
 		return;
 	}
 	
@@ -96,6 +103,7 @@ int task_create(task_t *task, task_routine entry, void *args)
 	stack_addr = (unsigned int *)kmalloc(task->stack_size);
 	if (stack_addr == NULL)
 	{
+		assert(stack_addr == NULL);
 		return -1;
 	}
 
@@ -149,7 +157,7 @@ void task_sleep(unsigned long delay)
 {
 	timer_t         *timer;
 	
-	dbg("start sleep\n");
+	dbg("start sleep ...\n");
 
 	#ifdef DEBUG
 	scheduler->dump();
@@ -198,6 +206,7 @@ void task_create_init(void)
 	init->stack_size = STACK_DEF_SIZE;
 	init->priority	 = MAX_PRIORITY-1;
 	init->state      = CREATING;
+	init->mm.pgd	 = kernel_pgd;
 	memcpy(init->name, INIT_TASK_NAME, strlen(INIT_TASK_NAME) + 1);
 
 	INIT_LIST_HEAD(&init->list);
