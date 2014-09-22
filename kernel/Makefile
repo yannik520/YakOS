@@ -5,7 +5,6 @@ ALLOBJS-y += \
 	$(LOCALDIR)/sched.o \
 	$(LOCALDIR)/task.o \
 	$(LOCALDIR)/printk.o \
-	$(LOCALDIR)/malloc.o \
 	$(LOCALDIR)/timer.o \
 	$(LOCALDIR)/semaphore.o \
 	$(LOCALDIR)/symtab.o \

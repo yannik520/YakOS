@@ -64,4 +64,8 @@ typedef signed int	bool;
 
 #define BITS_PER_LONG 32
 
+typedef struct {
+	int counter;
+} atomic_t;
+
 #endif

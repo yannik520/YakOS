@@ -62,9 +62,6 @@ void arch_context_switch(task_t *oldtask, task_t *newtask)
 {
 	/* printk("oldtask->sp=0x%x, newtask->sp=0x%x\n", */
 	/*        oldtask->sp, newtask->sp); */
-	printk("before cpu_switch_mm\n");
-	printk("oldtask->mm.pgd=0x%x, newtask->mm.pgd=0x%x\n", oldtask->mm.pgd, newtask->mm.pgd);
 	cpu_switch_mm((unsigned long)newtask->mm.pgd);
-	printk("after cpu_switch_mm\n");
 	arm_context_switch(&oldtask->sp, newtask->sp);
 }

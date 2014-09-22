@@ -20,34 +20,37 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef __ARCH_H__
-#define __ARCH_H__
+#include <arch/mmu.h>
+#include <kernel/malloc.h>
+#include <kernel/list.h>
+#include <kernel/types.h>
+#include <kernel/printk.h>
+#include <compiler.h>
+#include <mm/page_alloc.h>
 
-/*
- * On ARMv5 and above those functions can be implemented around the
- * clz instruction for much better code efficiency.  __clz returns
- * the number of leading zeros, zero input will return 32, and
- * 0x80000000 will return 0.
- */
-static inline unsigned int __clz(unsigned int x)
+void kmalloc_init(uint32_t *addr, uint32_t size)
 {
-	unsigned int ret;
+	if (NULL == addr) {
+		printk("%s %d: addr is null!\n", __FUNCTION__, __LINE__);
+		return;
+	}
 
-	asm("clz\t%0, %1" : "=r" (ret) : "r" (x));
-
-	return ret;
+	page_alloc_init(addr, size);
 }
 
-/*
- * fls() returns zero if the input is zero, otherwise returns the bit
- * position of the last set bit, where the LSB is 1 and MSB is 32.
- */
-static inline int fls(int x)
+void *kmalloc(uint32_t size)
 {
-	return 32 - __clz(x);
+	int			 i;
+	uint32_t		*mem = NULL;
+
+	if (size == 0)
+		return NULL;
+	
+       mem = alloc_pages(size);
+       return mem;
 }
 
-void exception_init(void);
-void arch_early_init(void);
-
-#endif
+void kfree(void *addr)
+{
+	free_pages(addr);
+}
