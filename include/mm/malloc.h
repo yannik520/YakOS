@@ -21,23 +21,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <arch/mmu.h>
-#include <arch/memory.h>
-#include <mm/malloc.h>
-#include <string.h>
+#ifndef _MALLOC_H_
+#define _MALLOC_H_
 
-#define HEAP_SIZE		0x100000 //1M
-extern unsigned int	__heap;
+#include <kernel/types.h>
+#include <kernel/list.h>
 
-void exception_init(void) {
-	unsigned long vectors_vaddr = EXCEPTION_BASE;
-	memcpy((void *)vectors_vaddr, (PAGE_OFFSET+TEXT_OFFSET), 64);
-}
+void kmalloc_init(uint32_t *addr, uint32_t size);
+void *kmalloc(uint32_t size);
+void kfree(void *addr);
 
-void arch_early_init(void) {
-	arm_mmu_init();
-	kmalloc_init(&__heap, HEAP_SIZE);
-       	arm_mmu_remap_evt();
-	exception_init();
-	//clean_user_space();
-}
+#endif

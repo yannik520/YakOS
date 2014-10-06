@@ -99,7 +99,7 @@ void page_alloc_init(uint32_t *addr, uint32_t size) {
 	zone->spanned_pages  = size >> PAGE_SHIFT;
 
 	for (i = 0; i < MAX_ORDER; i++) {
-		INIT_LIST_HEAD(&zone->free_area[i]);
+		INIT_LIST_HEAD((struct list_head *)&zone->free_area[i]);
 	}
 	used_pages	    = ((zone->spanned_pages * sizeof(struct page)) >> PAGE_SHIFT) + 1;
 	zone->managed_pages = zone->spanned_pages - used_pages;
@@ -110,7 +110,10 @@ void page_alloc_init(uint32_t *addr, uint32_t size) {
 	
 	for (i = 0; i < zone->managed_pages; i++) {
 		cur_page	= memmap_pages + i;
+		cur_page->flags = 0;
 		cur_page->index = i;
+		cur_page->units = 0;
+		cur_page->private = 0;
 	}
 	insert_to_free_area(zone, memmap_pages+used_pages, zone->managed_pages);
 
@@ -188,12 +191,11 @@ void *page_address(struct page *page) {
 	return (void *)((unsigned long)memmap_pages + (page_idx << PAGE_SHIFT));
 }
 
-void *alloc_pages(size_t size) {
+struct page *alloc_pages(size_t size) {
 
 	unsigned int	 order = get_order(size);
 	struct zone	*zone  = &zones[ZONE_NORMAL];
 	struct page	*page;
-	unsigned long	 used_pages;
 	
 	if (order >= MAX_ORDER) {
 		return NULL;
@@ -204,7 +206,7 @@ void *alloc_pages(size_t size) {
 	up(&zone->lock);
 
 	/* print_free_list(); */
-	return page_address(page);
+	return page;
 }
 
 static inline unsigned long
@@ -279,7 +281,6 @@ struct page *virt_to_page(void *addr) {
 
 void free_pages(void *addr) {
 	struct page *page;
-	unsigned int used_pages;
 	unsigned int order;
 
 	if (0 == addr) {

@@ -25,8 +25,8 @@
 #include <arch/memmap.h>
 #include <arch/memory.h>
 #include <kernel/types.h>
-#include <kernel/malloc.h>
 #include <kernel/printk.h>
+#include <mm/malloc.h>
 
 #define MB	(1024 * 1024)
 

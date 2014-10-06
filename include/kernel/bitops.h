@@ -20,6 +20,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef __BITOPS_H__
+#define __BITOPS_H__
+
 #include <kernel/types.h>
 
 /* The following bit operation functions are borrowed from linux */
@@ -87,3 +90,5 @@ static inline int test_bit(int nr, const volatile unsigned long *addr)
 {
 	return 1UL & (addr[BIT_WORD(nr)] >> (nr & (BITS_PER_LONG-1)));
 }
+
+#endif

@@ -47,7 +47,7 @@ static __always_inline void init_timer_value(timer_t *t)
 	t->periodic_time = 0;
 	t->function = NULL;
 	t->arg = NULL;
-	INIT_LIST_HEAD(&t->entry);
+	INIT_LIST_HEAD((struct list_head *)&t->entry);
 }
 
 void oneshot_timer_add(timer_t *timer, unsigned long delay, timer_function function, void *arg);

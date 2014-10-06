@@ -38,15 +38,26 @@ enum zone_type {
 
 struct page
 {
-	struct list_head	 list;
-	uint32_t		 index;
-	int			_mapcount;
-	unsigned long		private;  
+	unsigned long flags;
+	struct list_head list;
+	struct {
+		union {
+			uint32_t index;
+			void *freelist;
+		};
+	};
+	struct {
+		union {
+			int _mapcount;
+			int units;
+		};
+	};
+	unsigned long private;  
 };
 
 struct free_area {
-	struct list_head	free_list;
-	unsigned long		nr_free;
+	struct list_head free_list;
+	unsigned long nr_free;
 };
 
 struct zone {
@@ -85,6 +96,8 @@ static inline void __ClearPageBuddy(struct page *page)
 }
 
 void page_alloc_init(uint32_t *addr, uint32_t size);
-void *alloc_pages(size_t size);
+struct page *alloc_pages(size_t size);
+void *page_address(struct page *page);
+struct page *virt_to_page(void *addr);
 void free_pages(void *addr);
 #endif

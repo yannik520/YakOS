@@ -33,7 +33,7 @@
 #define kfree free
 #else
 #include <kernel/printk.h>
-#include <kernel/malloc.h>
+#include <mm/malloc.h>
 #define VFS_MALLOC(t, n) t *n = (t *)kmalloc(sizeof(t))
 #endif
 

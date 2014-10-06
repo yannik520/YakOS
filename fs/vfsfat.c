@@ -30,7 +30,7 @@
 #else
 #include <string.h>
 #include <kernel/printk.h>
-#include <kernel/malloc.h>
+#include <mm/malloc.h>
 #endif
 
 #include "fs/vfsfs.h"

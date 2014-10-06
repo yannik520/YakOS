@@ -21,12 +21,14 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <arch/mmu.h>
-#include <kernel/malloc.h>
+#include <arch/memory.h>
 #include <kernel/list.h>
 #include <kernel/types.h>
 #include <kernel/printk.h>
 #include <compiler.h>
+#include <mm/malloc.h>
 #include <mm/page_alloc.h>
+#include <mm/slob.h>
 
 void kmalloc_init(uint32_t *addr, uint32_t size)
 {
@@ -40,17 +42,40 @@ void kmalloc_init(uint32_t *addr, uint32_t size)
 
 void *kmalloc(uint32_t size)
 {
-	int			 i;
-	uint32_t		*mem = NULL;
+	uint32_t	*mem   = NULL;
+	int		 align = ARCH_SLOB_MINALIGN;
+	void		*ret;
 
-	if (size == 0)
-		return NULL;
+	if (size < PAGE_SIZE - align) {
+		/* smaller than one page size? */
+		if (!size)
+			return NULL;
+
+		mem = slob_alloc(size + align, align);
+		
+		if (!mem)
+			return NULL;
+		*mem = size;
+		ret = (void *)mem + align;
+	} else {
+		ret = slob_new_pages(size);
+	}
 	
-       mem = alloc_pages(size);
-       return mem;
+       return ret;
 }
 
 void kfree(void *addr)
 {
-	free_pages(addr);
+	struct page *sp;
+	
+	if (NULL == addr) 
+		return;
+
+	sp = virt_to_page(addr);
+	if (PageSlob(sp)) {
+		int		 align = ARCH_SLOB_MINALIGN;
+		unsigned int	*m     = (unsigned int *)(addr - align);
+		slob_free(m, *m + align);
+	} else
+		free_pages(addr);
 }

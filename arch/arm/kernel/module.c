@@ -22,7 +22,7 @@
  */
 #include <stdlib.h>
 #include <kernel/types.h>
-#include <kernel/malloc.h>
+#include <mm/malloc.h>
 #include <kernel/printk.h>
 #include <module/module_arch.h>
 

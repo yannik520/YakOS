@@ -228,7 +228,7 @@ CMD_FUNC(mount) {
 		return -1;
 	}
 
-	if (vfs_mount(fimage_addr, "FAT")) {
+	if (vfs_mount((const uint8_t *)fimage_addr, "FAT")) {
 		printk("FAT FS Mount Failed!\n");
 		return -1;
 	}

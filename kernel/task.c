@@ -23,7 +23,7 @@
 #include <string.h>
 #include <kernel/task.h>
 #include <kernel/printk.h>
-#include <kernel/malloc.h>
+#include <mm/malloc.h>
 #include <kernel/types.h>
 #include <kernel/timer.h>
 #include <arch/arch_task.h>

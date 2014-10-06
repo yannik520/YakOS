@@ -21,7 +21,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <kernel/types.h>
-#include <kernel/malloc.h>
+#include <mm/malloc.h>
 #include <kernel/list.h>
 #include <kernel/semaphore.h>
 #include <kernel/printk.h>
