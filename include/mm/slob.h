@@ -28,7 +28,21 @@
 #include <kernel/bitops.h>
 #include <mm/page_alloc.h>
 
+typedef s16 slobidx_t;
+
+struct slob_block {
+	slobidx_t units;
+};
+typedef struct slob_block slob_t;
+
+#define SLOB_BREAK1 256
+#define SLOB_BREAK2 1024
+
 #define PG_slob_free 0
+
+#define SLOB_UNIT sizeof(slob_t)
+#define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
+#define SLOB_UNITS(size) DIV_ROUND_UP(size, SLOB_UNIT)
 
 static inline int PageSlob(const struct page *page)	\
 { return test_bit(PG_slob_free, &page->flags); }

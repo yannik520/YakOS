@@ -7,6 +7,7 @@ ALLOBJS-y += \
 	$(LOCALDIR)/printk.o \
 	$(LOCALDIR)/timer.o \
 	$(LOCALDIR)/semaphore.o \
+	$(LOCALDIR)/symbols.o \
 	$(LOCALDIR)/symtab.o \
 	$(LOCALDIR)/module.o \
 	$(LOCALDIR)/debug.o

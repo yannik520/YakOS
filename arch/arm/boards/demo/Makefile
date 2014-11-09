@@ -1,7 +1,7 @@
 LOCALDIR := arch/arm/boards/demo
 
 MEMBASE := 0xc0008000
-STACKSIZE := 0x200000
+STACKSIZE := 0x800000
 
 ALLOBJS-y += \
 	$(LOCALDIR)/text.o \

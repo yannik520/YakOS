@@ -25,12 +25,12 @@
 
 extern int printk(const char *fmt, ...);
 
-const int symbols_nelts = 1;
-const struct symbols symbols[] = 
-{
-	{ "printk", (void *)&printk },
-	{ (const char *)0, (void *)0}
-};
+/* const int symbols_nelts = 1; */
+/* const struct symbols symbols[] =  */
+/* { */
+/* 	{ "printk", (void *)&printk }, */
+/* 	{ (const char *)0, (void *)0} */
+/* }; */
 
 /* Binary search is twice as large but still small. */
 #ifndef SYMTAB_CONF_BINARY_SEARCH

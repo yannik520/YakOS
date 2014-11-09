@@ -27,15 +27,6 @@
 #include <mm/page_alloc.h>
 #include <mm/slob.h>
 
-typedef s16 slobidx_t;
-
-struct slob_block {
-	slobidx_t units;
-};
-typedef struct slob_block slob_t;
-
-#define SLOB_BREAK1 256
-#define SLOB_BREAK2 1024
 static LIST_HEAD(free_slob_small);
 static LIST_HEAD(free_slob_medium);
 static LIST_HEAD(free_slob_large);
@@ -66,10 +57,6 @@ static inline void clear_slob_page_free(struct page *sp)
 	list_del(&sp->list);
 	__ClearPageSlobFree(sp);
 }
-
-#define SLOB_UNIT sizeof(slob_t)
-#define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
-#define SLOB_UNITS(size) DIV_ROUND_UP(size, SLOB_UNIT)
 
 DEFINE_SEMAPHORE(sem);
 
@@ -135,7 +122,7 @@ void *slob_page_alloc(struct page *sp, size_t size, int align) {
 		slobidx_t avail = slob_units(cur);
 		
 		if (align) {
-			aligned = (slob_t *)ALIGN((unsigned long)cur, align);
+			aligned = (slob_t *)ALIGN((unsigned long)cur + align - 1, align);
 			delta = aligned - cur;
 		}
 		if (avail >= units + delta) { /* room enough? */
@@ -173,7 +160,10 @@ void *slob_page_alloc(struct page *sp, size_t size, int align) {
 			if (!sp->units) {
 				clear_slob_page_free(sp);
 			}
-			return cur;
+			
+			set_slob(cur, units, cur + units); /* just to store the size */
+
+			return (void *)((unsigned int)cur + align);
 		}
 		if (slob_last(cur)) {
 			return NULL;
@@ -295,7 +285,7 @@ void slob_free(void *block, int size) {
 			next = slob_next(prev);
 		}
 
-		if (!slob_last(prev) && b + units == next) {
+		if (!slob_last(prev) && ((b + units) == next)) {
 			/* merge with the following block */
 			units += slob_units(next);
 			set_slob(b, units, slob_next(next));

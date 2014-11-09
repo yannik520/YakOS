@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	for (int i=0; i<2; i++) {
+
 	if ((fd = vfs_open(argv[2], &file)) == -1) {
 		printf("vfs_open fail\n");
 		return -1;
@@ -64,6 +66,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	}
 	printf("test success\n");
 	return 0;
 }

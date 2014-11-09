@@ -1,0 +1,34 @@
+#!/bin/sh
+
+NM=tools/arm-elf-toolchain-macosx/bin/arm-elf-nm
+INC_DIR=include/module
+KERNEL_DIR=kernel
+
+SYMBOLS=`$NM -P $* | grep -v " . _ " | grep " [A-Z] " | cut -f 1 -d \ | grep -v symbols | wc -l`
+SYMBOLS=`expr $SYMBOLS + 1`
+
+echo $SYMBOLS
+
+echo \#ifndef __SYMBOLS_H__ > $INC_DIR/symbols.h
+echo \#define __SYMBOLS_H__ >> $INC_DIR/symbols.h
+echo "struct symbols {" >> $INC_DIR/symbols.h
+echo "	const char	*name;" >> $INC_DIR/symbols.h
+echo "	void		*value;" >> $INC_DIR/symbols.h
+echo "};" >> $INC_DIR/symbols.h
+echo "\n" >> $INC_DIR/symbols.h
+echo "extern const int symbols_nelts;" >> $INC_DIR/symbols.h
+echo "extern const struct symbols symbols[$SYMBOLS];" >> $INC_DIR/symbols.h
+echo \#endif >> $INC_DIR/symbols.h
+
+echo \#include '<module/symbols.h>' > $KERNEL_DIR/symbols.c
+
+$NM -P $* | grep -v " . _ " | grep " [A-Z] " | cut -f 1 -d \ | grep -v symbols |  perl -ne 'print "extern int $1();\n" if(/(\w+)/)' | sort >> $KERNEL_DIR/symbols.c
+
+echo "const int symbols_nelts = $SYMBOLS;" >> $KERNEL_DIR/symbols.c
+echo "const struct symbols symbols[$SYMBOLS] = {" >> $KERNEL_DIR/symbols.c
+
+if [ -f $* ] ; then 
+    $NM -P $* | grep -v " . _ " | grep " [A-Z] " | cut -f 1 -d \ | grep -v symbols | perl -ne 'print "{\"$1\", (void *)$1},\n" if(/(\w+)/)' | sort >> $KERNEL_DIR/symbols.c
+fi
+
+echo "{(char *)0, (void *)0} };" >> $KERNEL_DIR/symbols.c

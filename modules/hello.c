@@ -37,7 +37,8 @@ void exit_module(void)
 }
 
 struct module_entry mod_entry = {
-	.name = {'h','e','l','l','o','\0',},
+	.name = "hello",
 	.num_syms = 1,
-	.syms = {{"init_module", &init_module}, {"exit_moduel", &exit_module}}
+	.syms = {{"init_module", &init_module},
+		 {"exit_moduel", &exit_module}}
 };

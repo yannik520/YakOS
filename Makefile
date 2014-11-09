@@ -90,7 +90,7 @@ ALLOBJS-m := $(ALLOBJS-m:%.o=%.ko)
 .PHONY: all
 all: prepare $(TARGET_BIN) $(TARGET_ELF) $(TARGET_SYM) $(ALLOBJS-m)
 
-prepare: prepare_include build.ld
+prepare: prepare_symbols_file prepare_include build.ld
 
 .PHONY: prepare_env prepare_include build.ld
 prepare_env:
@@ -100,6 +100,16 @@ prepare_include:
 	echo $(ALL_INCLUDE_FILES)
 	@cp $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h) ./include/arch
 	@cp $(wildcard ./include/arch/$(ARCH)/*.h) ./include/arch
+
+ifdef WITH_SYMBOLS
+.PHONY: prepare_symbols_file
+prepare_symbols_file:
+	@./tools/make-symbols-nm $(TARGET_ELF)
+else
+prepare_symbols_file:
+	@cp tools/empty-symbols.c kernel/symbols.c
+	@cp tools/empty-symbols.h include/module/symbols.h
+endif
 
 build.ld: $(LINKER_SCRIPT_TEMPLETE)
 	@sed "s/%MEMBASE%/$(MEMBASE)/;s/%STACKSIZE%/$(STACKSIZE)/" < $< > $@
@@ -112,6 +122,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 $(TARGET_ELF): $(ALLOBJS-y) $(LINKER_SCRIPT)
 	@echo linking $@
 	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS-y) -o $@ $(PLATFORM_LIBGCC)
+
 $(TARGET_SYM): $(TARGET_ELF)
 	@echo generating listing: $@
 	$(NOECHO)$(OBJDUMP) -Mreg-names-raw -S $< | $(CPPFILT) > $@

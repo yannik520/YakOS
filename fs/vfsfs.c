@@ -76,7 +76,8 @@ static int __vfs_lookup(struct vfs_node *dir, const char *stp, size_t namelen)
 		name[namelen] = 0;
 		if (vfs_lookup(dir, name, &namei))
 			return -1;
-		//printk("%s\n", name);
+		/* printk("dir->priv=0x%x.\n", dir->priv); */
+		//kfree(dir->priv);
 		*dir = namei;
 	}
 
@@ -228,7 +229,7 @@ int vfs_open(const char *path, struct vfs_node *file)
 				stp = p + 1;
 			}
 		}
-		
+
 		if (__vfs_lookup(&dir, stp, p - stp))
 			return -1;
 	}
@@ -258,6 +259,7 @@ int vfs_close(int fd)
 	struct vfs_node *file = fp_get(fd);
 	struct vfs_opvector *vops = file->vops;
 	VFS_ASSERT(vops && vops->close);
+	fd_free(fd);
 	return vops->close(file->priv);
 }
 

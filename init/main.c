@@ -50,9 +50,6 @@ void kmain(void)
 {
 	task_t	*task_shell;
 	int	 ret;
-	unsigned int *mem1;
-	unsigned int *mem2;
-	unsigned int *mem3;
 
 	/*************** Init Arch ****************/
 	arch_early_init();
@@ -86,12 +83,6 @@ void kmain(void)
 
 	arch_enable_ints();
 
-	mem1 = kmalloc(4091);
-	mem2 = kmalloc(8190);
-	kfree(mem2);
-	kfree(mem1);
-	mem3 = kmalloc(8190);
-	kfree(mem3);
 	while(1)
 	{
 		enter_critical_section();

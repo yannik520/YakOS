@@ -22,6 +22,6 @@ SECTIONS
 	. = ALIGN(4096);
 	__heap = .;
 
-	. = . + 0x200000; /* 8kB of stack memory */
+	. = . + 0x800000; /* 8kB of stack memory */
 	stack_top = .;
 }

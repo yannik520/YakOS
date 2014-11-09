@@ -37,7 +37,7 @@ void exception_init(void) {
 void arch_early_init(void) {
 	arm_mmu_init();
 	kmalloc_init(&__heap, HEAP_SIZE);
-       	arm_mmu_remap_evt();
+	arm_mmu_remap_evt();
 	exception_init();
 	//clean_user_space();
 }

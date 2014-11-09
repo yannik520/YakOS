@@ -189,11 +189,40 @@ unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
 	return result;
 }
 
+void help(void) {
+	struct shell_command	*cur_cmd;
+	int i;
+	
+	printk("All Supported Commands:\n");
+	for (i=0; i<80; i++)
+		printk("-");
+	printk("\n");
+	list_for_each_entry(cur_cmd, &commands, list) {
+		printk("--> %s:\n", cur_cmd->command);
+		printk("\t%s.\n", cur_cmd->description);
+	}
+	for (i=0; i<80; i++)
+		printk("-");
+	printk("\n\n");
+}
+
 void (*pFun)();
 extern unsigned int stack_top;
 
 CMD_FUNC(insmod) {
 	struct k_module	*mod;
+	unsigned char *file_buf;
+	unsigned char *buf;
+	size_t count;
+	size_t size = PAGE_SIZE;
+	int		 fd;
+	struct vfs_node	 file;
+	char		*path = args;
+
+	if (NULL == path) {
+		printk("Please give a correct path!\n");
+		return -1;
+	}
 
 	mod = alloc_kmodule();
 	if (unlikely(NULL == mod))
@@ -201,7 +230,35 @@ CMD_FUNC(insmod) {
 		printk("kmodule alloc failed!\n");
 		return -1;
 	}
-	load_kmodule(0xc0100000, mod);
+
+	file_buf = kmalloc(size);
+	if (unlikely(NULL == file_buf))
+	{
+		printk("file buffer alloc failed!\n");
+		return -1;
+	}
+	buf = file_buf;
+	
+	if ((fd = vfs_open(path, &file)) == -1) {
+		printk("vfs_open failed\n");
+		return -1;
+	}
+
+	while (vfs_read(fd, buf, size, &count) != -1 && (count != 0)) {
+		if (count > 0) {
+			buf += count;
+			size = PAGE_SIZE - count;
+			//printk("%s\n", buf);
+		}
+	}
+
+	if (vfs_close(fd)) {
+		printk("vfs_close failed\n");
+		return -1;
+	}
+
+	load_kmodule((unsigned int)file_buf, mod);
+	/* load_kmodule(0xc0100000, mod); */
 	/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
 	/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
 	pFun = mod->entry->syms[0].value;
@@ -236,14 +293,14 @@ CMD_FUNC(mount) {
 }
 
 CMD_FUNC(ls) {
-	size_t count;
-	char buf[1024] = {0};
-	int fd;
-	struct vfs_node file;
-	char *path = args;
+	size_t		 count;
+	int		 fd;
+	struct vfs_node	 file;
+	char		*path = args;
+	char buf[1024]	      = {0};
 
 	if (NULL == path) {
-		printk("Please give a correct path!\n");
+		printk("Invalid path!\n");
 		return -1;
 	}
 
@@ -252,9 +309,11 @@ CMD_FUNC(ls) {
 		return -1;
 	}
 
-	while (!vfs_read(fd, buf, sizeof(buf), &count)) {
-		if (count > 0) {
+	while (vfs_read(fd, buf, 1024, &count) != -1 && (count != 0)) {
+		if (count > 0)
+		{
 			printk("%s\n", buf);
+			memset(buf, 0, 1024);
 		}
 	}
 
@@ -271,10 +330,16 @@ CMD_FUNC(kmsg) {
 	return 0;
 }
 
+CMD_FUNC(help) {
+	help();
+	return 0;
+}
+
 SHELL_COMMAND(kmsg_command, "kmsg", "help: shows all kernel message", CMD_FUNC_NAME(kmsg));
 SHELL_COMMAND(insmod_command, "insmod", "help: insmod the given module", CMD_FUNC_NAME(insmod));
 SHELL_COMMAND(mount_command, "mount", "help: mount the given file system", CMD_FUNC_NAME(mount));
 SHELL_COMMAND(ls_command, "ls", "help: list all file or directory", CMD_FUNC_NAME(ls));
+SHELL_COMMAND(help_command, "help", "help: display all commands", CMD_FUNC_NAME(help));
 
 void shell_unregister_command(struct shell_command *cmd)
 {
@@ -354,6 +419,7 @@ int init_shell(void *arg)
 	shell_register_command(&insmod_command);
 	shell_register_command(&mount_command);
 	shell_register_command(&ls_command);
+	shell_register_command(&help_command);
 
 	for (;;) {
 		len = readline("# ");

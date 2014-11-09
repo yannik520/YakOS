@@ -46,20 +46,21 @@ void *kmalloc(uint32_t size)
 	int		 align = ARCH_SLOB_MINALIGN;
 	void		*ret;
 
-	if (size < PAGE_SIZE - align) {
+	if (!size) return NULL;
+
+	size = ALIGN(size + SLOB_UNIT + align - 1, align);
+
+	if (size < PAGE_SIZE) {
 		/* smaller than one page size? */
 		if (!size)
 			return NULL;
-
-		mem = slob_alloc(size + align, align);
 		
-		if (!mem)
-			return NULL;
-		*mem = size;
-		ret = (void *)mem + align;
+		mem = slob_alloc(size, align);
+		ret = (void *)mem;
 	} else {
 		ret = slob_new_pages(size);
 	}
+
 	
        return ret;
 }
@@ -67,15 +68,16 @@ void *kmalloc(uint32_t size)
 void kfree(void *addr)
 {
 	struct page *sp;
-	
-	if (NULL == addr) 
+
+	if (unlikely(NULL == addr)) 
 		return;
 
 	sp = virt_to_page(addr);
 	if (PageSlob(sp)) {
 		int		 align = ARCH_SLOB_MINALIGN;
-		unsigned int	*m     = (unsigned int *)(addr - align);
-		slob_free(m, *m + align);
+		slobidx_t	*m     = (slobidx_t *)((unsigned int)addr - align);
+
+		slob_free(m, (*m) * SLOB_UNIT);
 	} else
 		free_pages(addr);
 }
