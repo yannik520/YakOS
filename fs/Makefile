@@ -1,4 +1,5 @@
 LOCALDIR := fs
 
-ALLOBJS-$(CONFIG_BUILD_MODULE_HELLO) += $(LOCALDIR)/vfsfs.o
-ALLOBJS-$(CONFIG_BUILD_MODULE_HELLO) += $(LOCALDIR)/vfsfat.o
+ALLOBJS-y += \
+	$(LOCALDIR)/vfsfs.o \
+	$(LOCALDIR)/vfsfat.o

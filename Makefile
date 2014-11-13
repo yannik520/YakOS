@@ -76,9 +76,9 @@ include arch/$(ARCH)/boot/Makefile
 include arch/$(ARCH)/boards/$(BOARD)/Makefile
 include kernel/Makefile
 include mm/Makefile
-include modules/Makefile
 include fs/Makefile
 include init/Makefile
+include modules/Makefile
 
 LINKER_SCRIPT_TEMPLETE := arch/$(ARCH)/boot/build.ld
 LINKER_SCRIPT := build.ld

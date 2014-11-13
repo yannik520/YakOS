@@ -153,7 +153,7 @@ struct fatfs_priv {
 	size_t root_entries;
 
 	struct fat_opvector *opvector;
-}__aligned(4);
+}__attribute__((aligned(4)));
 
 struct fatfs_dirent {
 	struct fatfs_priv *fs;
@@ -166,13 +166,13 @@ struct fatfs_dirent {
 	size_t entry;
 	size_t flag;
 	size_t reserve;
-}__aligned(4);
+}__attribute__((aligned(4)));
 
 struct fat_opvector {
 	size_t fat_max_cluster;
 	size_t fat_cluster_mask;
 	int (*fat_next_cluster)(struct fatfs_priv *, size_t , size_t *);
-}__aligned(4);
+}__attribute__((aligned(4)));
 
 extern struct fat_opvector fat12fs_opvector;
 extern struct fat_opvector fat16fs_opvector;

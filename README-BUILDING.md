@@ -7,5 +7,13 @@ To configure and build the YakOS, use:
 
     make menuconfig
     make
+    make WITH_SYMBOLS=1
+
+Load with u-boot and run:
+    loadb 0xc0008000   --> load kernel image
+    loadb 0xc0200000   --> load ramdisk
+    go 0xc0008000      --> run kernel
+    mount 0xc0200000   --> mount file system
+    insmod /HELLO.KO   --> insmod the module hello
 
 So easy!
