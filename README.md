@@ -15,7 +15,7 @@ YakOS is an embedded operating system macro kernel.
 ![github](http://raw.github.com/yannik520/YakOS/master/documents/screenshot.png "github")
 
 ### Contact with me:
-    TEL. : ＋86-13419548808
+    TEL. : +86-13419548808
     QQ   : 791884247
     E-Mail: yannik520@gmail.com
 
