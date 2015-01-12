@@ -21,6 +21,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <stdlib.h>
+#include <string.h>
 #include <kernel/types.h>
 #include <mm/malloc.h>
 #include <kernel/printk.h>
@@ -52,7 +53,7 @@ int apply_relocate(unsigned int input_addr,
 	{
 		int32_t addend;
 
-		memcpy((char*)&addend, elf_addr, 4);
+		memcpy((char*)&addend, (void *)elf_addr, 4);
 		addr += addend;
 		module_output_write_segment(output,(char*) &addr, 4);
 	}
@@ -64,7 +65,7 @@ int apply_relocate(unsigned int input_addr,
 		int32_t addend;
 		int32_t offset;
 
-		memcpy((char*)&addend, elf_addr, 4);
+		memcpy((char*)&addend, (void *)elf_addr, 4);
 		offset = (addend & 0x00ffffff) << 2;
 		offset += addr - (sectionaddr + rela->r_offset);
 		offset >>= 2;
@@ -79,7 +80,7 @@ int apply_relocate(unsigned int input_addr,
 		int32_t offset;
 		char *base;
 
-		memcpy((char*)instr, elf_addr, 4);
+		memcpy((char*)instr, (void *)elf_addr, 4);
 		/* Ignore the addend since it will be zero for calls to symbols,
 		   and I can't think of a case when doing a relative call to
 		   a non-symbol position */

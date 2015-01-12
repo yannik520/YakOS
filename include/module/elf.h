@@ -120,6 +120,7 @@ struct sec_info {
 	elf32_word	s_size;
 	elf32_off	s_reloff;
 	elf32_word	s_relsize;
+	elf32_word	s_relas;
 };
 
 enum SEC_TYPE {
@@ -128,6 +129,7 @@ enum SEC_TYPE {
 	SEC_TYPE_DATA,
 	SEC_TYPE_SYMTAB,
 	SEC_TYPE_STRTAB,
+	SEC_TYPE_BSS,
 	SEC_TYPE_MAX
 };
 
