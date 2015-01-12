@@ -1,5 +1,5 @@
-/* ANSI-C code produced by gperf version 3.0.1 */
-/* Command-line: gperf  */
+/* ANSI-C code produced by gperf version 3.0.3 */
+/* Command-line: /Library/Developer/CommandLineTools/usr/bin/gperf  */
 /* Computed positions: -k'1,3' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -29,6 +29,8 @@
 #error "gperf generated tables don't work with this execution character set. Please report a bug to <bug-gnu-gperf@gnu.org>."
 #endif
 
+
+#include <stddef.h>
 struct kconf_id;
 /* maximum key range = 45, duplicates = 0 */
 
@@ -71,7 +73,7 @@ kconf_id_hash (register const char *str, register unsigned int len)
       47, 47, 47, 47, 47, 47, 47, 47, 47, 47,
       47, 47, 47, 47, 47, 47
     };
-  register int hval = len;
+  register unsigned int hval = len;
 
   switch (hval)
     {
@@ -153,9 +155,6 @@ static struct kconf_id_strings_t kconf_id_strings_contents =
     "prompt"
   };
 #define kconf_id_strings ((const char *) &kconf_id_strings_contents)
-#ifdef __GNUC__
-__inline
-#endif
 struct kconf_id *
 kconf_id_lookup (register const char *str, register unsigned int len)
 {
@@ -171,50 +170,50 @@ kconf_id_lookup (register const char *str, register unsigned int len)
   static struct kconf_id wordlist[] =
     {
       {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str2,		T_IF,		TF_COMMAND|TF_PARAM},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str3,		T_TYPE,		TF_COMMAND, S_INT},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str4,		T_HELP,		TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str5,		T_ENDIF,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str6,		T_SELECT,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str7,	T_ENDMENU,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str8,	T_TYPE,		TF_COMMAND, S_TRISTATE},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str9,	T_ENDCHOICE,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str10,		T_RANGE,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str11,		T_TYPE,		TF_COMMAND, S_STRING},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str12,	T_DEFAULT,	TF_COMMAND, S_UNKNOWN},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str13,	T_DEFAULT,	TF_COMMAND, S_BOOLEAN},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str14,		T_MENU,		TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str2),		T_IF,		TF_COMMAND|TF_PARAM},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str3),		T_TYPE,		TF_COMMAND, S_INT},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str4),		T_HELP,		TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str5),		T_ENDIF,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str6),		T_SELECT,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str7),	T_ENDMENU,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str8),	T_TYPE,		TF_COMMAND, S_TRISTATE},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str9),	T_ENDCHOICE,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str10),		T_RANGE,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str11),		T_TYPE,		TF_COMMAND, S_STRING},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str12),	T_DEFAULT,	TF_COMMAND, S_UNKNOWN},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str13),	T_DEFAULT,	TF_COMMAND, S_BOOLEAN},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str14),		T_MENU,		TF_COMMAND},
       {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str16,	T_DEFAULT,	TF_COMMAND, S_BOOLEAN},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str17,	T_DEFAULT,	TF_COMMAND, S_TRISTATE},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str18,	T_MAINMENU,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str16),	T_DEFAULT,	TF_COMMAND, S_BOOLEAN},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str17),	T_DEFAULT,	TF_COMMAND, S_TRISTATE},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str18),	T_MAINMENU,	TF_COMMAND},
       {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str20,	T_MENUCONFIG,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str21,		T_CONFIG,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str22,		T_ON,		TF_PARAM},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str23,		T_TYPE,		TF_COMMAND, S_HEX},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str20),	T_MENUCONFIG,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str21),		T_CONFIG,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str22),		T_ON,		TF_PARAM},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str23),		T_TYPE,		TF_COMMAND, S_HEX},
       {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str26,		T_SOURCE,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str27,	T_DEPENDS,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str28,	T_OPTIONAL,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str26),		T_SOURCE,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str27),	T_DEPENDS,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str28),	T_OPTIONAL,	TF_COMMAND},
       {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str31,		T_SELECT,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str32,	T_COMMENT,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str33,	T_REQUIRES,	TF_COMMAND},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str34,		T_TYPE,		TF_COMMAND, S_BOOLEAN},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str31),		T_SELECT,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str32),	T_COMMENT,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str33),	T_REQUIRES,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str34),		T_TYPE,		TF_COMMAND, S_BOOLEAN},
       {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str37,	T_TYPE,		TF_COMMAND, S_BOOLEAN},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str37),	T_TYPE,		TF_COMMAND, S_BOOLEAN},
       {-1}, {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str41,		T_CHOICE,	TF_COMMAND},
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str41),		T_CHOICE,	TF_COMMAND},
       {-1}, {-1}, {-1}, {-1},
-      {(int)(long)&((struct kconf_id_strings_t *)0)->kconf_id_strings_str46,		T_PROMPT,	TF_COMMAND}
+      {offsetof(struct kconf_id_strings_t, kconf_id_strings_str46),		T_PROMPT,	TF_COMMAND}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
     {
-      register int key = kconf_id_hash (str, len);
+      unsigned int key = kconf_id_hash (str, len);
 
-      if (key <= MAX_HASH_VALUE && key >= 0)
+      if (key <= MAX_HASH_VALUE)
         {
           register int o = wordlist[key].name;
           if (o >= 0)

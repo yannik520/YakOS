@@ -100,4 +100,5 @@ struct page *alloc_pages(size_t size);
 void *page_address(struct page *page);
 struct page *virt_to_page(void *addr);
 void free_pages(void *addr);
+void remap_page(uint32_t vaddr, uint32_t attr);
 #endif

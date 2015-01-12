@@ -231,7 +231,7 @@ $(obj)/lkc_defs.h: $(src)/lkc_proto.h
 # The following requires flex/bison/gperf
 # By default we use the _shipped versions, uncomment the following line if
 # you are modifying the flex/bison src.
-# LKC_GENPARSER := 1
+LKC_GENPARSER := 1
 
 ifdef LKC_GENPARSER
 

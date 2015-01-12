@@ -76,12 +76,24 @@ copy_loop:
 	blo	copy_loop
 	
 stack_setup:
-	/* for irq mode */
 	mrs	r0, cpsr
 	bic	r0, r0, #0x1f
+	
+	/* for irq mode */
 	orr	r1, r0, #0x12
 	msr	cpsr_c, r1
 	ldr	r13, =irq_save_spot
+
+	/* for abort mode */
+	orr	r1, r0, #0x17
+	msr	cpsr_c, r1
+	ldr	sp, =abort_stack_top
+
+	/* for undefined mode */
+	orr	r1, r0, #0x1b
+	msr	cpsr_c, r1
+	ldr	sp, =undefined_stack_top
+	
 	/* for svc mode */
 	orr	r1, r0, #0x13
 	msr	cpsr_c, r1
@@ -100,6 +112,7 @@ __bss_loop:
 	bl	kmain
 	b	.
 
+.ltorg
 
 ENTRY(arm_context_switch)
 	push    { r4-r11, lr}

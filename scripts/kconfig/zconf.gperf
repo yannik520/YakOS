@@ -7,6 +7,10 @@
 %pic
 %struct-type
 
+%{
+#include <stddef.h>
+%}
+
 struct kconf_id;
 
 %%

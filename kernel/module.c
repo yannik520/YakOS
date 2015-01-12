@@ -581,11 +581,11 @@ static unsigned int segment_offset(struct k_module *output)
 
 const struct module_output_ops mod_output_ops =
 {
-	allocate_segment,
-	start_segment,
-	end_segment,
-	write_segment,
-	segment_offset
+	.allocate_segment = allocate_segment,
+	.start_segment	  = start_segment,
+	.end_segment	  = end_segment,
+	.write_segment	  = write_segment,
+	.segment_offset	  = segment_offset
 };
 
 struct k_module *alloc_kmodule(void)

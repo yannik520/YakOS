@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  */
-#define AUTOCONF_TIMESTAMP "2014-03-25 22:31:17 CST"
+#define AUTOCONF_TIMESTAMP "2015-01-12 15:16:01 CST"
 
 
 /*

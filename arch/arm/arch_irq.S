@@ -64,6 +64,7 @@
 
 */
 #include <linkage.h>
+#include <asm.h>
 
 ENTRY(arm_irq)
 	/* save r4-r6 and use as a temporary place to save while we switch into supervisor mode */
@@ -123,52 +124,73 @@ ENTRY(arm_irq)
 ENTRY(undefined)
 	ldr	r0, =undefined_str
 	bl	printk
-	b 	undefined
+	b 	.
 	
 ENTRY(syscall)
 	ldr	r0, =syscall_str
-	bl	printk
-	b	syscall
+	bl	__puts
+	b	.
 
 ENTRY(prefetch_abort)
 	ldr	r0, =prefetch_abort
-	bl	printk
-	b	prefetch_abort
+	bl	__puts
+	b	.
 
 ENTRY(data_abort)
 	ldr	r0, =data_abort_str
+	sub	r1, lr, #0x8
 	bl	printk
-	b	data_abort
+	b	.
 
 ENTRY(reserved)
 	ldr	r0, =reserved_str
-	bl	printk
-	b	reserved
+	bl	__puts
+	b	.
 
 ENTRY(irq)
 	b	arm_irq
 
 ENTRY(fiq)
 	ldr	r0, =fiq_str
-	bl	printk
-	b	fiq
+	bl	__puts
+	b	.
+.ltorg
+
+undefined_str:
+	.ascii	"Exception: undefined\n\0"
+	.align
+syscall_str:
+	.ascii	"Exception: syscall\n\0"
+	.align
+prefetch_abort_str:
+	.ascii	"Exception: prefetch abort\n\0"
+	.align
+data_abort_str:
+	.ascii	"Exception: data abort: 0x%x\n\0"
+	.align
+reserved_str:
+	.ascii	"Exception: reserved\n\0"
+	.align
+fiq_str:
+	.ascii	"Exception: fiq\n\0"
+	.align
+
+.ltorg
 
 .bss
+.align 2
 ENTRY(irq_save_spot)
 	.word	0	/* r4 */
 	.word	0	/* r5 */
 	.word	0	/* r6 */
-.data
-.align 4
-undefined_str:
-	.ascii	"Exception: undefined\n"
-syscall_str:
-	.ascii	"Exception: syscall\n"
-prefetch_abort_str:
-	.ascii	"Exception: prefetch abort\n"
-data_abort_str:
-	.ascii	"Exception: data abort\n"
-reserved_str:
-	.ascii	"Exception: reserved\n"
-fiq_str:
-	.ascii	"Exception: fiq\n"
+.ltorg
+
+DATA(abort_stack)
+	.skip 1024
+DATA(abort_stack_top)
+
+DATA(undefined_stack)
+	.skip 1024
+DATA(undefined_stack_top)
+
+

@@ -1,126 +1,138 @@
-cmd_scripts/kconfig//mconf.o := gcc -Wp,-MD,scripts/kconfig//.mconf.o.d        -c -o scripts/kconfig//mconf.o scripts/kconfig//mconf.c
+cmd_scripts/kconfig//mconf.o := gcc -Wp,-MD,scripts/kconfig//.mconf.o.d -DKBUILD_NO_NLS       -c -o scripts/kconfig//mconf.o scripts/kconfig//mconf.c
 
 deps_scripts/kconfig//mconf.o := \
   scripts/kconfig//mconf.c \
     $(wildcard include/config/mode.h) \
     $(wildcard include/config/.h) \
-  /usr/include/stdc-predef.h \
-  /usr/include/i386-linux-gnu/bits/predefs.h \
-  /usr/include/i386-linux-gnu/sys/ioctl.h \
-  /usr/include/features.h \
-    $(wildcard include/config/c11.h) \
-    $(wildcard include/config/c99.h) \
-    $(wildcard include/config/c95.h) \
-    $(wildcard include/config/ix.h) \
-    $(wildcard include/config/ix2.h) \
-    $(wildcard include/config/ix199309.h) \
-    $(wildcard include/config/ix199506.h) \
-    $(wildcard include/config/en.h) \
-    $(wildcard include/config/en/extended.h) \
-    $(wildcard include/config/x98.h) \
-    $(wildcard include/config/en2k.h) \
-    $(wildcard include/config/en2kxsi.h) \
-    $(wildcard include/config/en2k8.h) \
-    $(wildcard include/config/en2k8xsi.h) \
-    $(wildcard include/config/gefile.h) \
-    $(wildcard include/config/gefile64.h) \
-    $(wildcard include/config/e/offset64.h) \
-    $(wildcard include/config/d.h) \
-    $(wildcard include/config/c.h) \
-    $(wildcard include/config/ile.h) \
-    $(wildcard include/config/ntrant.h) \
-    $(wildcard include/config/tify/level.h) \
-    $(wildcard include/config/cxx11.h) \
-    $(wildcard include/config/i.h) \
-    $(wildcard include/config/ix/implicitly.h) \
-    $(wildcard include/config/ern/inlines.h) \
-  /usr/include/i386-linux-gnu/sys/cdefs.h \
-    $(wildcard include/config/espaces.h) \
-  /usr/include/i386-linux-gnu/bits/wordsize.h \
-  /usr/include/i386-linux-gnu/gnu/stubs.h \
-  /usr/include/i386-linux-gnu/gnu/stubs-32.h \
-  /usr/include/i386-linux-gnu/bits/ioctls.h \
-  /usr/include/i386-linux-gnu/asm/ioctls.h \
-  /usr/include/asm-generic/ioctls.h \
-  /usr/include/linux/ioctl.h \
-  /usr/include/i386-linux-gnu/asm/ioctl.h \
-  /usr/include/asm-generic/ioctl.h \
-  /usr/include/i386-linux-gnu/bits/ioctl-types.h \
-  /usr/include/i386-linux-gnu/sys/ttydefaults.h \
-  /usr/include/i386-linux-gnu/sys/wait.h \
-  /usr/include/signal.h \
-  /usr/include/i386-linux-gnu/bits/sigset.h \
-  /usr/include/i386-linux-gnu/bits/types.h \
-  /usr/include/i386-linux-gnu/bits/typesizes.h \
-  /usr/include/i386-linux-gnu/bits/signum.h \
-  /usr/include/time.h \
-  /usr/include/i386-linux-gnu/bits/siginfo.h \
-  /usr/include/i386-linux-gnu/bits/sigaction.h \
-  /usr/include/i386-linux-gnu/bits/sigcontext.h \
-  /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
-  /usr/include/i386-linux-gnu/bits/sigstack.h \
-  /usr/include/i386-linux-gnu/sys/ucontext.h \
-  /usr/include/i386-linux-gnu/bits/pthreadtypes.h \
-  /usr/include/i386-linux-gnu/bits/sigthread.h \
-  /usr/include/i386-linux-gnu/bits/waitflags.h \
-  /usr/include/i386-linux-gnu/bits/waitstatus.h \
-  /usr/include/endian.h \
-  /usr/include/i386-linux-gnu/bits/endian.h \
-  /usr/include/i386-linux-gnu/bits/byteswap.h \
-  /usr/include/i386-linux-gnu/bits/byteswap-16.h \
+  /usr/include/sys/ioctl.h \
+    $(wildcard include/config//tty.h) \
+  /usr/include/sys/ttycom.h \
+  /usr/include/sys/ioccom.h \
+  /usr/include/sys/_types.h \
+  /usr/include/sys/cdefs.h \
+    $(wildcard include/config/bit/inode.h) \
+  /usr/include/sys/_symbol_aliasing.h \
+  /usr/include/sys/_posix_availability.h \
+  /usr/include/machine/_types.h \
+  /usr/include/i386/_types.h \
+  /usr/include/sys/_pthread/_pthread_types.h \
+  /usr/include/sys/filio.h \
+  /usr/include/sys/sockio.h \
+  /usr/include/sys/appleapiopts.h \
+  /usr/include/sys/wait.h \
+  /usr/include/sys/_types/_pid_t.h \
+  /usr/include/sys/_types/_id_t.h \
+  /usr/include/sys/signal.h \
+  /usr/include/machine/signal.h \
+  /usr/include/i386/signal.h \
+  /usr/include/machine/_mcontext.h \
+  /usr/include/i386/_mcontext.h \
+  /usr/include/mach/i386/_structs.h \
+  /usr/include/sys/_pthread/_pthread_attr_t.h \
+  /usr/include/sys/_types/_sigaltstack.h \
+  /usr/include/sys/_types/_ucontext.h \
+  /usr/include/sys/_types/_sigset_t.h \
+  /usr/include/sys/_types/_size_t.h \
+  /usr/include/sys/_types/_uid_t.h \
+  /usr/include/sys/resource.h \
+  /Library/Developer/CommandLineTools/usr/bin/../lib/clang/6.0/include/stdint.h \
+  /usr/include/stdint.h \
+  /usr/include/sys/_types/_int8_t.h \
+  /usr/include/sys/_types/_int16_t.h \
+  /usr/include/sys/_types/_int32_t.h \
+  /usr/include/sys/_types/_int64_t.h \
+  /usr/include/_types/_uint8_t.h \
+  /usr/include/_types/_uint16_t.h \
+  /usr/include/_types/_uint32_t.h \
+  /usr/include/_types/_uint64_t.h \
+  /usr/include/sys/_types/_intptr_t.h \
+  /usr/include/sys/_types/_uintptr_t.h \
+  /usr/include/_types/_intmax_t.h \
+  /usr/include/_types/_uintmax_t.h \
+  /usr/include/Availability.h \
+  /usr/include/AvailabilityInternal.h \
+  /usr/include/sys/_types/_timeval.h \
+  /usr/include/machine/endian.h \
+  /usr/include/i386/endian.h \
+  /usr/include/sys/_endian.h \
+  /usr/include/libkern/_OSByteOrder.h \
+  /usr/include/libkern/i386/_OSByteOrder.h \
   /usr/include/ctype.h \
-  /usr/include/xlocale.h \
+    $(wildcard include/config/pe/inline/.h) \
+    $(wildcard include/config/ii.h) \
+    $(wildcard include/config/ended/locales/.h) \
+  /usr/include/runetype.h \
+  /usr/include/_types.h \
+  /usr/include/sys/_types/_ct_rune_t.h \
+  /usr/include/sys/_types/_rune_t.h \
+  /usr/include/sys/_types/_wchar_t.h \
+  /usr/include/sys/_types/_wint_t.h \
   /usr/include/errno.h \
-  /usr/include/i386-linux-gnu/bits/errno.h \
-  /usr/include/linux/errno.h \
-  /usr/include/i386-linux-gnu/asm/errno.h \
-  /usr/include/asm-generic/errno.h \
-  /usr/include/asm-generic/errno-base.h \
+  /usr/include/sys/errno.h \
+  /usr/include/sys/_types/_errno_t.h \
   /usr/include/fcntl.h \
-  /usr/include/i386-linux-gnu/bits/fcntl.h \
-  /usr/include/i386-linux-gnu/bits/fcntl-linux.h \
-  /usr/include/i386-linux-gnu/bits/stat.h \
-  /usr/lib/gcc/i686-linux-gnu/4.8/include-fixed/limits.h \
-  /usr/lib/gcc/i686-linux-gnu/4.8/include-fixed/syslimits.h \
+  /usr/include/sys/fcntl.h \
+  /usr/include/sys/_types/_mode_t.h \
+  /usr/include/sys/_types/_off_t.h \
+  /usr/include/sys/_types/_o_sync.h \
+  /usr/include/sys/_types/_o_dsync.h \
+  /usr/include/sys/_types/_seek_set.h \
+  /usr/include/sys/_types/_s_ifmt.h \
+  /usr/include/sys/_types/_timespec.h \
+  /usr/include/sys/_types/_filesec_t.h \
+  /Library/Developer/CommandLineTools/usr/bin/../lib/clang/6.0/include/limits.h \
   /usr/include/limits.h \
-  /usr/include/i386-linux-gnu/bits/posix1_lim.h \
-  /usr/include/i386-linux-gnu/bits/local_lim.h \
-  /usr/include/linux/limits.h \
-  /usr/include/i386-linux-gnu/bits/posix2_lim.h \
-  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+  /usr/include/machine/limits.h \
+  /usr/include/i386/limits.h \
+  /usr/include/i386/_limits.h \
+  /usr/include/sys/syslimits.h \
+  /usr/include/signal.h \
+  /usr/include/sys/_pthread/_pthread_t.h \
+  /Library/Developer/CommandLineTools/usr/bin/../lib/clang/6.0/include/stdarg.h \
   /usr/include/stdlib.h \
-  /usr/include/i386-linux-gnu/sys/types.h \
-  /usr/include/i386-linux-gnu/sys/select.h \
-  /usr/include/i386-linux-gnu/bits/select.h \
-  /usr/include/i386-linux-gnu/bits/time.h \
-  /usr/include/i386-linux-gnu/sys/sysmacros.h \
   /usr/include/alloca.h \
-  /usr/include/i386-linux-gnu/bits/stdlib-float.h \
+  /usr/include/sys/_types/_null.h \
+  /usr/include/machine/types.h \
+  /usr/include/i386/types.h \
+  /usr/include/sys/_types/_dev_t.h \
   /usr/include/string.h \
-    $(wildcard include/config/ing/inlines.h) \
+  /usr/include/sys/_types/_rsize_t.h \
+  /usr/include/sys/_types/_ssize_t.h \
+  /usr/include/strings.h \
+  /usr/include/secure/_string.h \
+    $(wildcard include/config/tify/level.h) \
+  /usr/include/secure/_common.h \
   /usr/include/termios.h \
-  /usr/include/i386-linux-gnu/bits/termios.h \
+  /usr/include/sys/termios.h \
+  /usr/include/sys/_types/_posix_vdisable.h \
+  /usr/include/sys/ttydefaults.h \
   /usr/include/unistd.h \
-  /usr/include/i386-linux-gnu/bits/posix_opt.h \
-  /usr/include/i386-linux-gnu/bits/environments.h \
-  /usr/include/i386-linux-gnu/bits/confname.h \
-  /usr/include/getopt.h \
+  /usr/include/sys/unistd.h \
+  /usr/include/sys/_types/_gid_t.h \
+  /usr/include/sys/_types/_useconds_t.h \
+  /usr/include/sys/select.h \
+  /usr/include/sys/_types/_fd_def.h \
+  /usr/include/sys/_types/_time_t.h \
+  /usr/include/sys/_types/_suseconds_t.h \
+  /usr/include/sys/_types/_fd_setsize.h \
+  /usr/include/sys/_types/_fd_set.h \
+  /usr/include/sys/_types/_fd_clr.h \
+  /usr/include/sys/_types/_fd_isset.h \
+  /usr/include/sys/_types/_fd_zero.h \
+  /usr/include/sys/_types/_fd_copy.h \
+  /usr/include/sys/_select.h \
+  /usr/include/sys/_types/_uuid_t.h \
+  /usr/include/gethostuuid.h \
   /usr/include/locale.h \
-  /usr/include/i386-linux-gnu/bits/locale.h \
-  scripts/kconfig//lkc.h \
-  scripts/kconfig//expr.h \
+  /usr/include/_locale.h \
+  scripts/kconfig/lkc.h \
+  scripts/kconfig/expr.h \
   /usr/include/stdio.h \
-  /usr/include/libio.h \
-    $(wildcard include/config/ar/t.h) \
-    $(wildcard include/config//io/file.h) \
-  /usr/include/_G_config.h \
-  /usr/include/wchar.h \
-  /usr/include/i386-linux-gnu/bits/stdio_lim.h \
-  /usr/include/i386-linux-gnu/bits/sys_errlist.h \
-  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
-  /usr/include/libintl.h \
-    $(wildcard include/config//gettext.h) \
-  scripts/kconfig//lkc_proto.h \
+  /usr/include/sys/_types/_va_list.h \
+  /usr/include/sys/stdio.h \
+  /usr/include/secure/_stdio.h \
+  /Library/Developer/CommandLineTools/usr/bin/../lib/clang/6.0/include/stdbool.h \
+  scripts/kconfig/lkc_proto.h \
 
 scripts/kconfig//mconf.o: $(deps_scripts/kconfig//mconf.o)
 
