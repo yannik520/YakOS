@@ -1,11 +1,13 @@
-#ifndef __SYMBOLS_H__
-#define __SYMBOLS_H__
+#ifndef SYMBOLS_H_
+#define SYMBOLS_H_
+
 struct symbols {
-	const char	*name;
-	void		*value;
+  const char *name;
+  void *value;
 };
 
-
 extern const int symbols_nelts;
-extern const struct symbols symbols[177];
-#endif
+
+extern const struct symbols symbols[/* symbols_nelts */];
+
+#endif /* SYMBOLS_H_ */

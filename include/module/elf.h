@@ -121,6 +121,7 @@ struct sec_info {
 	elf32_off	s_reloff;
 	elf32_word	s_relsize;
 	elf32_word	s_relas;
+	elf32_word	s_number;
 };
 
 enum SEC_TYPE {
