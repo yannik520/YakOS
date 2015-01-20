@@ -1,13 +1,17 @@
 YakOS
 ==========
 
-YakOS is an embedded operating system macro kernel.
+YakOS is an embedded real-time operating system, and support some very insteresting features which just can be found in Linux.
 
 ### Features:
-1. support for the ARM CPU.
+1. At present, just support for ARM.
 2. Support preemptive task scheduling algorithm.
-3. Memory management based on buddy memory allocation algorithm.
-4. Can be extended dynamically with module just like linux.
+3. Buddy memory allocation system.
+4. Extended dynamically with kernel module.
+5. A simplified command shell.
+6. FAT32 file system, and VFS framework.
+7. KConfig build system.
+8. ...
 
 ### Architecture:
 ![github](http://raw.github.com/yannik520/YakOS/master/documents/arch.png "github")
@@ -15,8 +19,6 @@ YakOS is an embedded operating system macro kernel.
 ![github](http://raw.github.com/yannik520/YakOS/master/documents/screenshot.png "github")
 
 ### Contact with me:
-    TEL. : +86-13419548808
-    QQ   : 791884247
     E-Mail: yannik520@gmail.com
 
 
