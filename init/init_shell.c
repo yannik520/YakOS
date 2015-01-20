@@ -206,7 +206,7 @@ void help(void) {
 	printk("\n\n");
 }
 
-void (*pFun)();
+
 extern unsigned int stack_top;
 
 CMD_FUNC(insmod) {
@@ -218,6 +218,7 @@ CMD_FUNC(insmod) {
 	int		 fd;
 	struct vfs_node	 file;
 	char		*path = args;
+	void (*pFun)();
 
 	if (NULL == path) {
 		printk("Please give a correct path!\n");
@@ -258,6 +259,7 @@ CMD_FUNC(insmod) {
 	}
 
 	load_kmodule((unsigned int)file_buf, mod);
+	kfree(file_buf);
 	/* load_kmodule(0xc0100000, mod); */
 	/* printk("module name: %s numb_syms=%d\n", ((struct module *)elfloader_autostart_processes)->name, */
 	/* 	       ((struct module *)elfloader_autostart_processes)->num_syms); */
@@ -268,6 +270,31 @@ CMD_FUNC(insmod) {
 	/*        *((unsigned int *)(elfloader_autostart_processes) + 2)); */
 	(*pFun)();
 	
+	return 0;
+}
+
+CMD_FUNC(rmmod) {
+	struct k_module	*mod;
+	char		*mod_name = args;
+	void (*pFun)();
+
+	if (NULL == mod_name) {
+		printk("Please give a correct module name!\n");
+		return -1;
+	}
+
+	mod = find_module_by_name(mod_name);
+	if (NULL == mod)
+	{
+		printk("Cann't find the module!\n");
+		return -1;
+	}
+
+	pFun = mod->entry->syms[1].value;
+	(*pFun)();
+	
+	free_kmodule(mod);
+
 	return 0;
 }
 
@@ -337,6 +364,7 @@ CMD_FUNC(help) {
 
 SHELL_COMMAND(kmsg_command, "kmsg", "help: shows all kernel message", CMD_FUNC_NAME(kmsg));
 SHELL_COMMAND(insmod_command, "insmod", "help: insmod the given module", CMD_FUNC_NAME(insmod));
+SHELL_COMMAND(rmmod_command, "rmmod", "help: remove the given module", CMD_FUNC_NAME(rmmod));
 SHELL_COMMAND(mount_command, "mount", "help: mount the given file system", CMD_FUNC_NAME(mount));
 SHELL_COMMAND(ls_command, "ls", "help: list all file or directory", CMD_FUNC_NAME(ls));
 SHELL_COMMAND(help_command, "help", "help: display all commands", CMD_FUNC_NAME(help));
@@ -417,6 +445,7 @@ int init_shell(void *arg)
 
 	shell_register_command(&kmsg_command);
 	shell_register_command(&insmod_command);
+	shell_register_command(&rmmod_command);
 	shell_register_command(&mount_command);
 	shell_register_command(&ls_command);
 	shell_register_command(&help_command);

@@ -87,6 +87,9 @@ struct module_output {
 #define module_output_alloc_segment(output, type, size)		\
 	((output)->ops->allocate_segment(output, type, size))
 
+#define module_output_free_segment(output, type)		\
+	((output)->ops->free_segment(output, type))
+
 #define module_output_start_segment(output, type, addr, size)		\
 	((output)->ops->start_segment(output, type, addr, size))
 
@@ -103,6 +106,7 @@ struct module_output {
 struct module_output_ops {
 	void * (*allocate_segment)(struct k_module *output,
 				   unsigned int type, int size);
+	void (*free_segment)(struct k_module * const output, unsigned int type);
 	int (*start_segment)(struct k_module *output,
 			     unsigned int type, void *addr, int size);
 	int (*end_segment)(struct k_module *output);
@@ -114,7 +118,7 @@ struct module_output_ops {
 
 struct k_module * alloc_kmodule(void);
 void free_kmodule(struct k_module *kmod);
-int load_kmodule(unsigned int input_addr,
-		 struct k_module *mod);
+int load_kmodule(unsigned int input_addr, struct k_module *mod);
+struct k_module *find_module_by_name(const char *name);
 
 #endif /* __MODULE_H__ */

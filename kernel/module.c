@@ -639,6 +639,39 @@ static void * allocate_segment(struct k_module * const output,
 	return block;
 }
 
+static void free_segment(struct k_module * const output, unsigned int type)
+{
+	if (!output)
+		return;
+
+	switch(type) {
+	case MODULE_SEG_TEXT:
+		if (NULL != output->seg_info.text.address) {
+			kfree(output->seg_info.text.address);
+		}
+		break;
+	case MODULE_SEG_RODATA:
+		if (NULL != output->seg_info.rodata.address) {
+			kfree(output->seg_info.rodata.address);
+		}
+		break;
+	case MODULE_SEG_DATA:
+		if (NULL != output->seg_info.data.address) {
+			kfree(output->seg_info.data.address);
+		}
+		break;
+	case MODULE_SEG_BSS:
+		if (NULL != output->seg_info.bss.address) {
+			kfree(output->seg_info.bss.address);
+		}
+		break;
+	default:
+		printk("please give a correct segment type.\n");
+		break;
+	}
+	return;
+}
+
 static int start_segment(struct k_module *output,
 			 unsigned int type, void *addr, int size)
 {
@@ -670,6 +703,7 @@ static unsigned int segment_offset(struct k_module *output)
 const struct module_output_ops mod_output_ops =
 {
 	.allocate_segment = allocate_segment,
+	.free_segment	  = free_segment,
 	.start_segment	  = start_segment,
 	.end_segment	  = end_segment,
 	.write_segment	  = write_segment,
@@ -707,22 +741,31 @@ void free_kmodule(struct k_module *kmod)
 	up(&kmod_sem);
 
 	/* Free text segment */
-	if (NULL != kmod->seg_info.text.address) {
-		kfree(kmod->seg_info.text.address);
-	}
+	module_output_free_segment(kmod, MODULE_SEG_TEXT);
 
 	/* Free rodata segment */
-	if (NULL != kmod->seg_info.rodata.address) {
-		kfree(kmod->seg_info.rodata.address);
-	}
+	module_output_free_segment(kmod, MODULE_SEG_RODATA);
 
 	/* Free data segment */
-	if (NULL != kmod->seg_info.data.address) {
-		kfree(kmod->seg_info.data.address);
-	}
+	module_output_free_segment(kmod, MODULE_SEG_DATA);
 
 	/* Free bss segment */
-	if (NULL != kmod->seg_info.bss.address) {
-		kfree(kmod->seg_info.bss.address);
+	module_output_free_segment(kmod, MODULE_SEG_BSS);
+
+	kfree(kmod);
+}
+
+struct k_module *find_module_by_name(const char *name)
+{
+	struct k_module *kmod;
+
+	if (NULL == name)
+		return NULL;
+	
+	list_for_each_entry(kmod, &k_module_root, list) {
+		if (0 == strcmp(kmod->entry->name, name))
+			return kmod;
 	}
+
+	return NULL;
 }
