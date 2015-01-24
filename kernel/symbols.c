@@ -132,6 +132,7 @@ extern int scheduler();
 extern int sem();
 extern int shell_register_command();
 extern int shell_unregister_command();
+extern int show_arch_info();
 extern int show_logo();
 extern int simple_strtoul();
 extern int slob_alloc();
@@ -166,7 +167,9 @@ extern int undefined_stack();
 extern int undefined_stack_top();
 extern int unmask_interrupt();
 extern int up();
+extern int vfs_change_path();
 extern int vfs_close();
+extern int vfs_get_cur_path();
 extern int vfs_lookup();
 extern int vfs_mount();
 extern int vfs_open();
@@ -175,8 +178,8 @@ extern int virt_to_page();
 extern int vsnprintf();
 extern int zones();
 extern int zones_name();
-const int symbols_nelts = 177;
-const struct symbols symbols[177] = {
+const int symbols_nelts = 180;
+const struct symbols symbols[180] = {
 {"__aeabi_idiv", (void *)__aeabi_idiv},
 {"__aeabi_idiv0", (void *)__aeabi_idiv0},
 {"__aeabi_idivmod", (void *)__aeabi_idivmod},
@@ -310,6 +313,7 @@ const struct symbols symbols[177] = {
 {"sem", (void *)sem},
 {"shell_register_command", (void *)shell_register_command},
 {"shell_unregister_command", (void *)shell_unregister_command},
+{"show_arch_info", (void *)show_arch_info},
 {"show_logo", (void *)show_logo},
 {"simple_strtoul", (void *)simple_strtoul},
 {"slob_alloc", (void *)slob_alloc},
@@ -344,7 +348,9 @@ const struct symbols symbols[177] = {
 {"undefined_stack_top", (void *)undefined_stack_top},
 {"unmask_interrupt", (void *)unmask_interrupt},
 {"up", (void *)up},
+{"vfs_change_path", (void *)vfs_change_path},
 {"vfs_close", (void *)vfs_close},
+{"vfs_get_cur_path", (void *)vfs_get_cur_path},
 {"vfs_lookup", (void *)vfs_lookup},
 {"vfs_mount", (void *)vfs_mount},
 {"vfs_open", (void *)vfs_open},

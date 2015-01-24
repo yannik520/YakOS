@@ -20,33 +20,40 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <kernel/types.h>
+#include <kernel/printk.h>
+#include <module/module.h>
+#include <fs/vfsfs.h>
+#include <fs/vfsfat.h>
+#include <init.h>
 
-#ifndef _INIT_H_
-#define _INIT_H_
+CMD_FUNC(pwd) {
+	char *path = vfs_get_cur_path();
 
-#include <kernel/list.h>
+	printk("%s\n", path);
 
-#define CONSOLE_BUFFER_SIZE 256
+	return 0;
+}
 
-#define CMD_FUNC(name)					\
-	static int do_command_##name(char *args)
-#define CMD_FUNC_NAME(name) do_command_##name
+SHELL_COMMAND(pwd_command, "pwd", "help: To print working directory", CMD_FUNC_NAME(pwd));
 
-#define SHELL_COMMAND(name, command, description, cmd_func) \
-	static struct shell_command name = { {NULL, NULL},  \
-					     command,	    \
-					     description,   \
-					     cmd_func }
+int init_module (void)
+{
+	printk("start init pwd command!\n");
 
-struct shell_command {
-	struct list_head list;
-	char *command;
-	char *description;
-	int (*func)(char *args);
+	shell_register_command(&pwd_command);
+  
+	return 0;
+}
+
+void exit_module(void)
+{
+	printk("delete pwd command!\n");
+}
+
+struct module_entry mod_entry = {
+	.name = "pwd",
+	.num_syms = 2,
+	.syms = {{"init_module", &init_module},
+		 {"exit_moduel", &exit_module}}
 };
-
-void shell_unregister_command(struct shell_command *cmd);
-void shell_register_command(struct shell_command *cmd);
-int init_shell(void *arg);
-
-#endif

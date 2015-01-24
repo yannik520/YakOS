@@ -31,14 +31,13 @@
 #include <fs/vfsfs.h>
 #include <fs/vfsfat.h>
 
-#define CMD_FUNC(name)					\
-	static int do_command_##name(char *args)
-#define CMD_FUNC_NAME(name) do_command_##name
 
 char console_buffer[CONSOLE_BUFFER_SIZE];
 static char erase_seq[] = "\b \b";    /* erase sequence	*/
 static char   tab_seq[] = "        "; /* used to expand TABs	*/
 LIST_HEAD(commands);
+
+
 
 static char * delete_char (char *buffer, char *p, int *colp, int *np, int plen)
 {
@@ -211,18 +210,26 @@ extern unsigned int stack_top;
 
 CMD_FUNC(insmod) {
 	struct k_module	*mod;
-	unsigned char *file_buf;
-	unsigned char *buf;
-	size_t count;
-	size_t size = PAGE_SIZE;
+	unsigned char	*file_buf;
+	unsigned char	*buf;
+	size_t		 count;
+	size_t		 size	  = PAGE_SIZE;
 	int		 fd;
 	struct vfs_node	 file;
-	char		*path = args;
+	char		*path	  = args;
+	char new_path[128]	  = {'\0'};
+	char		*cur_path;
 	void (*pFun)();
 
 	if (NULL == path) {
 		printk("Please give a correct path!\n");
 		return -1;
+	}
+
+	cur_path = vfs_get_cur_path();
+	strcpy(new_path, cur_path);
+	if ((NULL != path) && (0 < strlen(path))) {
+		vfs_change_path(new_path, path);
 	}
 
 	mod = alloc_kmodule();
@@ -240,7 +247,7 @@ CMD_FUNC(insmod) {
 	}
 	buf = file_buf;
 	
-	if ((fd = vfs_open(path, &file)) == -1) {
+	if ((fd = vfs_open(new_path, &file)) == -1) {
 		printk("vfs_open failed\n");
 		return -1;
 	}
@@ -324,14 +331,21 @@ CMD_FUNC(ls) {
 	int		 fd;
 	struct vfs_node	 file;
 	char		*path = args;
-	char buf[1024]	      = {0};
+	char new_path[128]    = {'\0'};
+	char *cur_path = vfs_get_cur_path();
+	char *buf;
 
-	if (NULL == path) {
-		printk("Invalid path!\n");
+	buf = kmalloc(1024);
+	if (NULL == buf) {
 		return -1;
 	}
-
-	if ((fd = vfs_open(path, &file)) == -1) {
+	
+	strcpy(new_path, cur_path);
+	if ((NULL != path) && (0 < strlen(path))) {
+		vfs_change_path(new_path, path);
+	}
+	
+	if ((fd = vfs_open(new_path, &file)) == -1) {
 		printk("vfs_open failed\n");
 		return -1;
 	}
@@ -339,7 +353,8 @@ CMD_FUNC(ls) {
 	while (vfs_read(fd, buf, 1024, &count) != -1 && (count != 0)) {
 		if (count > 0)
 		{
-			printk("%s\n", buf);
+			if (0 < strlen(buf))
+				printk("%s\n", buf);
 			memset(buf, 0, 1024);
 		}
 	}
@@ -348,7 +363,19 @@ CMD_FUNC(ls) {
 		printk("vfs_close failed\n");
 		return -1;
 	}
+	
+	kfree(buf);
+	return 0;
+}
 
+CMD_FUNC(cd) {
+	char	*cur_path = vfs_get_cur_path();
+	char	*path	  = args;
+
+	if (NULL == path)
+		return -1;
+
+	vfs_change_path(cur_path, path);
 	return 0;
 }
 
@@ -367,6 +394,7 @@ SHELL_COMMAND(insmod_command, "insmod", "help: insmod the given module", CMD_FUN
 SHELL_COMMAND(rmmod_command, "rmmod", "help: remove the given module", CMD_FUNC_NAME(rmmod));
 SHELL_COMMAND(mount_command, "mount", "help: mount the given file system", CMD_FUNC_NAME(mount));
 SHELL_COMMAND(ls_command, "ls", "help: list all file or directory", CMD_FUNC_NAME(ls));
+SHELL_COMMAND(cd_command, "cd", "help: change to the specified directory", CMD_FUNC_NAME(cd));
 SHELL_COMMAND(help_command, "help", "help: display all commands", CMD_FUNC_NAME(help));
 
 void shell_unregister_command(struct shell_command *cmd)
@@ -423,8 +451,9 @@ int run_command(const char *cmd)
 				}
 			}
 	
-			if (0 == strcmp("--help", args) ||
-			    0 == strcmp("-h", args)) {
+			if ((NULL != args) &&
+			    ((0 == strcmp("--help", args)) ||
+			     (0 == strcmp("-h", args)))) {
 				printk("%s\n", cur_cmd->description);
 			}
 			else {
@@ -448,9 +477,11 @@ int init_shell(void *arg)
 	shell_register_command(&rmmod_command);
 	shell_register_command(&mount_command);
 	shell_register_command(&ls_command);
+	shell_register_command(&cd_command);
 	shell_register_command(&help_command);
 
 	for (;;) {
+		printk("%s ", vfs_get_cur_path());
 		len = readline("# ");
 		
 		if (len > 0) {

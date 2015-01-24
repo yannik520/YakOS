@@ -32,8 +32,9 @@
 #include <kernel/list.h>
 
 LIST_HEAD(fs_root);
-static struct vfs_node __vfsroot;
+static struct vfs_node	__vfsroot;
 static struct vfs_node *desc[FD_MAX_NUM] = {0};
+static char cur_path[128]		 = "/";
 
 static struct vfs_fs *find_filesystem(const char *name)
 {
@@ -268,4 +269,71 @@ int vfs_lookup(struct vfs_node *dir, const char *name, struct vfs_node *namei)
 	VFS_ASSERT(dir && namei && name);
 	struct vfs_opvector *vops = dir->vops;
 	return vops->lookup(dir->priv, name, namei);
+}
+
+char *vfs_get_cur_path(void)
+{
+	return (char *)cur_path;
+}
+
+void vfs_change_path(char *cur_path, char *input_path)
+{
+	unsigned int	 len;
+	char		*this, *next;
+	
+	if ((NULL == cur_path) || (NULL == input_path))
+		return;
+
+	while(input_path) {
+		if ('/' == *input_path) {
+			/* input a absolute path */
+			strcpy(cur_path, input_path);
+			break;
+		}
+		else if ((1 == strlen(input_path)) && ('.' == *input_path)) {
+			break;
+		}
+		else if (('.' == *input_path) && ('.' != *(input_path+1))) {
+			/* the input path is "./xxx" */
+			if ('/' == *(cur_path + strlen(cur_path) - 1))
+				strcat(cur_path, input_path+strlen("./"));
+			else {
+				if ((len = strlen(".")) < strlen(input_path))
+					strcat(cur_path, input_path+len);
+			}
+			break;
+		}
+		else if(('.' == *input_path) && ('.' == *(input_path+1))) {
+			if (strlen("/") < strlen(cur_path)) {
+				/* to find the last '/' in cur_path */
+				this = cur_path;
+				do {
+					next = this + 1;
+					this = strchr(next, '/');
+				} while(this);
+		
+				if (cur_path == (next - 1))
+					*next = '\0';
+				else
+					*(next -1) = '\0';
+
+				if ((len = strlen("../")) < strlen(input_path)) {
+					input_path += len;
+				}
+				else {
+					break;
+				}
+			}
+			else {
+				break;
+			}
+		}
+		else {
+			/* to add a '/' character if the last is not '/' */
+			if ('/' != *(cur_path + strlen(cur_path) - 1))
+				strcat(cur_path, "/");
+			strcat(cur_path, input_path);
+			break;
+		}
+	}
 }

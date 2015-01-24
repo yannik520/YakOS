@@ -37,6 +37,7 @@ int			sum = 0;
 struct semaphore	sem;
 
 void show_logo(void) {
+	printk("\n");
 	printk("▄▄▄    ▄▄▄           ▄▄          ▄▄▄▄      ▄▄▄▄   \n");
 	printk(" ██▄  ▄██            ██         ██▀▀██   ▄█▀▀▀▀█  \n");
 	printk("  ██▄▄██    ▄█████▄  ██ ▄██▀   ██    ██  ██▄      \n");
@@ -44,6 +45,7 @@ void show_logo(void) {
 	printk("    ██     ▄██▀▀▀██  ██▀██▄    ██    ██       ▀██ \n");
 	printk("    ██     ██▄▄▄███  ██  ▀█▄    ██▄▄██   █▄▄▄▄▄█▀ \n");
 	printk("    ▀▀      ▀▀▀▀ ▀▀  ▀▀   ▀▀▀    ▀▀▀▀     ▀▀▀▀▀   \n");
+	printk("\n");
 }
 
 void kmain(void)

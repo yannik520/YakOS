@@ -86,6 +86,8 @@ int vfs_closedir(struct vfs_node *dir);
 int vfs_open(const char *path, struct vfs_node *file);
 int vfs_read(int fd, void *buf, size_t count, size_t *ready);
 int vfs_close(int fd);
+char *vfs_get_cur_path(void);
+void vfs_change_path(char *cur_path, char *input_path);
 
 #endif
 

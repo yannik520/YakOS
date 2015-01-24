@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 	char buf[1024];
 	struct vfs_node file;
 	int fd;
+	char new_path[128] = "/";
 
 	if (argc < 2) {
 		printf("too few argument!\n");
@@ -45,28 +46,139 @@ int main(int argc, char *argv[])
 	}
 
 	for (int i=0; i<2; i++) {
-
-	if ((fd = vfs_open(argv[2], &file)) == -1) {
-		printf("vfs_open fail\n");
-		return -1;
-	}
-	printf("fd=%d\n", fd);
-
-	FILE * fout = fopen(argc < 4? "fout.txt": argv[3], "wb");
-	if (fout != NULL) {
-		while (!vfs_read(fd, buf, sizeof(buf), &count) && count > 0) {
-			printf("%s\n", buf);
-			fwrite(buf, 1, count, fout);
+		if ((fd = vfs_open(argv[2], &file)) == -1) {
+			printf("vfs_open fail\n");
+			return -1;
 		}
-		fclose(fout);
+		printf("fd=%d\n", fd);
+
+		FILE * fout = fopen(argc < 4? "fout.txt": argv[3], "wb");
+		if (fout != NULL) {
+			while (!vfs_read(fd, buf, sizeof(buf), &count) && count > 0) {
+				printf("%s\n", buf);
+				fwrite(buf, 1, count, fout);
+			}
+			fclose(fout);
+		}
+
+		if (vfs_close(fd)) {
+			printf("vfs_close fail\n");
+			return -1;
+		}
+
 	}
 
-	if (vfs_close(fd)) {
-		printf("vfs_close fail\n");
-		return -1;
-	}
+	printf("Test vfs_change_path:\n");
+	printf("test 1: /# ls /\n");
+	vfs_change_path(new_path, "/");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
 
-	}
+	printf("test 2: /# ls .\n");
+	vfs_change_path(new_path, ".");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
+
+	printf("test 3: /# ls ..\n");
+	vfs_change_path(new_path, "..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
+
+	printf("test 4: /# ls ../..\n");
+	vfs_change_path(new_path, "../..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
+
+	printf("test 5: /# ls ../abc\n");
+	vfs_change_path(new_path, "../abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
+
+	printf("test 6: /# ls ./abc\n");
+	vfs_change_path(new_path, "./abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/");
+
+	printf("test 7: /# ls ./abc/def\n");
+	vfs_change_path(new_path, "./abc/def");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 8: /xxx# ls /\n");
+	vfs_change_path(new_path, "/");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 9: /xxx# ls .\n");
+	vfs_change_path(new_path, ".");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 10: /xxx# ls ..\n");
+	vfs_change_path(new_path, "..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 11: /xxx# ls ../..\n");
+	vfs_change_path(new_path, "../..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 12: /xxx# ls ../abc\n");
+	vfs_change_path(new_path, "../abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 13: /xxx# ls ./abc\n");
+	vfs_change_path(new_path, "./abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 14: /xxx# ls ./abc/def\n");
+	vfs_change_path(new_path, "./abc/def");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx");
+
+	printf("test 15: /xxx/xxx# ls /\n");
+	vfs_change_path(new_path, "/");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 16: /xxx/xxx# ls .\n");
+	vfs_change_path(new_path, ".");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 17: /xxx/xxx# ls ..\n");
+	vfs_change_path(new_path, "..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 18: /xxx/xxx# ls ../..\n");
+	vfs_change_path(new_path, "../..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 19: /xxx/xxx# ls ../abc\n");
+	vfs_change_path(new_path, "../abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 20: /xxx/xxx# ls ./abc\n");
+	vfs_change_path(new_path, "./abc");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx");
+
+	printf("test 21: /xxx/xxx# ls ./abc/def\n");
+	vfs_change_path(new_path, "./abc/def");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx/xxx");
+
+	printf("test 22: /xxx/xxx/xxx# ls ../..\n");
+	vfs_change_path(new_path, "../..");
+	printf("-> %s\n\n", new_path);
+	strcpy(new_path, "/xxx/xxx/xxx");
+
 	printf("test success\n");
 	return 0;
 }

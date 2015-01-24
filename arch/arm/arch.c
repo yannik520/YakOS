@@ -31,7 +31,13 @@ extern unsigned int	__heap;
 
 void exception_init(void) {
 	unsigned long vectors_vaddr = EXCEPTION_BASE;
-	memcpy((void *)vectors_vaddr, (PAGE_OFFSET+TEXT_OFFSET), 64);
+	memcpy((void *)vectors_vaddr, (void *)(PAGE_OFFSET+TEXT_OFFSET), 64);
+}
+
+void show_arch_info(void)
+{
+	printk("\nYakOS version 0.0.1\n");
+	printk("CPU: ARM926EJ-S.\n");
 }
 
 void arch_early_init(void) {
@@ -40,4 +46,5 @@ void arch_early_init(void) {
 	arm_mmu_remap_evt();
 	exception_init();
 	//clean_user_space();
+	show_arch_info();
 }
