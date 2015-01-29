@@ -134,6 +134,8 @@ extern int shell_register_command();
 extern int shell_unregister_command();
 extern int show_arch_info();
 extern int show_logo();
+extern int simple_str2lo();
+extern int simple_str2up();
 extern int simple_strtoul();
 extern int slob_alloc();
 extern int slob_free();
@@ -178,8 +180,8 @@ extern int virt_to_page();
 extern int vsnprintf();
 extern int zones();
 extern int zones_name();
-const int symbols_nelts = 180;
-const struct symbols symbols[180] = {
+const int symbols_nelts = 182;
+const struct symbols symbols[182] = {
 {"__aeabi_idiv", (void *)__aeabi_idiv},
 {"__aeabi_idiv0", (void *)__aeabi_idiv0},
 {"__aeabi_idivmod", (void *)__aeabi_idivmod},
@@ -315,6 +317,8 @@ const struct symbols symbols[180] = {
 {"shell_unregister_command", (void *)shell_unregister_command},
 {"show_arch_info", (void *)show_arch_info},
 {"show_logo", (void *)show_logo},
+{"simple_str2lo", (void *)simple_str2lo},
+{"simple_str2up", (void *)simple_str2up},
 {"simple_strtoul", (void *)simple_strtoul},
 {"slob_alloc", (void *)slob_alloc},
 {"slob_free", (void *)slob_free},

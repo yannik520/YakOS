@@ -7,7 +7,6 @@ To configure and build the YakOS, use:
 
     make menuconfig
     make
-    make WITH_SYMBOLS=1
 
 Load with u-boot and run:
     loadb 0xc0008000   --> load kernel image

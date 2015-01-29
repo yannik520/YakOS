@@ -23,6 +23,14 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
                 else if [ -x /bin/bash ]; then echo /bin/bash; \
                 else echo sh; fi ; fi)
 
+ifeq ("$(origin S)", "command line")
+  WITH_SYMBOLS = $(S)
+endif
+ifndef WITH_SYMBOLS
+  WITH_SYMBOLS = 0
+endif
+export WITH_SYMBOLS
+
 ifeq (.config,$(wildcard .config))
     include .config
 else
@@ -101,7 +109,7 @@ prepare_include:
 	@cp $(wildcard ./include/arch/$(ARCH)/boards/$(BOARD)/*.h) ./include/arch
 	@cp $(wildcard ./include/arch/$(ARCH)/*.h) ./include/arch
 
-ifdef WITH_SYMBOLS
+ifeq ($(WITH_SYMBOLS), 1)
 .PHONY: prepare_symbols_file
 prepare_symbols_file:
 	@./tools/make-symbols-nm $(TARGET_ELF)
@@ -122,6 +130,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 $(TARGET_ELF): $(ALLOBJS-y) $(LINKER_SCRIPT)
 	@echo linking $@
 	$(noecho)$(LD) $(LDFLAGS) -T $(LINKER_SCRIPT) $(ALLOBJS-y) -o $@ $(PLATFORM_LIBGCC)
+	$(if $(WITH_SYMBOLS:1=), @$(MAKE) S=1)
 
 $(TARGET_SYM): $(TARGET_ELF)
 	@echo generating listing: $@

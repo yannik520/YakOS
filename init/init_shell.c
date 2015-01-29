@@ -150,6 +150,40 @@ int readline(const char *const prompt)
 			 || ('A' <= (c) && (c) <= 'F'))
 
 #define isdigit(c)	('0' <= (c) && (c) <= '9')
+#define islower(c)	('a' <= (c) && (c) <= 'z')
+#define isupper(c)	('A' <= (c) && (c) <= 'Z')
+
+// convert string to upper
+void simple_str2up(char *str)
+{
+	if (NULL == str) {
+		return;
+	}
+	
+	while (*str) {
+		if (islower(*str))
+		{
+			*str -= 'a'-'A';
+		}
+		str++;
+	}
+}
+
+// convert string to lower
+void simple_str2lo(char *str)
+{
+	if (NULL == str) {
+		return;
+	}
+	
+	while (*str) {
+		if (isupper(*str))
+		{
+			*str -= 'A'-'a';
+		}
+		str++;
+	}
+}
 
 static unsigned int simple_guess_base(const char *cp)
 {
@@ -231,6 +265,8 @@ CMD_FUNC(insmod) {
 	if ((NULL != path) && (0 < strlen(path))) {
 		vfs_change_path(new_path, path);
 	}
+
+	simple_str2up(new_path);
 
 	mod = alloc_kmodule();
 	if (unlikely(NULL == mod))
@@ -344,6 +380,7 @@ CMD_FUNC(ls) {
 	if ((NULL != path) && (0 < strlen(path))) {
 		vfs_change_path(new_path, path);
 	}
+	simple_str2up(new_path);
 	
 	if ((fd = vfs_open(new_path, &file)) == -1) {
 		printk("vfs_open failed\n");
@@ -353,8 +390,10 @@ CMD_FUNC(ls) {
 	while (vfs_read(fd, buf, 1024, &count) != -1 && (count != 0)) {
 		if (count > 0)
 		{
-			if (0 < strlen(buf))
+			if (0 < strlen(buf)) {
+				simple_str2lo(buf);
 				printk("%s\n", buf);
+			}
 			memset(buf, 0, 1024);
 		}
 	}
@@ -375,7 +414,9 @@ CMD_FUNC(cd) {
 	if (NULL == path)
 		return -1;
 
+	simple_str2lo(path);
 	vfs_change_path(cur_path, path);
+	
 	return 0;
 }
 
