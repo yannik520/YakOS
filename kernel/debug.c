@@ -21,6 +21,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <string.h>
 #include <kernel/types.h>
 #include <kernel/printk.h>
 #include <kernel/debug.h>
@@ -38,4 +39,42 @@ void _assert(
 	       function
 		);
 	halt();
+}
+
+void hexdump(const void *ptr, size_t len)
+{
+	addr_t address = (addr_t)ptr;
+	size_t count;
+	int i;
+
+	for (count = 0 ; count < len; count += 16) {
+		printk("0x%08lx: ", address);
+		printk("%08x %08x %08x %08x |", *(const uint32_t *)address, *(const uint32_t *)(address + 4), *(const uint32_t *)(address + 8), *(const uint32_t *)(address + 12));
+		for (i=0; i < 16; i++) {
+			char c = *(const char *)(address + i);
+			if (isalpha(c)) {
+				printk("%c", c);
+			} else {
+				printk(".");
+			}
+		}
+		printk("|\n");
+		address += 16;
+	}
+}
+
+void hexdump8(const void *ptr, size_t len)
+{
+	addr_t address = (addr_t)ptr;
+	size_t count;
+	int i;
+
+	for (count = 0 ; count < len; count += 16) {
+		printk("0x%08lx: ", address);
+		for (i=0; i < 16; i++) {
+			printk("0x%02hhx ", *(const uint8_t *)(address + i));
+		}
+		printk("\n");
+		address += 16;
+	}
 }

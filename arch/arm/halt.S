@@ -24,18 +24,22 @@
 #include <linkage.h>
 	
 ENTRY(halt)
-    /* Disable interrupts */
-    cpsid iaf
+	/* Disable interrupts */
+	//cpsid iaf
+	mrs	r0, cpsr
+	bic	r0, r0, #(3<<6)		/* clear the I&F bit */
+	msr	cpsr_c, r0
 
 #ifdef DEBUG
-    /* print a message */
-    ldr r0, =halt_message
-    blx __puts
+	/* print a message */
+	ldr r0, =halt_message
+	blx __puts
 #endif
 
-    /* Halt(wait for interrupt) */
-1:  mcr p15, 0, r0, c7, c0, 4
-    b 1b
+	/* Halt(wait for interrupt) */
+1:  	mcr p15, 0, r0, c7, c0, 4
+	b 1b
+
 
 
 #ifdef DEBUG

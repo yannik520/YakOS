@@ -52,4 +52,8 @@ void _assert(
 	printk("%s %s: " fmt , "ERROR", \
 	       __FUNCTION__, ## args)
 
+/* dump memory */
+void hexdump(const void *ptr, size_t len);
+void hexdump8(const void *ptr, size_t len);
+
 #endif /* __DEBUG_H__ */

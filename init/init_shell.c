@@ -237,6 +237,8 @@ void help(void) {
 	for (i=0; i<80; i++)
 		printk("-");
 	printk("\n\n");
+
+	*((unsigned int *)(0xffffffff)) = 0;
 }
 
 

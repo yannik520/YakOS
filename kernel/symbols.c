@@ -15,6 +15,7 @@ extern int __puts();
 extern int __puts_early();
 extern int __udivsi3();
 extern int __umodsi3();
+extern int _assert();
 extern int _dvprintf();
 extern int _end();
 extern int _start();
@@ -32,6 +33,7 @@ extern int arch_enable_ints();
 extern int arch_idle();
 extern int arch_task_initialize();
 extern int arm_context_switch();
+extern int arm_data_abort_handler();
 extern int arm_irq();
 extern int arm_mmu_create_mapping();
 extern int arm_mmu_init();
@@ -39,6 +41,10 @@ extern int arm_mmu_map_page();
 extern int arm_mmu_map_section();
 extern int arm_mmu_remap_evt();
 extern int arm_mmu_unmap_section();
+extern int arm_prefetch_abort_handler();
+extern int arm_save_mode_regs();
+extern int arm_syscall_handler();
+extern int arm_undefined_handler();
 extern int clean_user_space();
 extern int commands();
 extern int console_buffer();
@@ -79,13 +85,20 @@ extern int free_pages();
 extern int fs_root();
 extern int get_cpsr();
 extern int getchar();
+extern int halt();
 extern int help();
+extern int hexdump();
+extern int hexdump8();
 extern int init_shell();
 extern int initial_task_func();
 extern int insert_to_free_area();
 extern int irq();
 extern int irq_save_spot();
 extern int is_pllc_invalid();
+extern int isalpha();
+extern int isdigit();
+extern int islower();
+extern int isupper();
 extern int k_module_root();
 extern int kernel_pgd();
 extern int kfree();
@@ -180,8 +193,8 @@ extern int virt_to_page();
 extern int vsnprintf();
 extern int zones();
 extern int zones_name();
-const int symbols_nelts = 182;
-const struct symbols symbols[182] = {
+const int symbols_nelts = 195;
+const struct symbols symbols[195] = {
 {"__aeabi_idiv", (void *)__aeabi_idiv},
 {"__aeabi_idiv0", (void *)__aeabi_idiv0},
 {"__aeabi_idivmod", (void *)__aeabi_idivmod},
@@ -198,6 +211,7 @@ const struct symbols symbols[182] = {
 {"__puts_early", (void *)__puts_early},
 {"__udivsi3", (void *)__udivsi3},
 {"__umodsi3", (void *)__umodsi3},
+{"_assert", (void *)_assert},
 {"_dvprintf", (void *)_dvprintf},
 {"_end", (void *)_end},
 {"_start", (void *)_start},
@@ -215,6 +229,7 @@ const struct symbols symbols[182] = {
 {"arch_idle", (void *)arch_idle},
 {"arch_task_initialize", (void *)arch_task_initialize},
 {"arm_context_switch", (void *)arm_context_switch},
+{"arm_data_abort_handler", (void *)arm_data_abort_handler},
 {"arm_irq", (void *)arm_irq},
 {"arm_mmu_create_mapping", (void *)arm_mmu_create_mapping},
 {"arm_mmu_init", (void *)arm_mmu_init},
@@ -222,6 +237,10 @@ const struct symbols symbols[182] = {
 {"arm_mmu_map_section", (void *)arm_mmu_map_section},
 {"arm_mmu_remap_evt", (void *)arm_mmu_remap_evt},
 {"arm_mmu_unmap_section", (void *)arm_mmu_unmap_section},
+{"arm_prefetch_abort_handler", (void *)arm_prefetch_abort_handler},
+{"arm_save_mode_regs", (void *)arm_save_mode_regs},
+{"arm_syscall_handler", (void *)arm_syscall_handler},
+{"arm_undefined_handler", (void *)arm_undefined_handler},
 {"clean_user_space", (void *)clean_user_space},
 {"commands", (void *)commands},
 {"console_buffer", (void *)console_buffer},
@@ -262,13 +281,20 @@ const struct symbols symbols[182] = {
 {"fs_root", (void *)fs_root},
 {"get_cpsr", (void *)get_cpsr},
 {"getchar", (void *)getchar},
+{"halt", (void *)halt},
 {"help", (void *)help},
+{"hexdump", (void *)hexdump},
+{"hexdump8", (void *)hexdump8},
 {"init_shell", (void *)init_shell},
 {"initial_task_func", (void *)initial_task_func},
 {"insert_to_free_area", (void *)insert_to_free_area},
 {"irq", (void *)irq},
 {"irq_save_spot", (void *)irq_save_spot},
 {"is_pllc_invalid", (void *)is_pllc_invalid},
+{"isalpha", (void *)isalpha},
+{"isdigit", (void *)isdigit},
+{"islower", (void *)islower},
+{"isupper", (void *)isupper},
 {"k_module_root", (void *)k_module_root},
 {"kernel_pgd", (void *)kernel_pgd},
 {"kfree", (void *)kfree},

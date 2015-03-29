@@ -66,6 +66,53 @@
 #include <linkage.h>
 #include <asm.h>
 
+.macro save_regs
+	stmfd 	sp!, { r0-r12, r14 }
+	sub	sp, sp, #12
+	mov	r0, sp
+	mrs	r1, spsr
+	stmia	r0, { r1, r13-r14 }^
+.endm
+
+ENTRY(arm_save_mode_regs)
+	mrs	r1, cpsr
+
+	bic	r2, r1, #0x1f	/* clear the mode bits */
+
+	orr     r3, r2, #0x11	/* fiq */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	orr     r3, r2, #0x12	/* irq */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	orr     r3, r2, #0x13	/* svc */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	orr     r3, r2, #0x17	/* abt */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	orr     r3, r2, #0x1b	/* und */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	orr     r3, r2, #0x1f	/* sys */
+	msr     cpsr_c, r3
+	str	r13, [r0], #4
+	str	r14, [r0], #4
+
+	msr	cpsr_c, r1
+
+	bx	lr
+
 ENTRY(arm_irq)
 	/* save r4-r6 and use as a temporary place to save while we switch into supervisor mode */
 	stmia	r13, { r4-r6 }
@@ -122,24 +169,23 @@ ENTRY(arm_irq)
 	ldmfd	sp!, { r0-r3, r12, lr, pc }^
 
 ENTRY(undefined)
-	ldr	r0, =undefined_str
-	bl	printk
-	b 	.
-	
+	save_regs
+	b	arm_undefined_handler
+	b	.
+
 ENTRY(syscall)
-	ldr	r0, =syscall_str
-	bl	__puts
+	save_regs
+	b	arm_syscall_handler
 	b	.
 
 ENTRY(prefetch_abort)
-	ldr	r0, =prefetch_abort
-	bl	__puts
+	save_regs
+	b	arm_prefetch_abort_handler
 	b	.
 
 ENTRY(data_abort)
-	ldr	r0, =data_abort_str
-	sub	r1, lr, #0x8
-	bl	printk
+	save_regs
+	b	arm_data_abort_handler
 	b	.
 
 ENTRY(reserved)
@@ -156,23 +202,12 @@ ENTRY(fiq)
 	b	.
 .ltorg
 
-undefined_str:
-	.ascii	"Exception: undefined\n\0"
-	.align
-syscall_str:
-	.ascii	"Exception: syscall\n\0"
-	.align
-prefetch_abort_str:
-	.ascii	"Exception: prefetch abort\n\0"
-	.align
-data_abort_str:
-	.ascii	"Exception: data abort: 0x%x\n\0"
-	.align
 reserved_str:
-	.ascii	"Exception: reserved\n\0"
+	.ascii	"reserved exception!\n\0"
 	.align
+
 fiq_str:
-	.ascii	"Exception: fiq\n\0"
+	.ascii	"Fiq occured!\n\0"
 	.align
 
 .ltorg
@@ -186,11 +221,9 @@ ENTRY(irq_save_spot)
 .ltorg
 
 DATA(abort_stack)
-	.skip 1024
+	.skip 2048
 DATA(abort_stack_top)
 
 DATA(undefined_stack)
-	.skip 1024
+	.skip 2048
 DATA(undefined_stack_top)
-
-

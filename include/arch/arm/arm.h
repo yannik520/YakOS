@@ -23,6 +23,8 @@
 #ifndef __ARM_H__
 #define __ARM_H__
 
+#include <arch/types.h>
+
 #define DSB __asm__ volatile("dsb" ::: "memory")
 #define ISB __asm__ volatile("isb" ::: "memory")
 
@@ -137,5 +139,34 @@
 #define TTB_SPGDT_LARGE_PAGE        (0x01)    /* 64K page */
 #define TTB_SPGDT_SMALL_PAGE        (0x02)    /* 4K page */
 #define TTB_SPGDT_TINY_PAGE         (0x03)    /* 1K page */
+
+struct arm_fault_frame {
+	uint32_t spsr;
+	uint32_t usp;
+	uint32_t ulr;
+	uint32_t r[13];
+	uint32_t pc;
+};
+
+#define MODE_MASK 0x1f
+#define MODE_USR 0x10
+#define MODE_FIQ 0x11
+#define MODE_IRQ 0x12
+#define MODE_SVC 0x13
+#define MODE_MON 0x16
+#define MODE_ABT 0x17
+#define MODE_UND 0x1b
+#define MODE_SYS 0x1f
+
+struct arm_mode_regs {
+	uint32_t fiq_r13, fiq_r14;
+	uint32_t irq_r13, irq_r14;
+	uint32_t svc_r13, svc_r14;
+	uint32_t abt_r13, abt_r14;
+	uint32_t und_r13, und_r14;
+	uint32_t sys_r13, sys_r14;
+};
+
+void arm_save_mode_regs(struct arm_mode_regs *regs);
 
 #endif

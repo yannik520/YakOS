@@ -9,4 +9,5 @@ ALLOBJS-$(CONFIG_ARCH_ARM) += \
 	$(LOCALDIR)/lib/strchr.o \
 	$(LOCALDIR)/arch.o \
 	$(LOCALDIR)/mmu.o \
-	$(LOCALDIR)/halt.o
+	$(LOCALDIR)/halt.o \
+	$(LOCALDIR)/faults.o

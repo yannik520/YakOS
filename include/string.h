@@ -36,5 +36,9 @@ void *memset(void *s, int c, size_t count);
 void *memcpy(void *dest, const void *src, size_t count);
 void *memmove(void *dest, const void *src, size_t count);
 int   memcmp (void const *, const void *, size_t);
+int islower(int c);
+int isupper(int c);
+int isdigit(int c);
+int isalpha(int c);
 
 #endif
