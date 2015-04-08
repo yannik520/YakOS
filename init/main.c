@@ -31,6 +31,7 @@
 #include <init.h>
 #include <fs/vfsfs.h>
 #include <fs/vfsfat.h>
+#include <driver/device.h>
 #include <compiler.h>
 
 int			sum = 0;
@@ -61,6 +62,7 @@ void kmain(void)
 	/*************** Init Platform ****************/
 	platform_init();
 	timer_init();
+	buses_init();
 
 	/*************** Init Task ****************/
 	task_init();

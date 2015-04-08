@@ -7,5 +7,5 @@ struct symbols {
 
 
 extern const int symbols_nelts;
-extern const struct symbols symbols[195];
+extern const struct symbols symbols[218];
 #endif

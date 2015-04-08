@@ -1,7 +1,30 @@
+/*
+ * Copyright (c) 2013 Yannik Li(Yanqing Li)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files
+ * (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include <kernel/printk.h>
 #include <kernel/list.h>
 #include <mm/malloc.h>
-#include <driver/device.h>
+#include <driver/kobject.h>
 #include <string.h>
 
 static void kobject_init(struct kobject *kobj)
@@ -73,13 +96,13 @@ struct kobject *kobject_create(void)
 	memset(kobj, 0, sizeof(*kobj));
 	kobject_init(kobj);
 
-	reutnr kobj;
+	return kobj;
 }
 
 struct kobject *kobject_create_and_add(const char *name, struct kobject *parent)
 {
-	struct kobject *kobj;
-	int retval;
+	struct kobject	*kobj;
+	int		 retval;
 
 	kobj = kobject_create();
 	if (!kobj)
@@ -112,7 +135,7 @@ int kset_register(struct kset *k)
 		return -1;
 
 	kset_init(k);
-	err = kobj_add(&k->kobj);
+	err = kobject_add(&k->kobj);
 	if (err)
 		return err;
 
@@ -155,7 +178,6 @@ void kset_release(struct kobject *kobj)
 struct kset *kset_create(const char *name, struct kobject *parent_kobj)
 {
 	struct kset *kset;
-	int retval;
 
 	kset = kmalloc(sizeof(*kset));
 	if (!kset)
@@ -168,11 +190,11 @@ struct kset *kset_create(const char *name, struct kobject *parent_kobj)
 	return kset;
 }
 
-kset *kset_create_and_add(const char *name,
-				 struct kobject *parent_kobj)
+struct kset *kset_create_and_add(const char *name,
+			  struct kobject *parent_kobj)
 {
-	struct kset *kset;
-	int error;
+	struct kset	*kset;
+	int		 error;
 	
 	kset = kset_create(name, parent_kobj);
 	if (!kset)

@@ -85,6 +85,7 @@ include arch/$(ARCH)/boards/$(BOARD)/Makefile
 include kernel/Makefile
 include mm/Makefile
 include fs/Makefile
+include drivers/Makefile
 include init/Makefile
 include modules/Makefile
 

@@ -45,6 +45,18 @@ extern int arm_prefetch_abort_handler();
 extern int arm_save_mode_regs();
 extern int arm_syscall_handler();
 extern int arm_undefined_handler();
+extern int bus_add_device();
+extern int bus_add_driver();
+extern int bus_find_device();
+extern int bus_find_device_by_name();
+extern int bus_for_each_dev();
+extern int bus_for_each_drv();
+extern int bus_probe_device();
+extern int bus_register();
+extern int bus_remove_device();
+extern int bus_remove_driver();
+extern int bus_unregister();
+extern int buses_init();
 extern int clean_user_space();
 extern int commands();
 extern int console_buffer();
@@ -107,6 +119,17 @@ extern int kmalloc();
 extern int kmalloc_init();
 extern int kmod_sem();
 extern int kmsg_dump();
+extern int kobject_add();
+extern int kobject_create();
+extern int kobject_create_and_add();
+extern int kobject_del();
+extern int kset_create();
+extern int kset_create_and_add();
+extern int kset_find_obj();
+extern int kset_init();
+extern int kset_register();
+extern int kset_release();
+extern int kset_unregister();
 extern int load_kmodule();
 extern int mask_interrupt();
 extern int memcmp();
@@ -193,8 +216,8 @@ extern int virt_to_page();
 extern int vsnprintf();
 extern int zones();
 extern int zones_name();
-const int symbols_nelts = 195;
-const struct symbols symbols[195] = {
+const int symbols_nelts = 218;
+const struct symbols symbols[218] = {
 {"__aeabi_idiv", (void *)__aeabi_idiv},
 {"__aeabi_idiv0", (void *)__aeabi_idiv0},
 {"__aeabi_idivmod", (void *)__aeabi_idivmod},
@@ -241,6 +264,18 @@ const struct symbols symbols[195] = {
 {"arm_save_mode_regs", (void *)arm_save_mode_regs},
 {"arm_syscall_handler", (void *)arm_syscall_handler},
 {"arm_undefined_handler", (void *)arm_undefined_handler},
+{"bus_add_device", (void *)bus_add_device},
+{"bus_add_driver", (void *)bus_add_driver},
+{"bus_find_device", (void *)bus_find_device},
+{"bus_find_device_by_name", (void *)bus_find_device_by_name},
+{"bus_for_each_dev", (void *)bus_for_each_dev},
+{"bus_for_each_drv", (void *)bus_for_each_drv},
+{"bus_probe_device", (void *)bus_probe_device},
+{"bus_register", (void *)bus_register},
+{"bus_remove_device", (void *)bus_remove_device},
+{"bus_remove_driver", (void *)bus_remove_driver},
+{"bus_unregister", (void *)bus_unregister},
+{"buses_init", (void *)buses_init},
 {"clean_user_space", (void *)clean_user_space},
 {"commands", (void *)commands},
 {"console_buffer", (void *)console_buffer},
@@ -303,6 +338,17 @@ const struct symbols symbols[195] = {
 {"kmalloc_init", (void *)kmalloc_init},
 {"kmod_sem", (void *)kmod_sem},
 {"kmsg_dump", (void *)kmsg_dump},
+{"kobject_add", (void *)kobject_add},
+{"kobject_create", (void *)kobject_create},
+{"kobject_create_and_add", (void *)kobject_create_and_add},
+{"kobject_del", (void *)kobject_del},
+{"kset_create", (void *)kset_create},
+{"kset_create_and_add", (void *)kset_create_and_add},
+{"kset_find_obj", (void *)kset_find_obj},
+{"kset_init", (void *)kset_init},
+{"kset_register", (void *)kset_register},
+{"kset_release", (void *)kset_release},
+{"kset_unregister", (void *)kset_unregister},
 {"load_kmodule", (void *)load_kmodule},
 {"mask_interrupt", (void *)mask_interrupt},
 {"memcmp", (void *)memcmp},
