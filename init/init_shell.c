@@ -30,7 +30,7 @@
 #include <module/module.h>
 #include <fs/vfsfs.h>
 #include <fs/vfsfat.h>
-
+#include <kernel/workqueue.h>
 
 char console_buffer[CONSOLE_BUFFER_SIZE];
 static char erase_seq[] = "\b \b";    /* erase sequence	*/
@@ -225,7 +225,7 @@ unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
 void help(void) {
 	struct shell_command	*cur_cmd;
 	int i;
-	
+
 	printk("All Supported Commands:\n");
 	for (i=0; i<80; i++)
 		printk("-");
@@ -522,8 +522,8 @@ int init_shell(void *arg)
 	shell_register_command(&help_command);
 
 	for (;;) {
-		printk("%s ", vfs_get_cur_path());
-		len = readline("# ");
+		printk("%s # ", vfs_get_cur_path());
+		len = readline("");
 		
 		if (len > 0) {
 			strcpy(lastcommand, console_buffer);

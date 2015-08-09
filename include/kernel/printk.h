@@ -24,7 +24,7 @@
 #ifndef __PRINTK_H__
 #define __PRINTK_H__
 
-extern void __puts(const char *s);
+extern unsigned char getchar(void);
 extern int printk(const char *fmt, ...);
 extern void kmsg_dump(void);
 

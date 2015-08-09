@@ -186,5 +186,5 @@ void timer_init(void)
 	INIT_LIST_HEAD(&timer_list);
 
 	/* register for a periodic timer tick */
-	platform_set_periodic_timer(timer_tick, NULL, 10); /* 10ms */
+	platform_set_periodic_timer((platform_timer_callback)timer_tick, NULL, 10); /* 10ms */
 }

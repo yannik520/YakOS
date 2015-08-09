@@ -39,16 +39,16 @@ void arch_cpu_reset(unsigned long addr)
 
 void console_init(void)
 {
-	__console_init();
+	_console_init();
 }
 
 void platform_init(void)
 {
-	/* init serial port */
-	console_init();
-	
 	/* init interrupt controller */
 	platform_init_interrupts();
+
+	/* init serial port */
+	console_init();
 
 	/* init timmer for kernel tick */
 	platform_init_timer();

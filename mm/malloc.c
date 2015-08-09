@@ -48,7 +48,7 @@ void *kmalloc(uint32_t size)
 
 	if (!size) return NULL;
 
-	size = ALIGN(size + SLOB_UNIT + align - 1, align);
+	size = (uint32_t)ALIGN(size + SLOB_UNIT + align - 1, align);
 
 	if (size < PAGE_SIZE) {
 		/* smaller than one page size? */

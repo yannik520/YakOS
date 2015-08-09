@@ -21,30 +21,44 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <arch/mmu.h>
-#include <arch/memory.h>
-#include <mm/malloc.h>
-#include <string.h>
+#ifndef _COMPLETION_H_
+#define _COMPLETION_H_
 
-#define HEAP_SIZE	0x100000 //1M
-extern unsigned int	__heap;
+#include <kernel/wait_queue.h>
 
-void exception_init(void) {
-	unsigned long vectors_vaddr = EXCEPTION_BASE;
-	memcpy((void *)vectors_vaddr, (void *)(PAGE_OFFSET+TEXT_OFFSET), 64);
-}
+struct completion {
+	unsigned int done;
+	wait_queue_head_t wait;
+};
 
-void show_arch_info(void)
+#define COMPLETION_INITIALIZER(work) \
+	{ 0, __WAIT_QUEUE_HEAD_INITIALIZER((work).wait) }
+
+#define COMPLETION_INITIALIZER_ONSTACK(work) \
+	({ init_completion(&work); work; })
+
+#define DECLARE_COMPLETION(work) \
+	struct completion work = COMPLETION_INITIALIZER(work)
+
+# define DECLARE_COMPLETION_ONSTACK(work) DECLARE_COMPLETION(work)
+
+static inline void init_completion(struct completion *x)
 {
-	printk("\nYakOS version 0.0.1\n");
-	printk("CPU: ARM926EJ-S.\n");
+	x->done = 0;
+	init_waitqueue_head(&x->wait);
 }
 
-void arch_early_init(void) {
-	arm_mmu_init();
-	kmalloc_init(&__heap, HEAP_SIZE);
-	arm_mmu_remap_evt();
-	exception_init();
-	//clean_user_space();
-	show_arch_info();
+static inline void reinit_completion(struct completion *x)
+{
+	x->done = 0;
 }
+
+extern void wait_for_completion(struct completion *);
+extern unsigned long wait_for_completion_timeout(struct completion *x,
+						 unsigned long timeout);
+extern bool completion_done(struct completion *x);
+
+extern void complete(struct completion *);
+extern void complete_all(struct completion *);
+
+#endif

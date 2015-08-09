@@ -39,7 +39,12 @@ typedef volatile struct timer {
 	void *arg;
 }timer_t;
 
-
+#define TIMER_INITIALIZER(_function, _expires, _periodic,  _data) {	\
+		.function      = (_function),	\
+		.expired_time  = (_expires),	\
+    		.periodic_time = (_periodic),	\
+		.arg	       = (_data),	\
+	}
 
 static __always_inline void init_timer_value(timer_t *t)
 {
@@ -50,6 +55,7 @@ static __always_inline void init_timer_value(timer_t *t)
 	INIT_LIST_HEAD((struct list_head *)&t->entry);
 }
 
+unsigned long long current_time(void);
 void oneshot_timer_add(timer_t *timer, unsigned long delay, timer_function function, void *arg);
 void periodic_timer_add(timer_t *timer, unsigned long period, timer_function function, void *arg);
 void timer_delete(timer_t *timer);

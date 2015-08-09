@@ -30,6 +30,9 @@
 
 #define MAX_PRIORITY	 8
 
+#define LONG_MAX	((long)(~0UL>>1))
+#define	MAX_SCHEDULE_TIMEOUT	LONG_MAX
+
 #define set_task_state(tsk, state_value)		\
 	do { (tsk)->state = (state_value); } while (0)
 #define set_current_state(state_value)			\
@@ -72,7 +75,8 @@ typedef struct task {
 	char name[32];
 } task_t;
 
-extern int critical_section_count;
+extern int	 critical_section_count;
+extern task_t	*current_task;
 
 void initial_task_func(void);
 task_t *task_alloc(char *name, int stack_size, unsigned int priority);
@@ -87,6 +91,8 @@ void task_exit(int retcode);
 void arch_enable_ints(void);
 void arch_disable_ints(void);
 
+signed long schedule_timeout(signed long timeout);
+  
 static __always_inline void enter_critical_section(void)
 {
 	if (critical_section_count == 0)

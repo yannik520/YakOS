@@ -28,6 +28,7 @@
 #include <kernel/timer.h>
 #include <arch/arch_task.h>
 #include <kernel/sched.h>
+#include <kernel/wait_queue.h>
 
 //#define DEBUG           1
 #include <kernel/debug.h>
@@ -235,4 +236,54 @@ void task_exit(int retcode)
 	scheduler->dequeue_task(current_task, 0);
 
 	task_schedule();
+}
+
+static int try_to_wake_up(task_t *t)
+{
+	t->state = READY;
+
+	enter_critical_section();
+
+	scheduler->enqueue_task(t, 0);
+	task_schedule();
+	
+	exit_critical_section();
+
+	return 0;
+}
+
+int default_wake_function(wait_queue_t *curr)
+{
+	return try_to_wake_up(curr->private);
+}
+
+signed long schedule_timeout(signed long timeout)
+{
+	timer_t         *timer;
+	unsigned long expire;
+
+	switch (timeout)
+	{
+	case MAX_SCHEDULE_TIMEOUT:
+		current_task->state = SLEEPING;
+		scheduler->dequeue_task(current_task, 0);
+		task_schedule();
+		goto out;
+	default:
+		if (timeout < 0) {
+			printk("schedule_timeout: wrong timeout "
+				"value %lx\n", timeout);
+			current_task->state = RUNNING;
+			goto out;
+		}
+	}
+
+	expire = timeout + current_time();
+
+	task_sleep(expire);
+
+	timeout = expire - current_time();
+
+ out:
+	return timeout < 0 ? 0 : timeout;
 }

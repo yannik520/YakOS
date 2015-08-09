@@ -20,6 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#include <arch/text.h>
 #include <kernel/kernel.h>
 #include <string.h>
 #include <kernel/task.h>
@@ -144,15 +145,15 @@ static void log_store(int level, const char *text, u16 text_len)
 	log_next_seq++;
 }
 
+extern volatile SERIAL_PORT uart;
 void puts(const char *s)
 {
-	/*if (mmu_opened) {
-		__puts(s);
-	}
-	else {
-		__puts_early(s);
-		}*/
-	__puts(s);
+	uart.puts(s);
+}
+
+unsigned char getchar(void)
+{
+	return uart.getchar();
 }
 
 static char *longlong_to_string(char *buf, unsigned long long n, int len, unsigned int flag)

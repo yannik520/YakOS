@@ -190,7 +190,7 @@ ENTRY(data_abort)
 
 ENTRY(reserved)
 	ldr	r0, =reserved_str
-	bl	__puts
+	bl	puts
 	b	.
 
 ENTRY(irq)
@@ -198,7 +198,7 @@ ENTRY(irq)
 
 ENTRY(fiq)
 	ldr	r0, =fiq_str
-	bl	__puts
+	bl	puts
 	b	.
 .ltorg
 

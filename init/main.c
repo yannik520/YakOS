@@ -68,11 +68,14 @@ void kmain(void)
 	task_init();
 	task_create_init();
 
+	/*************** Init Workqueu ****************/
+	init_workqueues();
+	
 	/*************** Init File System ****************/
 	register_filesystem(&fat_fs);
 	
 	/*************** Creating Shell TASK ****************/
-	task_shell = task_alloc("shell", 0x2000, 1);
+	task_shell = task_alloc("shell", 0x2000, 5);
 	if (NULL == task_shell)
 	{
 		return;
@@ -91,8 +94,8 @@ void kmain(void)
 	{
 		enter_critical_section();
 		arch_idle();
-		exit_critical_section();
 		task_schedule();
+		exit_critical_section();
 	}
 
 	task_free(task_shell);

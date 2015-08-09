@@ -82,21 +82,17 @@ int unmask_interrupt(unsigned int vector)
 handler_return platform_irq(struct arm_iframe *frame)
 {
 	unsigned int irq_num = 0;
+	handler_return ret = INT_NO_RESCHEDULE;
 	// get the current irq status
 	unsigned int irq_status = readl(ioaddr_intc(REG_INTC_IRQSTATUS));
 
-	while((irq_status & 0x1) == 0)
+	while(irq_status != 0)
 	{
 		irq_status >>= 1;
 		irq_num ++;
+		if (int_handler_table[irq_num].handler)
+			ret = int_handler_table[irq_num].handler(int_handler_table[irq_num].arg);
 	}
-
-	// deliver the interrupt
-	handler_return ret; 
-
-	ret = INT_NO_RESCHEDULE;
-	if (int_handler_table[irq_num].handler)
-		ret = int_handler_table[irq_num].handler(int_handler_table[irq_num].arg);
 
 	return ret;
 }

@@ -10,4 +10,8 @@ ALLOBJS-y += \
 	$(LOCALDIR)/symbols.o \
 	$(LOCALDIR)/symtab.o \
 	$(LOCALDIR)/module.o \
-	$(LOCALDIR)/debug.o
+	$(LOCALDIR)/debug.o \
+	$(LOCALDIR)/wait_queue.o \
+	$(LOCALDIR)/completion.o \
+	$(LOCALDIR)/workqueue.o
+
