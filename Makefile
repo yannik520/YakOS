@@ -1,4 +1,4 @@
-HOST ?= macosx
+HOST ?= Linux
 ARCH ?= arm
 TARGET ?= yakOS
 TARGET_BIN ?= $(TARGET).bin
@@ -6,8 +6,8 @@ TARGET_ELF ?= $(TARGET).elf
 TARGET_SYM ?= $(TARGETE).sym
 
 export TOPDIR=$(shell pwd)
-TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-elf-toolchain-$(HOST)/bin/
-TOOLCHAIN_PREFIX := $(TOOLCHAIN_PATH)arm-elf-
+TOOLCHAIN_PATH += $(TOPDIR)/tools/arm-eabi-5.3.0-$(HOST)-x86_64/bin/
+TOOLCHAIN_PREFIX := $(TOOLCHAIN_PATH)arm-eabi-
 CC := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
@@ -69,8 +69,8 @@ LDFLAGS += -gc-sections
 
 NOECHO ?= @
 
-ifeq ("x$(CONFIG_BUILD_BOARD_DEMO)", "xy")
-	BOARD ?= demo
+ifeq ("x$(CONFIG_BUILD_BOARD_Hi3560)", "xy")
+	BOARD ?= Hi3560
 else
 	BOARD ?= qemu_mini2440
 endif

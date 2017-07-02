@@ -1,4 +1,4 @@
-LOCALDIR := arch/arm/boards/demo
+LOCALDIR := arch/arm/boards/Hi3560
 
 MEMBASE := 0xc0008000
 STACKSIZE := 0x800000

@@ -1,6 +1,6 @@
-config BUILD_BOARD_DEMO
+config BUILD_BOARD_Hi3560
 	depends on ARCH_ARM
-	bool "bulid for board demo"
+	bool "bulid for board Hi3560"
 config BUILD_BOARD_QEMU
 	depends on ARCH_ARM
         bool "bulid for qemu_mini2440"

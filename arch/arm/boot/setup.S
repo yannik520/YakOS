@@ -59,21 +59,6 @@ ENTRY(reset)
 	/* enable alignment faults */
 	orr	r0, r0, #(1<<1) 
 	mcr	p15, 0, r0, c1, c0, 0
-
-/* relocate exception vertor table */
-relocate_vectors:
-	/* save current position to r0 */
-	adr	r0, _start
-	mov	r1, #0x0
-	/* if not start from address 0x0, relocat vertor table */
-	cmp	r0, r1
-	beq	stack_setup
-	adr	r2, reset
-copy_loop:	
-	ldmia	r0!, {r3-r10}
-	stmia	r1!, {r3-r10}
-	cmp	r0, r2
-	blo	copy_loop
 	
 stack_setup:
 	mrs	r0, cpsr
