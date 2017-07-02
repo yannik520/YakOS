@@ -17,6 +17,6 @@ YakOS is an embedded real-time operating system, and support some very insterest
 ![github](http://raw.github.com/yannik520/YakOS/master/documents/screenshot.png "github")
 
 ### Build and Test:
-    To fetch a prebuild toolchain from http://newos.org/toolchains/arm-eabi-5.3.0-Linux-x86_64.tar.xz or http://newos.org/toolchains/arm-eabi-5.3.0-Darwin-x86_64.tar.xz based on your host platform, and then unpackage it into tools directory, more detail can reference README-BUILDING.md.
-
-
+    To fetch a prebuild toolchain from http://newos.org/toolchains/arm-eabi-5.3.0-Linux-x86_64.tar.xz or
+    http://newos.org/toolchains/arm-eabi-5.3.0-Darwin-x86_64.tar.xz based on your host platform, and then
+    unpackage it into tools directory, more detail can reference README-BUILDING.md.
